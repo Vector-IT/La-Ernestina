@@ -361,7 +361,7 @@ class Tabla
                         break;
 
                     case 'number':
-						$strSalida.= $crlf.'<input type="'.$field['type'].'" step="'.$field["step"].'" class="form-control input-sm '.$field['cssControl'].'" id="'.$fname.'" '. ($field['isID']?'disabled':'') .' '. ($field['required']?'required':'') .' '. ($field['size'] > 0?'size="'.$field['size'].'"':'') .' '. ($field['readOnly']?'readonly':'') .' '. ($field['value']!=''?'value="'.$field['value'].'"':'') .'/>';
+						$strSalida.= $crlf.'<input type="'.$field['type'].'" step="'.$field["step"].'" class="form-control input-sm '.$field['cssControl'].'" id="'.$fname.'" '. ($field['isID'] && $prefix!='search'?'disabled':'') .' '. ($field['required']?'required':'') .' '. ($field['size'] > 0?'size="'.$field['size'].'"':'') .' '. ($field['readOnly'] && $prefix!='search'?'readonly':'') .' '. ($field['value']!=''?'value="'.$field['value'].'"':'') .'/>';
                         break;
 
                     case 'file':
@@ -837,6 +837,7 @@ class Tabla
         $strSalida = '';
 
 		if (count($this->searchFields) > 0) {
+			$strSalida.= $crlf.'<div id="searchForm">';
 			$strSalida.= $crlf.'<hr>';
 			$strSalida.= $crlf.'<h4>Buscar '. $this->titulo .'</h4>'; 
 			$strSalida.= $crlf.'<form id="frmSearch'. $this->tabladb .'" class="form-horizontal marginTop20" method="post" onSubmit="return false;" novalidate>';
@@ -850,7 +851,8 @@ class Tabla
 			$strSalida.= $crlf.'		<button type="submit" class="btn btn-sm btn-primary clickable" data-js="listar'. $this->tabladb .'()"><i class="fa fa-search fa-fw" aria-hidden="true"></i> Buscar</button>';
 			$strSalida.= $crlf.'	</div>';
 			$strSalida.= $crlf.'</div>';
-			$strSalida.= '</form>';
+			$strSalida.= $crlf.'</form>';
+			$strSalida.= $crlf.'</div>';
 			
 			echo $strSalida;
 		}
@@ -1010,7 +1012,15 @@ class Tabla
             }
             
             $strSalida.= $crlf.'	if (strID > 0) {';
-            $strSalida.= $crlf.'		$("#frm'. $this->tabladb .'").fadeIn();';
+
+            //Si hay form de busqueda lo oculto
+            if (count($this->searchFields) > 0) {
+                $strSalida.= $crlf.'	$("#searchForm").fadeOut(function() {$("#frm'. $this->tabladb .'").fadeIn();});';
+            }
+            else {
+                $strSalida.= $crlf.'		$("#frm'. $this->tabladb .'").fadeIn();';
+            }
+
             $strSalida.= $crlf.'		$("html, body").animate({';
             $strSalida.= $crlf.'			scrollTop: $("#frm'. $this->tabladb .'").offset().top';
             $strSalida.= $crlf.'		}, 1000);';
@@ -1166,12 +1176,23 @@ class Tabla
     
             $strSalida.= $crlf.'	else {';
             $strSalida.= $crlf.'		if (strID == 0) {';
-            $strSalida.= $crlf.'			$("#frm'. $this->tabladb .'").fadeIn(function() {';
-            $strSalida.= $crlf.'				$("#frm'. $this->tabladb .'").find(".form-control[type!=\'hidden\'][disabled!=disabled][readonly!=readonly]:first").focus()';
-            $strSalida.= $crlf.'			});';
+
+            if (count($this->searchFields) > 0) {
+                $strSalida.= $crlf.'	        $("#searchForm").fadeOut(function() {';
+                $strSalida.= $crlf.'			    $("#frm'. $this->tabladb .'").fadeIn(function() {';
+                $strSalida.= $crlf.'				    $("#frm'. $this->tabladb .'").find(".form-control[type!=\'hidden\'][disabled!=disabled][readonly!=readonly]:first").focus()';
+                $strSalida.= $crlf.'			    });';
+                $strSalida.= $crlf.'			});';
+            }
+            else {
+                $strSalida.= $crlf.'			$("#frm'. $this->tabladb .'").fadeIn(function() {';
+                $strSalida.= $crlf.'				$("#frm'. $this->tabladb .'").find(".form-control[type!=\'hidden\'][disabled!=disabled][readonly!=readonly]:first").focus()';
+                $strSalida.= $crlf.'			});';
+            }
+
             $strSalida.= $crlf.'		}';
             $strSalida.= $crlf.'		else {';
-            $strSalida.= $crlf.'			$("#frm'. $this->tabladb .'").fadeOut();';
+            $strSalida.= $crlf.'			$("#frm'. $this->tabladb .'").fadeOut(function() {$("#searchForm").fadeIn();});';
             $strSalida.= $crlf.'		}';
             $strSalida.= $crlf.'';
             $strSalida.= $crlf.'		$("#hdnOperacion").val("0");';

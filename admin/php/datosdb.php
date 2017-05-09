@@ -4,5 +4,5 @@
 	$dbuser = "ernestina";
 	$dbpass = "ernestina";
 	
-	$raiz = "/La Ernestina/";
+	$raiz = "/La-Ernestina/";
 ?>

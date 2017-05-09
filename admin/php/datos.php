@@ -56,7 +56,7 @@
 	$tabla = new Tabla("bancos", "bancos", "Bancos", "el Banco", true, "objeto/bancos", "fa-bank");
 	$tabla->labelField = "NombBanc";
 	$tabla->isSubItem = true;
-	
+
 	$tabla->addField("NumeBanc", "number", 0, "Número", false, true, true);
 	$tabla->addField("NombBanc", "text", 200, "Nombre");
 	$tabla->fields["NombBanc"]["cssControl"] = "ucase";
@@ -64,6 +64,19 @@
 	$tabla->addField("NumeEsta", "select", 0, "Estado", true, false, false, true, '1', '', 'estados', 'NumeEsta', 'NombEsta', '', 'NombEsta');
 
 	$config->tablas["bancos"] = $tabla;
+
+	/**
+	 * VENDEDORES
+	 */
+	$tabla = new Tabla("vendedores", "vendedores", "Vendedores", "el Vendedor", true, "objeto/vendedores", "fa-male");
+	$tabla->labelField = "NombVend";
+	$tabla->isSubItem = true;
+
+	$tabla->addField("NumeVend", "number", 0, "Número", false, true, true);
+	$tabla->addField("NombVend", "text", 200, "Nombre");
+	$tabla->addField("NumeEsta", "select", 0, "Estado", true, false, false, true, '1', '', 'estados', 'NumeEsta', 'NombEsta', '', 'NombEsta');
+
+	$config->tablas["vendedores"] = $tabla;
 
 	/**
 	 * TIPOS DE PAGOS
@@ -81,6 +94,19 @@
 	$config->tablas["tipospagos"] = $tabla;
 
 	/**
+	 * ESTADOS LOTES
+	 */
+	$tabla = new Tabla("estadoslotes", "estadoslotes", "Estados de lotes", "el Estado", true, "objeto/estadoslotes", "fa-wrench");
+	$tabla->labelField = "NombEstaLote";
+	$tabla->isSubItem = true;
+
+	$tabla->addField("NumeEstaLote", "number", 0, "Número", false, true, true);
+	$tabla->addField("NombEstaLote", "text", 100, "Nombre");
+	$tabla->fields["NombEstaLote"]["cssControl"] = "ucase";
+
+	$config->tablas["estadoslotes"] = $tabla;
+
+	/**
 	 * PROVINCIAS
 	 */
 	$tabla = new Tabla("provincias", "provincias", "Provincias", "la provincia", true, "objeto/provincias", "fa-linode");
@@ -96,16 +122,36 @@
 	$config->tablas["provincias"] = $tabla;
 
 	/**
-	 * VENDEDORES
+	 * CAJA
 	 */
-	$tabla = new Tabla("vendedores", "vendedores", "Vendedores", "el Vendedor", true, "objeto/vendedores", "fa-male");
-	$tabla->labelField = "NombVend";
+	$tabla = new Tabla("caja", "caja", "Caja", "el detalle", true, "objeto/caja", "fa-usd");
 
-	$tabla->addField("NumeVend", "number", 0, "Número", false, true, true);
-	$tabla->addField("NombVend", "text", 200, "Nombre");
-	$tabla->addField("NumeEsta", "select", 0, "Estado", true, false, false, true, '1', '', 'estados', 'NumeEsta', 'NombEsta', '', 'NombEsta');
+	$config->tablas["caja"] = $tabla;
 
-	$config->tablas["vendedores"] = $tabla;
+	/**
+	 * LOTES
+	 */
+	$tabla = new Tabla("lotes", "lotes", "Lotes", "el Lote", true, "objeto/lotes", "fa-map-o", "NombLote");
+	$tabla->labelField = "NombLote";
+
+	$tabla->searchFields = ["NumeLote", "NombLote", "NumeClie"];
+
+	$tabla->addFieldId("NumeLote", "Número de lote");
+	$tabla->addField("NombLote", "text", 100, "Nombre");
+	$tabla->addField("LoteCoor", "text", 80, "Coordenadas mapa");
+	$tabla->addField("ValoLote", "number", 0, "Precio");
+	$tabla->addField("NumeEstaLote", "select", 0, "Estado", true, false, false, true, '1', '', 'estadoslotes', 'NumeEstaLote', 'NombEstaLote');
+	
+	
+	$tabla->addField("NumeClie", "select", 100, "Cliente", true, false, false, true, '', '', 'clientes', 'NumeClie', 'NombClie', 'NumeEsta = 1', 'NombClie');
+	$tabla->fields["NumeClie"]["itBlank"] = true;
+	$tabla->fields["NumeClie"]["cssGroup"] = "form-group2";
+	
+	$tabla->addField("CantCuot", "number", 0, "Cantidad de Cuotas");
+	$tabla->fields["CantCuot"]["value"] = "0";
+	$tabla->fields["CantCuot"]["cssGroup"] = "form-group2";
+
+	$config->tablas["lotes"] = $tabla;
 
 	/**
 	 * CLIENTES
