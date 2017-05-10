@@ -329,7 +329,7 @@ class Tabla
 
         //if (!$field['isMasterID'] && $field['showOnForm']) {
         if ($field['showOnForm']) {
-            if ($field['isHiddenInForm'] || $field["type"] == 'hidden') {
+            if (($field['isHiddenInForm'] || $field["type"] == 'hidden') && ($prefix != 'search')) {
                 $strSalida.= $crlf.'<input type="hidden" id="'.$fname.'" value="'.$field['value'].'" />';
             } else {
                 $strSalida.= $crlf.'<div class="form-group form-group-sm '.$field['cssGroup'].'">';

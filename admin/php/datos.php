@@ -7,6 +7,8 @@
 	require_once 'datosdb.php';
 	require_once 'vectorForms.php';
 
+	require_once 'custom/caja.php';
+
 	//Variables
 	$crlf = "\n";
 
@@ -37,7 +39,6 @@
 	$tabla->numeCarg = 1;
 	$tabla->isSubItem = true;
 
-	//Campos
 	$tabla->addField("NumeUser", "number", 0, "Número", false, true, true);
 	$tabla->addField("NombPers", "text", 200, "Nombre Completo");
 	$tabla->addField("NombUser", "text", 0, "Usuario");
@@ -122,9 +123,39 @@
 	$config->tablas["provincias"] = $tabla;
 
 	/**
+	 * TIPOS DE CAJA
+	 */
+	$tabla = new Tabla("tiposcaja", "tiposcaja", "Tipos de operaciones de caja", "el registro", true, "objeto/tiposcaja", "fa-sitemap");
+	$tabla->isSubItem = true;
+	$tabla->labelField = "NombTipoCaja";
+
+	$tabla->addFieldId("NumeTipoCaja", "Número");
+	$tabla->addField("NombTipoCaja", "text", 100, "Nombre");
+	$tabla->fields["NombTipoCaja"]["cssControl"] = "ucase";
+	$tabla->addField("NumeTipoOper", "select", 0, "Tipo de operación", true, false, false, true, '', '', 'tiposoperaciones', 'NumeTipoOper', 'NombTipoOper');
+
+	$config->tablas["tiposcaja"] = $tabla;
+
+	/**
 	 * CAJA
 	 */
-	$tabla = new Tabla("caja", "caja", "Caja", "el detalle", true, "objeto/caja", "fa-usd");
+	$tabla = new Caja("caja", "caja", "Caja", "el detalle", true, "objeto/caja", "fa-money");
+	$tabla->labelField = "NombCaja";
+	$tabla->allowDelete = false;
+	$tabla->allowEdit = false;
+
+	$tabla->searchFields = ["FechCaja", "NombCaja"];
+	
+	$tabla->addFieldId("NumeCaja", "Número de caja");
+	$tabla->addField("FechCaja", "date", 0, "Fecha");
+	$tabla->fields["FechCaja"]["isHiddenInForm"] = true;
+
+	$tabla->addField("NombCaja", "text", 80, "Descripcion");
+	$tabla->fields["NombCaja"]["cssControl"] = "ucase";
+	$tabla->addField("NumeTipoCaja", "select", 80, "Tipo de operación", true, false, false, true, '', '', 'tiposcaja', 'NumeTipoCaja', 'NombTipoCaja', '', 'NombTipoCaja');
+	$tabla->addField("ImpoCaja", "number", 0, "Importe");
+	$tabla->fields["ImpoCaja"]["step"] = "0.1";
+	$tabla->addField("NumeEsta", "select", 0, "Estado", true, false, false, true, '1', '', 'estados', 'NumeEsta', 'NombEsta', '', 'NombEsta');
 
 	$config->tablas["caja"] = $tabla;
 
