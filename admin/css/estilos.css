@@ -32,6 +32,7 @@
 	.txtMediano {font-size:16pt;}
 	.txtSmall {font-size: 10px;}
 	.txtXSmall {font-size: 8px;}
+	.txtBold { font-weight: bold; }
 	.ucase {text-transform:uppercase;}
 
 	.thumbnail {width:200px; height:auto; margin:10px 0;}

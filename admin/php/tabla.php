@@ -1413,16 +1413,18 @@ class Tabla
                     $strID = $value;
                 }
 
-                if ($strCampos != "") {
-                    $strCampos.= ", ";
-                    $strValores.= ", ";
-                }
+                if ($value != '') {
+                    if ($strCampos != "") {
+                        $strCampos.= ", ";
+                        $strValores.= ", ";
+                    }
 
-                $strCampos.= $name;
-                if ($this->fields[$name]['isMD5']) {
-                    $strValores.= "'".md5($value)."'";
-                } else {
-                    $strValores.= "'$value'";
+                    $strCampos.= $name;
+                    if ($this->fields[$name]['isMD5']) {
+                        $strValores.= "'".md5($value)."'";
+                    } else {
+                        $strValores.= "'$value'";
+                    }
                 }
             }
             $strSQL.= " ($strCampos)";

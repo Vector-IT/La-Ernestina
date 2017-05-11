@@ -15,6 +15,7 @@
 	//Datos de configuracion iniciales
 	$config = new VectorForms($dbhost, $dbschema, $dbuser, $dbpass, $raiz, "La Ernestina", "img/logo.png", true);
 	$config->tbLogin = 'usuarios';
+	$config->cssFiles = ["admin/css/custom.css"];
 
 	$_SESSION['imgCKEditor'] = '/VectorForms/admin/ckeditor/imgup';
 
@@ -143,12 +144,23 @@
 	$tabla->labelField = "NombCaja";
 	$tabla->allowDelete = false;
 	$tabla->allowEdit = false;
+	$tabla->searchFields = ["NombCaja", "NumeTipoCaja"];
+	$tabla->jsFiles = ["admin/js/custom/caja.js"];
 
-	$tabla->searchFields = ["FechCaja", "NombCaja"];
+	$tabla->btnForm = [
+		array(
+			"titulo"=> '<i class="fa fa-th fa-fw" aria-hidden="true"></i> Ver Todos',
+			"class"=> "btn-primary",
+			"onclick"=> "verTodos()"
+		)
+	];
 	
 	$tabla->addFieldId("NumeCaja", "Número de caja");
 	$tabla->addField("FechCaja", "date", 0, "Fecha");
 	$tabla->fields["FechCaja"]["isHiddenInForm"] = true;
+	
+	$tabla->addField("NumeUser", "select", 0, "Usuario", true, false, false, true, '', '', 'usuarios', 'NumeUser', 'NombPers');
+	$tabla->fields["NumeUser"]["isHiddenInForm"] = true;
 
 	$tabla->addField("NombCaja", "text", 80, "Descripcion");
 	$tabla->fields["NombCaja"]["cssControl"] = "ucase";
@@ -164,6 +176,7 @@
 	 */
 	$tabla = new Tabla("lotes", "lotes", "Lotes", "el Lote", true, "objeto/lotes", "fa-map-o", "NombLote");
 	$tabla->labelField = "NombLote";
+	$tabla->allowDelete = false;
 
 	$tabla->searchFields = ["NumeLote", "NombLote", "NumeClie"];
 
@@ -174,7 +187,7 @@
 	$tabla->addField("NumeEstaLote", "select", 0, "Estado", true, false, false, true, '1', '', 'estadoslotes', 'NumeEstaLote', 'NombEstaLote');
 	
 	
-	$tabla->addField("NumeClie", "select", 100, "Cliente", true, false, false, true, '', '', 'clientes', 'NumeClie', 'NombClie', 'NumeEsta = 1', 'NombClie');
+	$tabla->addField("NumeClie", "select", 100, "Cliente", false, false, false, true, '', '', 'clientes', 'NumeClie', 'NombClie', 'NumeEsta = 1', 'NombClie');
 	$tabla->fields["NumeClie"]["itBlank"] = true;
 	$tabla->fields["NumeClie"]["cssGroup"] = "form-group2";
 	

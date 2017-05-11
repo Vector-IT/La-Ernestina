@@ -103,8 +103,13 @@ class VectorForms {
 		}
 		else {
 			if ($tabla->num_rows > 0) {
-				$fila = $tabla->fetch_array();
-				$strSalida = $fila[0];
+				if ($tabla->field_count == 1) {
+					$fila = $tabla->fetch_row();
+					$strSalida = $fila[0];
+				}
+				else {
+					$strSalida = $tabla->fetch_assoc();
+				}
 				$tabla->free();
 			}
 			else {

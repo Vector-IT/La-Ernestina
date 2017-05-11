@@ -2,15 +2,46 @@
 namespace VectorForms;
 
 class Caja extends Tabla {
+    public function customFunc($post) {
+        global $config;
+		
+		switch ($post['field']) {
+			case "NumeEsta":
+                return $config->ejecutarCMD("UPDATE caja SET NumeEsta = NOT NumeEsta WHERE NumeCaja = ". $post["dato"]["NumeCaja"]);
+				break;
+		}
+    }
+
     public function listar($strFiltro = "", $conBotones = true, $btnList = [], $order = '')
     {
         global $config, $crlf;
 
-        $strSQL = "SELECT NumeCaja, FechCaja, NombCaja, NumeTipoCaja, ImpoCaja, NumeEsta FROM caja";
+        $strSQL = "SELECT c.NumeCaja, c.FechCaja, c.NombCaja, c.NumeTipoCaja, c.ImpoCaja, c.NumeEsta, c.NumeUser,";
+        $strSQL.= $crlf." u.NombPers, tc.NombTipoCaja, tc.NumeTipoOper, e.NombEsta";
+        $strSQL.= $crlf." FROM caja c";
+        $strSQL.= $crlf." INNER JOIN usuarios u ON c.NumeUser = u.NumeUser";
+        $strSQL.= $crlf." INNER JOIN tiposcaja tc ON c.NumeTipoCaja = tc.NumeTipoCaja";
+        $strSQL.= $crlf." INNER JOIN estados e ON c.NumeEsta = e.NumeEsta";
+        
+        if ($strFiltro == "")
+            $strSQL.= $crlf." WHERE c.FechCaja > DATE_ADD(SYSDATE(), INTERVAL -8 DAY)";
+
+        $strSQL.= $crlf." ORDER BY c.NumeCaja DESC";
 
         $tabla = $config->cargarTabla($strSQL);
 
         $strSalida = '';
+
+        $credito = $config->buscarDato("SELECT SUM(ImpoCaja) FROM caja WHERE NumeEsta = 1 AND NumeTipoCaja IN (SELECT NumeTIpoCaja FROM tiposcaja WHERE NumeTipoOper = 1)");
+        $debito = $config->buscarDato("SELECT SUM(ImpoCaja) FROM caja WHERE NumeEsta = 1 AND NumeTipoCaja IN (SELECT NumeTIpoCaja FROM tiposcaja WHERE NumeTipoOper = 2)");
+        $saldo = floatval($credito) - floatval($debito);
+
+        if ($saldo >= 0) {
+            $strSalida.= $crlf.'<h4 id="txtSaldo" class="text-right">Saldo: $ '.$saldo.'</h4>';
+        }
+        else {
+            $strSalida.= $crlf.'<h4 id="txtSaldo"  class="text-right">Saldo: <span class="txtRojo">$ '.$saldo.'</span></h4>';
+        }
 
         if ($tabla) {
             if ($tabla->num_rows > 0) {
@@ -19,8 +50,11 @@ class Caja extends Tabla {
                 $strSalida.= $crlf.'<tr>';
                 $strSalida.= $crlf.'<th>Número</th>';
                 $strSalida.= $crlf.'<th>Fecha</th>';
-                $strSalida.= $crlf.'<th>Nombre</th>';
+                $strSalida.= $crlf.'<th>Usuario</th>';
+                $strSalida.= $crlf.'<th>Descripción</th>';
                 $strSalida.= $crlf.'<th>Tipo de operación</th>';
+                $strSalida.= $crlf.'<th>Crédito</th>';
+                $strSalida.= $crlf.'<th>Débito</th>';
                 $strSalida.= $crlf.'<th>Estado</th>';
                 $strSalida.= $crlf.'<th></th>';
                 $strSalida.= $crlf.'</tr>';
@@ -28,40 +62,42 @@ class Caja extends Tabla {
                 while ($fila = $tabla->fetch_assoc()) {
                     $col = 0;
                     
-                    $strSalida.= $crlf.'<tr>';
+                    $strSalida.= $crlf.'<tr class="'.($fila["NumeEsta"] != "1"?'txtTachado':'').'">';
                     
                     $strSalida.= $crlf.'<td id="NumeCaja'. $fila[$this->IDField].'">'.$fila['NumeCaja'].'</td>';
                     $strSalida.= $crlf.'<td id="FechCaja'. $fila[$this->IDField].'">'.$fila['FechCaja'].'</td>';
-                    $strSalida.= $crlf.'<td id="NombCaja'. $fila[$this->IDField].'">'.$fila['NombCaja'].'</td>';
-                    $strSalida.= $crlf.'<td id="NumeTipoCaja'. $fila[$this->IDField].'">'.$fila['NumeTipoCaja'].'</td>';
-                    $strSalida.= $crlf.'<td id="NumeEsta'. $fila[$this->IDField].'">'.$fila['NumeEsta'].'</td>';
+                    
+                    $strSalida.= $crlf.'<td class="ucase">'.$fila["NombPers"];
+                    $strSalida.= $crlf.'<input type="hidden" id="NumeUser'. $fila[$this->IDField].'" value="'.$fila["NumeUser"].'" />';
+                    $strSalida.= $crlf.'</td>';
+                    
+                    $strSalida.= $crlf.'<td id="NombCaja'. $fila[$this->IDField].'" class="ucase">'.$fila['NombCaja'].'</td>';
+
+                    $strSalida.= $crlf.'<td class="ucase">'.$fila["NombTipoCaja"];
+                    $strSalida.= $crlf.'<input type="hidden" id="NumeTipoCaja'. $fila[$this->IDField].'" value="'.$fila["NumeTipoCaja"].'" />';
+                    $strSalida.= $crlf.'</td>';
+
+                    if ($fila["NumeTipoOper"] == "1") {
+                        $strSalida.= $crlf.'<td class="txtBold">$ '.$fila['ImpoCaja'].'<span class="hide" id="ImpoCaja'. $fila[$this->IDField].'">'.$fila['ImpoCaja'].'</span></td>';
+                        $strSalida.= $crlf.'<td></td>';
+                    }
+                    else {
+                        $strSalida.= $crlf.'<td></td>';
+                        $strSalida.= $crlf.'<td class="txtBold txtRojo">$ '.$fila['ImpoCaja'].'<span class="hide" id="ImpoCaja'. $fila[$this->IDField].'">'.$fila['ImpoCaja'].'</span></td>';
+                    }
+
+                    $strSalida.= $crlf.'<td id="NombEsta'.$fila[$this->IDField].'" class="ucase">'.$fila["NombEsta"];
+                    $strSalida.= $crlf.'<input type="hidden" id="NumeEsta'.$fila[$this->IDField].'" value="'.$fila["NumeEsta"].'" />';
+                    $strSalida.= $crlf.'</td>';
 
                     //Botones
-                    if ($conBotones) {
-                        //De clase
-                        if (count($this->btnList) > 0) {
-                            for ($I = 0; $I < count($this->btnList); $I++) {
-                                $strSalida.= $crlf.'<td class="text-center"><button class="btn btn-sm '. $this->btnList[$I]['class'] .'" onclick="'. $this->btnList[$I]['onclick'] .'(\''.$fila[$this->IDField].'\')">'. $this->btnList[$I]['titulo'] .'</button></td>';
-                            }
-                        }
-
-                        //Editar
-                        if ($this->allowEdit) {
-                            $strSalida.= $crlf.'<td class="text-center"><button class="btn btn-sm btn-info" onclick="editar'. $this->tabladb .'(\''.$fila[$this->IDField].'\')"><i class="fa fa-pencil fa-fw" aria-hidden="true"></i> Editar</button></td>';
-                        }
-                        //Borrar
-                        if ($this->allowDelete) {
-                            $strSalida.= $crlf.'<td class="text-center"><button class="btn btn-sm btn-danger" onclick="borrar'. $this->tabladb .'(\''.$fila[$this->IDField].'\')"><i class="fa fa-trash-o fa-fw" aria-hidden="true"></i> Borrar</button></td>';
-                        }
+                    if ($fila["NumeEsta"] == "1") {
+                        $strSalida.= $crlf.'<td class="text-center"><button class="btn btn-sm btn-danger" onclick="cambiarEstado(\''.$fila[$this->IDField].'\')">INACTIVAR</button></td>';
                     }
-
-                    //Botones del método
-                    if (count($btnList) > 0) {
-                        for ($I = 0; $I < count($btnList); $I++) {
-                            $strSalida.= $crlf.'<td class="text-center"><button class="btn btn-sm '. $btnList[$I]['class'] .'" onclick="'. $btnList[$I]['onclick'] .'(\''.$fila[$this->IDField].'\')">'. $btnList[$I]['titulo'] .'</button></td>';
-                        }
+                    else {
+                        $strSalida.= $crlf.'<td class="text-center"><button class="btn btn-sm btn-success" onclick="cambiarEstado(\''.$fila[$this->IDField].'\')">ACTIVAR</button></td>';
                     }
-
+                    
                     $strSalida.= $crlf.'</tr>';
                 }
 
@@ -75,6 +111,15 @@ class Caja extends Tabla {
         }
             
         echo $strSalida;
+    }
+
+    public function insertar($datos) {
+        global $config;
+
+        $datos["FechCaja"] = $config->buscarDato("SELECT SYSDATE()");
+        $datos["NumeUser"] = $_SESSION["NumeUser"];
+
+        return parent::insertar($datos);
     }
 }
 ?>

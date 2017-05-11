@@ -1,3 +1,2 @@
-@media print {
-	form { display: inherit !important; }
-}
+.txtRojo { color: red; }
+.txtTachado { text-decoration:line-through; }
