@@ -55,7 +55,7 @@
 	/**
 	 * BANCOS
 	 */
-	$tabla = new Tabla("bancos", "bancos", "Bancos", "el Banco", true, "objeto/bancos", "fa-bank");
+	$tabla = new Tabla("bancos", "bancos", "Bancos", "el Banco", true, "objeto/bancos/", "fa-bank");
 	$tabla->labelField = "NombBanc";
 	$tabla->isSubItem = true;
 
@@ -70,7 +70,7 @@
 	/**
 	 * VENDEDORES
 	 */
-	$tabla = new Tabla("vendedores", "vendedores", "Vendedores", "el Vendedor", true, "objeto/vendedores", "fa-male");
+	$tabla = new Tabla("vendedores", "vendedores", "Vendedores", "el Vendedor", true, "objeto/vendedores/", "fa-male");
 	$tabla->labelField = "NombVend";
 	$tabla->isSubItem = true;
 
@@ -83,7 +83,7 @@
 	/**
 	 * TIPOS DE PAGOS
 	 */
-	$tabla = new Tabla("tipospagos", "tipospagos", "Formas de Pago", "la Forma de Pago", true, "objeto/tipospagos", "fa-credit-card");
+	$tabla = new Tabla("tipospagos", "tipospagos", "Formas de Pago", "la Forma de Pago", true, "objeto/tipospagos/", "fa-credit-card");
 	$tabla->labelField = "NombTipoPago";
 	$tabla->isSubItem = true;
 
@@ -98,7 +98,7 @@
 	/**
 	 * ESTADOS LOTES
 	 */
-	$tabla = new Tabla("estadoslotes", "estadoslotes", "Estados de lotes", "el Estado", true, "objeto/estadoslotes", "fa-wrench");
+	$tabla = new Tabla("estadoslotes", "estadoslotes", "Estados de lotes", "el Estado", true, "objeto/estadoslotes/", "fa-wrench");
 	$tabla->labelField = "NombEstaLote";
 	$tabla->isSubItem = true;
 
@@ -111,7 +111,7 @@
 	/**
 	 * PROVINCIAS
 	 */
-	$tabla = new Tabla("provincias", "provincias", "Provincias", "la provincia", true, "objeto/provincias", "fa-linode");
+	$tabla = new Tabla("provincias", "provincias", "Provincias", "la provincia", true, "objeto/provincias/", "fa-linode");
 	$tabla->labelField = "NombProv";
 	$tabla->isSubItem = true;
 	$tabla->allowDelete = false;
@@ -126,7 +126,7 @@
 	/**
 	 * TIPOS DE CAJA
 	 */
-	$tabla = new Tabla("tiposcaja", "tiposcaja", "Tipos de operaciones de caja", "el registro", true, "objeto/tiposcaja", "fa-sitemap");
+	$tabla = new Tabla("tiposcaja", "tiposcaja", "Tipos de operaciones de caja", "el registro", true, "objeto/tiposcaja/", "fa-sitemap");
 	$tabla->isSubItem = true;
 	$tabla->labelField = "NombTipoCaja";
 
@@ -140,7 +140,7 @@
 	/**
 	 * CAJA
 	 */
-	$tabla = new Caja("caja", "caja", "Caja", "el detalle", true, "objeto/caja", "fa-money");
+	$tabla = new Caja("caja", "caja", "Caja", "el detalle", true, "objeto/caja/", "fa-money");
 	$tabla->labelField = "NombCaja";
 	$tabla->allowDelete = false;
 	$tabla->allowEdit = false;
@@ -174,11 +174,20 @@
 	/**
 	 * LOTES
 	 */
-	$tabla = new Tabla("lotes", "lotes", "Lotes", "el Lote", true, "objeto/lotes", "fa-map-o", "NombLote");
+	$tabla = new Tabla("lotes", "lotes", "Lotes", "el Lote", true, "objeto/lotes/", "fa-map-o", "NombLote");
 	$tabla->labelField = "NombLote";
 	$tabla->allowDelete = false;
 
 	$tabla->searchFields = ["NumeLote", "NombLote", "NumeClie"];
+
+	$tabla->btnList = [
+			array("titulo"=> 'Ficha',
+					"onclick"=> "verCliente",
+					"class"=> "btn-default"),
+			array("titulo"=> 'Ver cuotas',
+					"onclick"=> "verCuotas",
+					"class"=> "btn-default"),
+	];
 
 	$tabla->addFieldId("NumeLote", "Número de lote");
 	$tabla->addField("NombLote", "text", 100, "Nombre");
@@ -200,24 +209,14 @@
 	/**
 	 * CLIENTES
 	 */
-	$tabla = new Tabla("clientes", "clientes", "Clientes", "el Cliente", true, "objeto/clientes", "fa-id-card-o");
+	$tabla = new Tabla("clientes", "clientes", "Clientes", "el Cliente", true, "objeto/clientes/", "fa-id-card-o");
 	$tabla->labelField = "NombClie";
-	$tabla->listarOnLoad = true;
 
 	$tabla->searchFields = array("NumeClie", "NombClie");
-
-	$tabla->btnForm = [
-			array('titulo'=>'<i class="fa fa-fw fa-money" aria-hidden="true"></i> Generar cuotas', 
-					'onclick'=>"generarCuotas()", 
-					'class'=>"btn-success"),
-	];
 
 	$tabla->btnList = [
 			array("titulo"=> 'Ficha',
 					"onclick"=> "verCliente",
-					"class"=> "btn-default"),
-			array("titulo"=> 'Ver cuotas',
-					"onclick"=> "verCuotas",
 					"class"=> "btn-default"),
 	];
 
@@ -266,4 +265,43 @@
 
 	$config->tablas["clientes"] = $tabla;
 
+	$tabla = new Tabla("cheques", "cheques", "Cheques", "el Cheque", true, "objeto/cheques/", "fa-credit-card");
+	
+	$tabla->addFieldId("CodiCheq", "CodiCheq", true, true);
+	$tabla->addField("NumeCheq", "number", 80, "Número");
+	$tabla->addField("EsPropio", "checkbox", 0, "Es propio?");
+	$tabla->addField("Cruzado", "checkbox", 0, "Es cruzado?");
+
+	$tabla->addField("FechReci", "date", 0, "Fecha recibido");
+	$tabla->fields["FechReci"]["cssGroup"] = "form-group3";
+
+	$tabla->addField("FechEmis", "date", 0, "Fecha de Emisión");
+	$tabla->fields["FechEmis"]["cssGroup"] = "form-group3";
+
+	$tabla->addField("FechPago", "date", 0, "Fecha de Vencimiento");
+	$tabla->fields["FechPago"]["cssGroup"] = "form-group3";
+
+	$tabla->addField("NumeBanc", "select", 80, "Banco", true, false, false, true, '', '', "bancos", "NumeBanc", "NombBanc", "NumeEsta = 1", "NombBanc");
+	$tabla->fields["NumeBanc"]["cssGroup"] = "form-group2";
+
+	$tabla->addField("NumeTipoCheq", "select", 80, "Tipo de cheque", true, false, false, true, '', '', "tiposcheques", "NumeTipoCheq", "NombTipoCheq", "", "NombTipoCheq");
+	$tabla->fields["NumeTipoCheq"]["cssGroup"] = "form-group2";
+
+	$tabla->addField("NombTitu", "text", 100, "Titular");
+	$tabla->fields["NombTitu"]["cssGroup"] = "form-group2";
+
+	$tabla->addField("CUITTitu", "text", 100, "CUIT Titular");
+	$tabla->fields["CUITTitu"]["cssGroup"] = "form-group2";
+
+	$tabla->addField("NombReci", "text", 80, "Nombre tercero", false);
+	$tabla->addField("TeleReci", "text", 80, "Teléfono tercero", false);
+	$tabla->addField("DireReci", "text", 400, "Dirección tercero", false);
+
+	$tabla->addField("ImpoCheq", "number", 0, "Importe");
+	$tabla->fields["ImpoCheq"]["step"] = "0.01";
+	
+	$tabla->addField("ObseCheq", "textarea", 400, "Observaciones", false);
+	$tabla->addField("NumeEsta", "select", 0, "Estado", true, false, false, true, '1', '', 'estados', 'NumeEsta', 'NombEsta', '', 'NombEsta');
+
+	$config->tablas["cheques"] = $tabla;
 	?>
