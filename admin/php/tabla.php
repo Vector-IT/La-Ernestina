@@ -16,7 +16,7 @@ class Tabla
     public $tituloSingular;
     
     public $showMenu;
-	public $isSubMenu;
+    public $isSubMenu;
     public $isSubItem;
     
     public $url;
@@ -39,7 +39,10 @@ class Tabla
 
     public $jsFiles;
     public $jsOnLoad;
+    public $jsOnList;
     public $jsOnEdit;
+
+    public $cssFiles;
 
     public $btnList;
     public $btnForm;
@@ -54,7 +57,9 @@ class Tabla
     public $gmapsCenterLng;
 
     public $listarOnLoad;
-	public $searchFields;
+    public $searchFields;
+
+    public $modalList;
 
     /**
      * Constructor de la clase Tabla
@@ -89,7 +94,10 @@ class Tabla
 
         $this->jsFiles = [];
         $this->jsOnLoad = '';
+        $this->jsOnList = '';
         $this->jsOnEdit = '';
+
+        $this->cssFiles = [];
 
         $this->btnList = [];
         $this->btnForm = [];
@@ -106,8 +114,10 @@ class Tabla
         $this->gmapsCenterLat = '0';
         $this->gmapsCenterLng = '0';
 
-		$this->listarOnLoad = true;
-		$this->searchFields = [];
+        $this->listarOnLoad = true;
+        $this->searchFields = [];
+
+        $this->modalList = [];
     }
 
     /**
@@ -153,6 +163,7 @@ class Tabla
                 'readOnly' => $readOnly,
                 'isID' => $isID,
                 'showOnList' => $showOnList,
+                'showOnForm' => $showOnForm,
                 'value' => $value,
                 'cssControl' => '',
                 'cssGroup' => $cssGroup,
@@ -165,7 +176,6 @@ class Tabla
                 'isHiddenInList' => $isHiddenInList,
                 'isMasterID' => $isMasterID,
                 'onChange' => $onChange,
-                'showOnForm' => $showOnForm,
                 'itBlank' => $itBlank,
                 'hoursDisabled' => '',
                 'dtpOnRender' => '',
@@ -176,7 +186,7 @@ class Tabla
                 'mirrorFormat' => '',
                 'formatDb' => '',
                 'isMD5' => false,
-				'step' => "1"
+                'step' => "1"
         );
 
         if ($isID) {
@@ -189,8 +199,9 @@ class Tabla
      * @param string $name: nombre del campo
      * @param string $label: etiqueta del control al crear en un form
      */
-	public function addFieldId($name, $label = "", $isHiddenInList = false, $isHiddenInForm = false) {
-		$this->fields[$name] = array (
+    public function addFieldId($name, $label = "", $isHiddenInList = false, $isHiddenInForm = false)
+    {
+        $this->fields[$name] = array (
                         'name' => $name,
                         'type' => 'number',
                         'size' => 0,
@@ -222,12 +233,12 @@ class Tabla
                         'mirrorFormat' => '',
                         'formatDb' => '',
                         'isMD5' => false,
-						'step' => "1"
+                        'step' => "1"
                 );
 
-		$this->IDField = $name;
-	}
-	
+        $this->IDField = $name;
+    }
+    
     /**
      * Agrega un campo a la tabla de tipo archivo o imagen
      * @param string $name: nombre del campo
@@ -272,7 +283,7 @@ class Tabla
                         'mirrorFormat' => '',
                         'formatDb' => '',
                         'isMD5' => false,
-						'step' => "1"
+                        'step' => "1"
                 );
     }
     
@@ -361,7 +372,7 @@ class Tabla
                         break;
 
                     case 'number':
-						$strSalida.= $crlf.'<input type="'.$field['type'].'" step="'.$field["step"].'" class="form-control input-sm '.$field['cssControl'].'" id="'.$fname.'" '. ($field['isID'] && $prefix!='search'?'disabled':'') .' '. ($field['required']?'required':'') .' '. ($field['size'] > 0?'size="'.$field['size'].'"':'') .' '. ($field['readOnly'] && $prefix!='search'?'readonly':'') .' '. ($field['value']!=''?'value="'.$field['value'].'"':'') .'/>';
+                        $strSalida.= $crlf.'<input type="'.$field['type'].'" step="'.$field["step"].'" class="form-control input-sm '.$field['cssControl'].'" id="'.$fname.'" '. ($field['isID'] && $prefix!='search'?'disabled':'') .' '. ($field['required']?'required':'') .' '. ($field['size'] > 0?'size="'.$field['size'].'"':'') .' '. ($field['readOnly'] && $prefix!='search'?'readonly':'') .' '. ($field['value']!=''?'value="'.$field['value'].'"':'') .'/>';
                         break;
 
                     case 'file':
@@ -388,9 +399,9 @@ class Tabla
 
                     case 'select':
                         $strSalida.= $crlf.'<select class="form-control input-sm ucase '.$field['cssControl'].'" id="'.$fname.'" '. ($field['required']?'required':'') .' '. ($field['readOnly']?'readonly':'') .' '. ($field['onChange'] !=''?'onchange="'.$field['onChange'].'"':'') .'>';
-						if ($field['lookupTable'] != '') {
-                        	$strSalida.= $crlf. $this->cargarCombo($field['lookupTable'], $field['lookupFieldID'], $field['lookupFieldLabel'], $field['lookupConditions'], $field['lookupOrder'], $field['value'], ($prefix == ''? $field['itBlank']: true));
-						}
+                        if ($field['lookupTable'] != '') {
+                            $strSalida.= $crlf. $this->cargarCombo($field['lookupTable'], $field['lookupFieldID'], $field['lookupFieldLabel'], $field['lookupConditions'], $field['lookupOrder'], $field['value'], ($prefix == ''? $field['itBlank']: true));
+                        }
                         $strSalida.= $crlf.'</select>';
                         break;
 
@@ -607,25 +618,24 @@ class Tabla
 
             $strSQL.= " FROM ". $this->tabladb;
 
-			$filtro = '';
+            $filtro = '';
             if ($this->masterFieldId != '') {
                 if (isset($_REQUEST[$this->masterFieldId])) {
                     $filtro.= " WHERE ". $this->masterFieldId ." = '" . $_REQUEST[$this->masterFieldId] ."'";
                 }
-            } 
+            }
 
-			if ($strFiltro != "") {
-				if ($filtro == '') {
-					$filtro.= " WHERE ";
-				}
-				else {
-					$filtro.= " AND ";
-				}
+            if ($strFiltro != "") {
+                if ($filtro == '') {
+                    $filtro.= " WHERE ";
+                } else {
+                    $filtro.= " AND ";
+                }
 
-				$filtro.= $strFiltro;
-			}
+                $filtro.= $strFiltro;
+            }
 
-			$strSQL.= $filtro;
+            $strSQL.= $filtro;
 
             if ($order != '') {
                 $strSQL.= " ORDER BY ". $order;
@@ -690,7 +700,7 @@ class Tabla
                                 } else {
                                     switch ($field["type"]) {
                                         case 'select':
-										case 'selectmultiple':
+                                        case 'selectmultiple':
                                             $strSalida.= $crlf.'<td class="ucase text-'. $field['txtAlign'] .' '. $field['cssControl'] .'">';
                                             if ($fila[$field['name']] != '') {
                                                 $strSalida.= $crlf. $config->buscarDato("SELECT {$field['lookupFieldLabel']} FROM {$field['lookupTable']} WHERE {$field['lookupFieldID']} = {$fila[$field['name']]}");
@@ -766,7 +776,7 @@ class Tabla
                             //De clase
                             if (count($this->btnList) > 0) {
                                 for ($I = 0; $I < count($this->btnList); $I++) {
-                                    $strSalida.= $crlf.'<td class="text-center"><button class="btn btn-sm '. $this->btnList[$I]['class'] .'" onclick="'. $this->btnList[$I]['onclick'] .'(\''.$fila[$this->IDField].'\')">'. $this->btnList[$I]['titulo'] .'</button></td>';
+                                    $strSalida.= $crlf.'<td class="text-center"><button id="'.$this->btnList[$I]['id'].$fila[$this->IDField].'" class="btn btn-sm '. $this->btnList[$I]['class'] .'" onclick="'. $this->btnList[$I]['onclick'] .'(\''.$fila[$this->IDField].'\')">'. $this->btnList[$I]['titulo'] .'</button></td>';
                                 }
                             }
 
@@ -783,7 +793,7 @@ class Tabla
                         //Botones del método
                         if (count($btnList) > 0) {
                             for ($I = 0; $I < count($btnList); $I++) {
-                                $strSalida.= $crlf.'<td class="text-center"><button class="btn btn-sm '. $btnList[$I]['class'] .'" onclick="'. $btnList[$I]['onclick'] .'(\''.$fila[$this->IDField].'\')">'. $btnList[$I]['titulo'] .'</button></td>';
+                                $strSalida.= $crlf.'<td class="text-center"><button  id="'.$this->btnList[$I]['id'].$fila[$this->IDField].'" class="btn btn-sm '. $btnList[$I]['class'] .'" onclick="'. $btnList[$I]['onclick'] .'(\''.$fila[$this->IDField].'\')">'. $btnList[$I]['titulo'] .'</button></td>';
                             }
                         }
 
@@ -820,7 +830,7 @@ class Tabla
                 } else {
                     $strSalida.= "<h3>No hay datos para mostrar</h3>";
                 }
-                $tabla->free();
+                //$tabla->free();
             } else {
                 $strSalida.= "<h3>No hay datos para mostrar</h3>";
             }
@@ -831,32 +841,33 @@ class Tabla
         echo $strSalida;
     }
 
-	public function searchForm() {
+    public function searchForm()
+    {
         global $crlf;
 
         $strSalida = '';
 
-		if (count($this->searchFields) > 0) {
-			$strSalida.= $crlf.'<div id="searchForm">';
-			$strSalida.= $crlf.'<hr>';
-			$strSalida.= $crlf.'<h4>Buscar '. $this->titulo .'</h4>'; 
-			$strSalida.= $crlf.'<form id="frmSearch'. $this->tabladb .'" class="form-horizontal marginTop20" method="post" onSubmit="return false;" novalidate>';
+        if (count($this->searchFields) > 0) {
+            $strSalida.= $crlf.'<div id="searchForm">';
+            $strSalida.= $crlf.'<hr>';
+            $strSalida.= $crlf.'<h4>Buscar '. $this->titulo .'</h4>';
+            $strSalida.= $crlf.'<form id="frmSearch'. $this->tabladb .'" class="form-horizontal marginTop20" method="post" onSubmit="return false;" novalidate>';
 
-			foreach ($this->searchFields as $field) {
-				$strSalida.= $crlf . $this->createField($this->fields[$field], 'search');
-			}
+            foreach ($this->searchFields as $field) {
+                $strSalida.= $crlf . $this->createField($this->fields[$field], 'search');
+            }
 
-			$strSalida.= $crlf.'<div class="form-group">';
-			$strSalida.= $crlf.'	<div class="col-md-offset-2 col-lg-offset-2 col-md-4 col-lg-4">';
-			$strSalida.= $crlf.'		<button type="submit" class="btn btn-sm btn-primary clickable" data-js="listar'. $this->tabladb .'()"><i class="fa fa-search fa-fw" aria-hidden="true"></i> Buscar</button>';
-			$strSalida.= $crlf.'	</div>';
-			$strSalida.= $crlf.'</div>';
-			$strSalida.= $crlf.'</form>';
-			$strSalida.= $crlf.'</div>';
-			
-			echo $strSalida;
-		}
-	}
+            $strSalida.= $crlf.'<div class="form-group">';
+            $strSalida.= $crlf.'	<div class="col-md-offset-2 col-lg-offset-2 col-md-4 col-lg-4">';
+            $strSalida.= $crlf.'		<button type="submit" class="btn btn-sm btn-primary clickable" data-js="listar'. $this->tabladb .'()"><i class="fa fa-search fa-fw" aria-hidden="true"></i> Buscar</button>';
+            $strSalida.= $crlf.'	</div>';
+            $strSalida.= $crlf.'</div>';
+            $strSalida.= $crlf.'</form>';
+            $strSalida.= $crlf.'</div>';
+            
+            echo $strSalida;
+        }
+    }
 
     public function script()
     {
@@ -867,6 +878,12 @@ class Tabla
         if (count($this->jsFiles) > 0) {
             for ($I = 0; $I < count($this->jsFiles); $I++) {
                 $strSalida.= $crlf.'	<script src="'. $config->raiz . $this->jsFiles[$I] .'"></script>';
+            }
+        }
+
+        if (count($this->cssFiles) > 0) {
+            for ($I = 0; $I < count($this->cssFiles); $I++) {
+                $strSalida.= $crlf.'	<link rel="stylesheet" href="'. $config->raiz . $this->cssFiles[$I] .'" />';
             }
         }
 
@@ -911,38 +928,38 @@ class Tabla
         //Listar
         $strSalida.= $crlf.'';
         $strSalida.= $crlf.'function listar'. $this->tabladb .'() {';
-		$strSalida.= $crlf.'	$("#actualizando").show();';
+        $strSalida.= $crlf.'	$("#actualizando").show();';
         $strSalida.= $crlf.'	$("#divDatos").html("");';
-		$strSalida.= $crlf.'';
-		$strSalida.= $crlf.'	var filtros = "";';
+        $strSalida.= $crlf.'';
+        $strSalida.= $crlf.'	var filtros = "";';
 
-		if (count($this->searchFields) > 0) {
-			foreach ($this->searchFields as $field) {
-				$strSalida.= $crlf.'	if ($("#search-'.$field.'").val() != "") {';
-				$strSalida.= $crlf.'		if (filtros != "") {';
-					$strSalida.= $crlf.'			filtros+= " AND ";';
-				$strSalida.= $crlf.'		}';
+        if (count($this->searchFields) > 0) {
+            foreach ($this->searchFields as $field) {
+                $strSalida.= $crlf.'	if ($("#search-'.$field.'").val() != "") {';
+                $strSalida.= $crlf.'		if (filtros != "") {';
+                    $strSalida.= $crlf.'			filtros+= " AND ";';
+                $strSalida.= $crlf.'		}';
 
-				switch ($this->fields[$field]["type"]) {
-					case "text": 
-						$strSalida.= $crlf.'		filtros+= "'.$field.' like \'%" + $("#search-'.$field.'").val() + "%\'";';
-						break;
+                switch ($this->fields[$field]["type"]) {
+                    case "text":
+                        $strSalida.= $crlf.'		filtros+= "'.$field.' like \'%" + $("#search-'.$field.'").val() + "%\'";';
+                        break;
 
-					default:
-						$strSalida.= $crlf.'		filtros+= "'.$field.' = \'" + $("#search-'.$field.'").val() + "\'";';
-						break;
-				}
-				
-				$strSalida.= $crlf.'	}';
-			}
+                    default:
+                        $strSalida.= $crlf.'		filtros+= "'.$field.' = \'" + $("#search-'.$field.'").val() + "\'";';
+                        break;
+                }
+                
+                $strSalida.= $crlf.'	}';
+            }
 
-			$strSalida.= $crlf.'';
-		}
+            $strSalida.= $crlf.'';
+        }
 
         $strSalida.= $crlf.'	$.post("php/tablaHandler.php",';
         $strSalida.= $crlf.'		{ operacion: "10"';
         $strSalida.= $crlf.'			, tabla: "'.$this->name.'"';
-		$strSalida.= $crlf.'			, filtro: filtros';
+        $strSalida.= $crlf.'			, filtro: filtros';
 
         if ($this->masterFieldId != '' && isset($_GET[$this->masterFieldId])) {
             $strSalida.= $crlf.'			, '. $this->masterFieldId .': "'. $_GET[$this->masterFieldId] .'"';
@@ -951,6 +968,7 @@ class Tabla
         $strSalida.= $crlf.'		function(data) {';
         $strSalida.= $crlf.'			$("#actualizando").hide();';
         $strSalida.= $crlf.'			$("#divDatos").html(data);';
+        $strSalida.= $crlf.'		    '. $this->jsOnList;
         $strSalida.= $crlf.'		}';
         $strSalida.= $crlf.'	);';
         $strSalida.= $crlf.'}';
@@ -1016,8 +1034,7 @@ class Tabla
             //Si hay form de busqueda lo oculto
             if (count($this->searchFields) > 0) {
                 $strSalida.= $crlf.'	$("#searchForm").fadeOut(function() {$("#frm'. $this->tabladb .'").fadeIn();});';
-            }
-            else {
+            } else {
                 $strSalida.= $crlf.'		$("#frm'. $this->tabladb .'").fadeIn();';
             }
 
@@ -1075,10 +1092,10 @@ class Tabla
                                 }
                             } else {
                                 switch ($field["type"]) {
-									case "ckeditor":
+                                    case "ckeditor":
                                         $strSalida.= $crlf.'		CKEDITOR.instances.'.$field['name'].'.setData($("#'.$field['name'].'" + strID).html());';
                                         break;
-										
+                                        
                                     case "image":
                                     case "file":
                                         $strSalida.= $crlf.'		if ($("#'.$field['name'].'" + strID).val() != "") {';
@@ -1183,8 +1200,7 @@ class Tabla
                 $strSalida.= $crlf.'				    $("#frm'. $this->tabladb .'").find(".form-control[type!=\'hidden\'][disabled!=disabled][readonly!=readonly]:first").focus()';
                 $strSalida.= $crlf.'			    });';
                 $strSalida.= $crlf.'			});';
-            }
-            else {
+            } else {
                 $strSalida.= $crlf.'			$("#frm'. $this->tabladb .'").fadeIn(function() {';
                 $strSalida.= $crlf.'				$("#frm'. $this->tabladb .'").find(".form-control[type!=\'hidden\'][disabled!=disabled][readonly!=readonly]:first").focus()';
                 $strSalida.= $crlf.'			});';
