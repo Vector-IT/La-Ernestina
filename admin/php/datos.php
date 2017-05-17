@@ -11,6 +11,7 @@
 	require_once 'custom/lote.php';
 	require_once 'custom/cuota.php';
 	require_once 'custom/cuotapago.php';
+	require_once 'custom/indexacion.php';
 
 	//Variables
 	$crlf = "\n";
@@ -145,6 +146,37 @@
 	$tabla->addField("NumeTipoOper", "select", 0, "Tipo de operación", true, false, false, true, '', '', 'tiposoperaciones', 'NumeTipoOper', 'NombTipoOper');
 
 	$config->tablas["tiposcaja"] = $tabla;
+
+	/**
+	 * INDEXACION DE CUOTAS
+	 */
+	$tabla = new Indexacion("indexaciones", "indexaciones", "Indexación de Cuotas", "el índice", true, "objeto/indexaciones/", "fa-percent");
+	$tabla->isSubItem = true;
+	$tabla->allowDelete = false;
+	$tabla->allowEdit = false;
+
+	$tabla->jsFiles = ["admin/js/custom/indexaciones.js"];
+
+	$tabla->btnList = [
+		array(
+			"id"=>'btnCambiarEstado',
+			"titulo"=>"Cambiar Estado",
+			"class"=>"btn-danger",
+			"onclick"=>"cambiarEstado"
+		)
+	];
+	
+	$tabla->addFieldId("NumeInde", "", true, true);
+	$tabla->addField("FechInde", "datetime", 0, "Fecha");
+	$tabla->fields["FechInde"]["showOnForm"] = false;
+	
+	$tabla->addField("PorcInde", "number", 0, "Porcentaje");
+	$tabla->fields["PorcInde"]["step"] = "0.01";
+
+	$tabla->addField("NumeEsta", "select", 0, "Estado", true, false, false, true, '1', '', 'estados', 'NumeEsta', 'NombEsta', '', 'NombEsta');	
+	$tabla->fields["NumeEsta"]["isHiddenInForm"] = true;
+
+	$config->tablas["indexaciones"] = $tabla;
 
 	/**
 	 * CAJA
