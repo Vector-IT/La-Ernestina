@@ -10,6 +10,7 @@
 	require_once 'custom/caja.php';
 	require_once 'custom/lote.php';
 	require_once 'custom/cuota.php';
+	require_once 'custom/cuotapago.php';
 
 	//Variables
 	$crlf = "\n";
@@ -26,6 +27,7 @@
 	 */
 	$config->menuItems = [
 			new MenuItem("Configuraciones", '', '', 'fa-cogs', 1, true, false),
+			new MenuItem("Reportes", 'reportes.php', '', 'fa-slideshare', '', false, false),
 			new MenuItem("Salir del Sistema", 'logout.php', '', 'fa-sign-out', '', false, false)
 	];
 
@@ -90,6 +92,9 @@
 	$tabla = new Tabla("tipospagos", "tipospagos", "Formas de Pago", "la Forma de Pago", true, "objeto/tipospagos/", "fa-credit-card");
 	$tabla->labelField = "NombTipoPago";
 	$tabla->isSubItem = true;
+	$tabla->allowDelete = false;
+	$tabla->allowEdit = false;
+	$tabla->allowNew = false;
 
 	$tabla->addField("NumeTipoPago", "number", 0, "Número", false, true, true);
 	$tabla->addField("NombTipoPago", "text", 100, "Nombre");
@@ -210,6 +215,7 @@
 	$tabla->fields["LoteCoor"]["isHiddenInList"] = true;
 
 	$tabla->addField("ValoLote", "number", 0, "Precio");
+	$tabla->fields["ValoLote"]["txtAlign"] = "right";
 
 	$tabla->addField("NumeEstaLote", "select", 0, "Estado", true, false, false, true, '1', '', 'estadoslotes', 'NumeEstaLote', 'NombEstaLote');
 	$tabla->fields["NumeEstaLote"]["showOnForm"] = false;
@@ -219,6 +225,7 @@
 	
 	$tabla->addField("CantCuot", "number", 0, "Cantidad de Cuotas");
 	$tabla->fields["CantCuot"]["showOnForm"] = false;
+	$tabla->fields["CantCuot"]["txtAlign"] = "right";
 
 	$config->tablas["lotes"] = $tabla;
 
@@ -262,9 +269,15 @@
 
 	$tabla->addField("ImpoCuot", "number", 0, "Importe de cuota pura", true, true);
 	$tabla->fields["ImpoCuot"]["step"] = "0.01";
+	$tabla->fields["ImpoCuot"]["txtAlign"] = "right";
 
 	$tabla->addField("ImpoOtro", "number", 0, "Interés", true, true);
 	$tabla->fields["ImpoOtro"]["step"] = "0.01";
+	$tabla->fields["ImpoOtro"]["txtAlign"] = "right";
+
+	$tabla->addField("ImpoPago", "calcfield", 0, "Importe Pagado");
+	$tabla->fields["ImpoPago"]["showOnForm"] = false;
+	$tabla->fields["ImpoPago"]["txtAlign"] = "right";
 
 	$tabla->addField("ObseCuot", "textarea", 200, "Observaciones", false);
 	$tabla->fields["ObseCuot"]["isHiddenInList"] = true;
@@ -276,16 +289,27 @@
 	/**
 	 * CUOTASPAGOS
 	 */
-	$tabla = new Tabla("cuotaspagos", "cuotaspagos", "Pagos de la Cuota", "el pago", false);
+	$tabla = new CuotaPago("cuotaspagos", "cuotaspagos", "Pagos de la Cuota", "el pago", false);
 	$tabla->masterTable = "cuotas";
 	$tabla->masterFieldId = "CodiIden";
 	$tabla->masterFieldName = "NumeCuot";
+	$tabla->allowEdit = false;
+	$tabla->allowDelete = false;
 
 	$tabla->btnForm = [
 		array(
 			"titulo"=> '<i class="fa fa-credit-card fa-fw" aria-hidden="true"></i> Cheques',
 			"class"=> 'btn-primary',
 			"onclick"=> "abrirCheques();"
+		)
+	];
+
+	$tabla->btnList = [
+		array(
+			"id"=>'btnCambiarEstado',
+			"titulo"=>"Cambiar Estado",
+			"class"=>"btn-danger",
+			"onclick"=>"cambiarEstado"
 		)
 	];
 
@@ -296,23 +320,40 @@
 		"admin/js/custom/jquery.fancybox.min.js"
 	];
 
-	$tabla->jsOnLoad = "cargarCheques();";
+	$tabla->jsOnLoad = "afterLoad();";
+	$tabla->jsOnList = "afterList();";
 
 	$tabla->cssFiles = [
 		"admin/css/custom/jquery.fancybox.min.css"
 	];
 
 	$tabla->addFieldId("NumePago", "NumePago", false, false);
-	$tabla->addField("CodiIden", "number");
-	$tabla->fields["CodiIden"]["showOnForm"] = false;
-	$tabla->fields["CodiIden"]["showOnList"] = false;
+	$tabla->fields["NumePago"]["isHiddenInForm"] = true;
+	$tabla->fields["NumePago"]["isHiddenInList"] = true;
 
-	$tabla->addField("NumeTipoPago", "select", 80, "Forma de pago", true, false, false, true, '', '', 'tipospagos', 'NumeTipoPago', 'NombTipoPago', "NumeEsta = 1");
+	$tabla->addField("CodiIden", "number");
+	$tabla->fields["CodiIden"]["isHiddenInForm"] = true;
+	$tabla->fields["CodiIden"]["isHiddenInList"] = true;
+
+	$tabla->addField("FechPago", "datetime", 0, "Fecha");
+	$tabla->fields["FechPago"]["showOnForm"] = false;
+
+	$tabla->addField("NumeTipoPago", "select", 80, "Forma de pago", true, false, false, true, '1', '', 'tipospagos', 'NumeTipoPago', 'NombTipoPago', "NumeEsta = 1");
+	$tabla->fields["NumeTipoPago"]["onChange"] = "formasPago()";
+
 	$tabla->addField("CodiCheq", "select", 100, "Cheque", false, false, false, true, '', '', 'cheques', 'CodiCheq', 'NumeCheq', "NumeEsta = 1", "NumeCheq");
 	$tabla->fields["CodiCheq"]["itBlank"] = true;
+	$tabla->fields["CodiCheq"]["onChange"] = "buscarImporte()";
+
+	$tabla->addField("ImpoPago", "number", 0, "Importe");
+	$tabla->fields["ImpoPago"]["step"] = "0.01";
+	$tabla->fields["ImpoPago"]["txtAlign"] = "right";
 
 	$tabla->addField("ObsePago", "textarea", 200, "Observaciones", false);
 	$tabla->fields["ObsePago"]["isHiddenInList"] = true;
+
+	$tabla->addField("NumeEsta", "select", 0, "Estado", true, false, false, true, '1', '', 'estados', 'NumeEsta', 'NombEsta', '', 'NombEsta');
+	$tabla->fields["NumeEsta"]["isHiddenInForm"] = true;
 
 	$config->tablas["cuotaspagos"] = $tabla;
 

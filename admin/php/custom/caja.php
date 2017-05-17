@@ -37,10 +37,10 @@ class Caja extends Tabla {
         $saldo = floatval($credito) - floatval($debito);
 
         if ($saldo >= 0) {
-            $strSalida.= $crlf.'<h4 id="txtSaldo" class="text-right">Saldo: $ '.$saldo.'</h4>';
+            $strSalida.= $crlf.'<h4 id="txtSaldo" class="well well-sm text-right">Saldo: $ '.$saldo.'</h4>';
         }
         else {
-            $strSalida.= $crlf.'<h4 id="txtSaldo"  class="text-right">Saldo: <span class="txtRojo">$ '.$saldo.'</span></h4>';
+            $strSalida.= $crlf.'<h4 id="txtSaldo" class="well well-sm text-right">Saldo: <span class="txtRojo">$ '.$saldo.'</span></h4>';
         }
 
         if ($tabla) {

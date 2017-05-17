@@ -56,7 +56,9 @@ if (isset($_REQUEST["tb"])) {
 </head>
 <body>
     <?php
-        $config->crearMenu();
+        if (!isset($_REQUEST["menu"]) || $_REQUEST["menu"] == 1) {
+            $config->crearMenu();
+        }
         
         require_once 'php/header.php';
     ?>

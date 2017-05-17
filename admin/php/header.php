@@ -1,3 +1,4 @@
+<?php if (!isset($_REQUEST["header"]) || $_REQUEST["header"] == 1) {?>
 	<div class="jumbotron" style="padding:10px 0;">
 		<div class="container-fluid" style="min-height:50px;">
 			<div>
@@ -20,3 +21,4 @@
 		</div>
 		<?php }?>
 	</div>
+<?php } ?>

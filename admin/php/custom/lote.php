@@ -38,9 +38,10 @@ class Lote extends Tabla
                     "NumeTipoCuot"=>"1",
                     "FechVenc"=>$fecha->format("Y-m-d"),
                     "ImpoCuot"=>$impoAnti,
-                    "ImpoOtro"=>"0"
+                    "ImpoOtro"=>"0",
+                    "NumeEstaCuot"=>"1"
                 );
-                $cuota->insertar($datos);
+                $resCuota = $cuota->insertar($datos);
 
                 //Creo las cuotas
                 if (intval($cantCuot) > 0) {
@@ -60,9 +61,10 @@ class Lote extends Tabla
                             "NumeTipoCuot"=>"2",
                             "FechVenc"=>$fechVenc->format("Y-m-d"),
                             "ImpoCuot"=>$impoCuot,
-                            "ImpoOtro"=>"0"
+                            "ImpoOtro"=>"0",
+                            "NumeEstaCuot"=>"1"
                         );
-                        $cuota->insertar($datos);
+                        $resCuota = $cuota->insertar($datos);
                     }
                 }
 
