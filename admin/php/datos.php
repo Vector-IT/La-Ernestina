@@ -399,7 +399,7 @@
 	$tabla = new Tabla("clientes", "clientes", "Clientes", "el Cliente", true, "objeto/clientes/", "fa-id-card-o");
 	$tabla->labelField = "NombClie";
 
-	$tabla->searchFields = array("NumeClie", "NombClie");
+	$tabla->searchFields = array("NombClie");
 
 	$tabla->btnList = [
 			array(
@@ -558,8 +558,11 @@
 	$tabla->addField("Tabla", "text", 80, "Tabla", false);
 	$tabla->fields["Tabla"]["isHiddenInList"] = true;
 
-	$tabla->addField("Campo", "text", 80, "Campo", false);
-	$tabla->fields["Campo"]["isHiddenInList"] = true;
+	$tabla->addField("CampoNumero", "text", 80, "Campo Número", false);
+	$tabla->fields["CampoNumero"]["isHiddenInList"] = true;
+
+	$tabla->addField("CampoNombre", "text", 80, "Campo Nombre", false);
+	$tabla->fields["CampoNombre"]["isHiddenInList"] = true;
 
 	$tabla->addField("ColumnFoot", "number", 0, "Columna footer");
 	$tabla->fields["ColumnFoot"]["isHiddenInList"] = true;
