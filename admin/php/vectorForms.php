@@ -55,8 +55,6 @@ class VectorForms {
 	 * @return mysqli
 	 */
 	private function newConn() {
-		global $config;
-
 		$conn = new \mysqli($this->dbhost, $this->dbuser, $this->dbpass, $this->db);
 		$conn->set_charset("utf8");
 
@@ -124,6 +122,50 @@ class VectorForms {
 		return $strSalida;
 	}
 
+	public function cargarCombo($tabla, $CampoNumero, $CampoTexto, $filtro = "", $orden = "", $seleccion = "", $itBlank = false, $itBlankText = 'Seleccione...')
+    {
+        global $crlf;
+
+        $strSQL = "SELECT ". $CampoNumero;
+        if ($CampoTexto != "") {
+            $strSQL.= ",". $CampoTexto;
+        }
+        $strSQL.= " FROM ". $tabla;
+
+        if ($filtro != "") {
+            $strSQL.= " WHERE $filtro";
+        }
+
+        if ($orden != "") {
+            $strSQL.= " ORDER BY $orden";
+        }
+
+        $tabla = $this->cargarTabla($strSQL);
+
+        $strSalida = "";
+        if ($itBlank) {
+            $strSalida.= $crlf.'<option value="">'.$itBlankText.'</option>';
+        }
+
+        while ($fila = $tabla->fetch_assoc()) {
+            if ($CampoTexto != "") {
+                if (strcmp($fila[$CampoNumero], $seleccion) != "0") {
+                    $strSalida.= $crlf.'<option value="'.$fila[$CampoNumero].'">'.htmlentities($fila[$CampoTexto]).'</option>';
+                } else {
+                    $strSalida.= $crlf.'<option value="'.$fila[$CampoNumero].'" selected>'.htmlentities($fila[$CampoTexto]).'</option>';
+                }
+            } else {
+                if (strcmp($fila[$CampoNumero], $seleccion) != "0") {
+                    $strSalida.= $crlf.'<option value="'.$fila[$CampoNumero].'" />';
+                } else {
+                    $strSalida.= $crlf.'<option value="'.$fila[$CampoNumero].'" selected />';
+                }
+            }
+        }
+
+        return $strSalida;
+    }
+
 	/**
 	 * Ejecutar query en la BD y devolver el resultado
 	 *
@@ -144,7 +186,7 @@ class VectorForms {
 	 * Crear menu de opciones
 	 */
 	public function crearMenu() {
-		global $config, $crlf;
+		global $crlf;
 
 		$strSalida = '';
 		$strSeparador = $crlf.'<div class="separator"></div>';
@@ -187,7 +229,7 @@ class VectorForms {
 			foreach ($this->menuItems as $item) {
 				if (!$item->Used) {
 					if ($item->NumeCarg != '') {
-						$NumeCarg = intval($config->buscarDato("SELECT NumeCarg FROM usuarios WHERE NumeUser = ". $_SESSION["NumeUser"]));
+						$NumeCarg = intval($this->buscarDato("SELECT NumeCarg FROM usuarios WHERE NumeUser = ". $_SESSION["NumeUser"]));
 							
 						if (intval($item->NumeCarg) < $NumeCarg) {
 							continue;
@@ -241,7 +283,7 @@ class VectorForms {
 			//Tablas
 			if ($tabla->showMenu) {
 				if ($tabla->numeCarg != '') {
-					$NumeCarg = intval($config->buscarDato("SELECT NumeCarg FROM usuarios WHERE NumeUser = ". $_SESSION["NumeUser"]));
+					$NumeCarg = intval($this->buscarDato("SELECT NumeCarg FROM usuarios WHERE NumeUser = ". $_SESSION["NumeUser"]));
 		
 					if (intval($tabla->numeCarg) < $NumeCarg) {
 						continue;
@@ -290,7 +332,7 @@ class VectorForms {
 		foreach ($this->menuItems as $item) {
 			if ($item->Index == '' || !$item->Used) {
 				if ($item->NumeCarg != '') {
-					$NumeCarg = intval($config->buscarDato("SELECT NumeCarg FROM usuarios WHERE NumeUser = ". $_SESSION["NumeUser"]));
+					$NumeCarg = intval($this->buscarDato("SELECT NumeCarg FROM usuarios WHERE NumeUser = ". $_SESSION["NumeUser"]));
 		
 					if (intval($item->NumeCarg) < $NumeCarg) {
 						continue;

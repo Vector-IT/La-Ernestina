@@ -37,7 +37,7 @@ class CuotaPago extends Tabla
                 break;
 
             case "Cheques":
-                return $this->cargarCombo("cheques", "CodiCheq", "CONCAT(NumeCheq, ' - ', NombTitu,' - $', ImpoCheq)", "NumeEsta = 1", "2", "", true);
+                return $config->cargarCombo("cheques", "CodiCheq", "CONCAT(NumeCheq, ' - ', NombTitu,' - $', ImpoCheq)", "NumeEsta = 1", "2", "", true);
                 break;
 
             case "ImpoCheq":

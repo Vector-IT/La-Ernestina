@@ -1,7 +1,3 @@
-<?php
-    $clientes = $config->getTabla("clientes");
-?>
-
 <div id="modalCliente" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
 	<div class="modal-dialog modal-lg" role="document">
 		<div class="modal-content">
@@ -18,7 +14,7 @@
 						<label for="NumeClie" class="control-label col-md-2">Cliente:</label>
 						<div class="col-md-8">
 							<select class="form-control ucase" id="NumeClie">
-								<?php echo $clientes->cargarCombo('clientes', 'NumeClie', 'NombClie', 'NumeEsta = 1', 'NombClie')?>
+								<?php echo $config->cargarCombo('clientes', 'NumeClie', 'NombClie', 'NumeEsta = 1', 'NombClie')?>
 							</select>
 						</div>
 					</div>

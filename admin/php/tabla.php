@@ -40,8 +40,9 @@ class Tabla
     public $jsFiles;
     public $jsOnLoad;
     public $jsOnList;
+    public $jsOnNew;
     public $jsOnEdit;
-
+    
     public $cssFiles;
 
     public $btnList;
@@ -95,6 +96,7 @@ class Tabla
         $this->jsFiles = [];
         $this->jsOnLoad = '';
         $this->jsOnList = '';
+        $this->jsOnNew = '';
         $this->jsOnEdit = '';
 
         $this->cssFiles = [];
@@ -327,7 +329,7 @@ class Tabla
 
     protected function createField($field, $prefix = '')
     {
-        global $crlf;
+        global $crlf, $config;
 
         $strSalida = '';
 
@@ -400,14 +402,14 @@ class Tabla
                     case 'select':
                         $strSalida.= $crlf.'<select class="form-control input-sm ucase '.$field['cssControl'].'" id="'.$fname.'" '. ($field['required']?'required':'') .' '. ($field['readOnly']?'readonly':'') .' '. ($field['onChange'] !=''?'onchange="'.$field['onChange'].'"':'') .'>';
                         if ($field['lookupTable'] != '') {
-                            $strSalida.= $crlf. $this->cargarCombo($field['lookupTable'], $field['lookupFieldID'], $field['lookupFieldLabel'], $field['lookupConditions'], $field['lookupOrder'], $field['value'], ($prefix == ''? $field['itBlank']: true));
+                            $strSalida.= $crlf. $config->cargarCombo($field['lookupTable'], $field['lookupFieldID'], $field['lookupFieldLabel'], $field['lookupConditions'], $field['lookupOrder'], $field['value'], ($prefix == ''? $field['itBlank']: true));
                         }
                         $strSalida.= $crlf.'</select>';
                         break;
 
                     case 'selectmultiple':
                         $strSalida.= $crlf.'<select class="form-control input-sm ucase selectpicker '.$field['cssControl'].'" multiple id="'.$fname.'" '. ($field['required']?'required':'') .' title="SELECCIONE" '. ($field['readOnly']?'readonly':'') .' '. ($field['onChange'] !=''?'onchange="'.$field['onChange'].'"':'') .'>';
-                        $strSalida.= $crlf. $this->cargarCombo($field['lookupTable'], $field['lookupFieldID'], $field['lookupFieldLabel'], $field['lookupConditions'], $field['lookupOrder'], $field['value'], $field['itBlank']);
+                        $strSalida.= $crlf. $config->cargarCombo($field['lookupTable'], $field['lookupFieldID'], $field['lookupFieldLabel'], $field['lookupConditions'], $field['lookupOrder'], $field['value'], $field['itBlank']);
                         $strSalida.= $crlf.'</select>';
                         $strSalida.= $crlf.'<script type="text/javascript">';
                         $strSalida.= $crlf.'$("#'.$fname.'").selectpicker({
@@ -421,7 +423,7 @@ class Tabla
                     case 'datalist':
                         $strSalida.= $crlf.'<input class="form-control input-sm '.$field['cssControl'].'" list="lst-'.$fname.'" id="'.$fname.'" '. ($field['isID']?'disabled':'') .' '. ($field['required']?'required':'') .' '. ($field['size'] > 0?'size="'.$field['size'].'"':'') .' '. ($field['readOnly']?'readonly':'') .' '. ($field['onChange'] !=''?'onchange="'.$field['onChange'].'"':'') .'/>';
                         $strSalida.= $crlf.'<datalist id="lst-'.$fname.'">';
-                        $strSalida.= $crlf. $this->cargarCombo($field['lookupTable'], $field['lookupFieldLabel'], '', $field['lookupConditions'], $field['lookupOrder'], $field['value'], $field['itBlank']);
+                        $strSalida.= $crlf. $config->cargarCombo($field['lookupTable'], $field['lookupFieldLabel'], '', $field['lookupConditions'], $field['lookupOrder'], $field['value'], $field['itBlank']);
                         $strSalida.= $crlf.'</datalist>';
                         break;
 
@@ -1206,6 +1208,8 @@ class Tabla
                 $strSalida.= $crlf.'			});';
             }
 
+            $strSalida.= $crlf.'	        '. $this->jsOnNew;
+
             $strSalida.= $crlf.'		}';
             $strSalida.= $crlf.'		else {';
             $strSalida.= $crlf.'			$("#frm'. $this->tabladb .'").fadeOut(function() {$("#searchForm").fadeIn();});';
@@ -1554,7 +1558,7 @@ class Tabla
         }
     }
 
-    public function cargarCombo($tabla, $CampoNumero, $CampoTexto, $filtro = "", $orden = "", $seleccion = "", $itBlank = false, $itBlankText = 'Seleccione...')
+    public function cargarCombo1($tabla, $CampoNumero, $CampoTexto, $filtro = "", $orden = "", $seleccion = "", $itBlank = false, $itBlankText = 'Seleccione...')
     {
         global $config, $crlf;
 

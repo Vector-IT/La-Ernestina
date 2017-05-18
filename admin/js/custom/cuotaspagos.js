@@ -31,6 +31,17 @@ function afterList() {
 	else {
 		$("#btnNuevo").show();
 	}
+
+    $("#divDatos").find("tr").each(function (I) {
+        if (I > 0) {
+            var strID = $(this).find("input[id^='NumePago']").val();
+
+            if ($("#NumeEsta" + strID).val() != "1") {
+                $(this).addClass("txtTachado");
+            }
+        }
+    });
+	
 }
 
 function cargarCheques() {

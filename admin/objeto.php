@@ -67,14 +67,19 @@ if (isset($_REQUEST["tb"])) {
         <div class="page-header">
             <h2>
             <?php
+            $icono = "";
+            if ($tabla->icono != '') {
+                $icono = '<i class="fa fa-fw '.$tabla->icono.'" aria-hidden="true"></i> ';
+            }
+
             if ($tabla->masterTable == '') {
-                echo $tabla->titulo;
+                echo $icono.$tabla->titulo;
             } else {
                 if (isset($_REQUEST[$tabla->masterFieldId])) {
                     $strAux = $config->buscarDato("SELECT {$tabla->masterFieldName} FROM {$tabla->masterTable} WHERE {$tabla->masterFieldId} = '{$_REQUEST[$tabla->masterFieldId]}'");
-                    echo $tabla->titulo. ' de ' .$strAux;
+                    echo $icono.$tabla->titulo. ' de ' .$strAux;
                 } else {
-                    echo $tabla->titulo;
+                    echo $icono.$tabla->titulo;
                 }
             }
             ?>

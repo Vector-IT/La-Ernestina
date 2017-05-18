@@ -11,6 +11,7 @@
 	require_once 'custom/lote.php';
 	require_once 'custom/cuota.php';
 	require_once 'custom/cuotapago.php';
+	require_once 'custom/cheque.php';
 	require_once 'custom/indexacion.php';
 
 	//Variables
@@ -157,6 +158,9 @@
 
 	$tabla->jsFiles = ["admin/js/custom/indexaciones.js"];
 
+	$tabla->jsOnLoad = "verEstado();";
+	$tabla->jsOnList = "verEstado();";
+
 	$tabla->btnList = [
 		array(
 			"id"=>'btnCambiarEstado',
@@ -264,7 +268,7 @@
 	/**
 	 * CUOTAS
 	 */
-	$tabla = new Cuota("cuotas", "cuotas", "Cuotas", "la Cuota", false, "objeto/cuotas/", "");
+	$tabla = new Cuota("cuotas", "cuotas", "Cuotas", "la Cuota", false, "", "fa-map-o");
 	$tabla->labelField = "NumeCuot";
 	$tabla->masterTable = "lotes";
 	$tabla->masterFieldId = "NumeLote";
@@ -321,7 +325,7 @@
 	/**
 	 * CUOTASPAGOS
 	 */
-	$tabla = new CuotaPago("cuotaspagos", "cuotaspagos", "Pagos de la Cuota", "el pago", false);
+	$tabla = new CuotaPago("cuotaspagos", "cuotaspagos", "Pagos de la Cuota", "el pago", false, "", "fa-map-o");
 	$tabla->masterTable = "cuotas";
 	$tabla->masterFieldId = "CodiIden";
 	$tabla->masterFieldName = "NumeCuot";
@@ -452,7 +456,24 @@
 	/**
 	 * CHEQUES
 	 */
-	$tabla = new Tabla("cheques", "cheques", "Cheques", "el Cheque", true, "objeto/cheques/", "fa-credit-card");
+	$tabla = new Cheque("cheques", "cheques", "Cheques", "el Cheque", true, "objeto/cheques/", "fa-credit-card");
+	$tabla->labelField = "NumeCheq";
+
+	$tabla->allowDelete = false;
+
+	$tabla->btnList = [
+		array(
+			"id"=>'btnCambiarEstado',
+			"titulo"=>"Cambiar Estado",
+			"class"=>"btn-danger",
+			"onclick"=>"cambiarEstado"
+		)
+	];
+	
+	$tabla->jsFiles = ["admin/js/custom/cheques.js"];
+	$tabla->jsOnList = "verEstado();";
+	$tabla->jsOnNew = "onNew();";
+	$tabla->jsOnEdit = "onEdit();";
 	
 	$tabla->addFieldId("CodiCheq", "CodiCheq", true, true);
 	$tabla->addField("NumeCheq", "number", 80, "Número");
@@ -481,14 +502,6 @@
 	$tabla->fields["CUITTitu"]["cssGroup"] = "form-group2";
 	$tabla->fields["CUITTitu"]["isHiddenInList"] = true;
 
-	$tabla->addField("NombReci", "text", 80, "Nombre tercero", true);
-
-	$tabla->addField("TeleReci", "text", 80, "Teléfono tercero", true);
-	$tabla->fields["TeleReci"]["isHiddenInList"] = true;
-
-	$tabla->addField("DireReci", "text", 400, "Dirección tercero", false);
-	$tabla->fields["DireReci"]["isHiddenInList"] = true;
-
 	$tabla->addField("ImpoCheq", "number", 0, "Importe");
 	$tabla->fields["ImpoCheq"]["step"] = "0.01";
 	
@@ -496,6 +509,66 @@
 	$tabla->fields["ObseCheq"]["isHiddenInList"] = true;
 
 	$tabla->addField("NumeEsta", "select", 0, "Estado", true, false, false, true, '1', '', 'estados', 'NumeEsta', 'NombEsta', '', 'NombEsta');
+	$tabla->fields["ObseCheq"]["isHiddenInForm"] = true;
+	
+	//Recibido de 
+	$tabla->addField("NombReci", "text", 80, "Recibido de", true);
+	$tabla->fields["NombReci"]["cssGroup"] = "form-group2";
+
+	$tabla->addField("TeleReci", "text", 80, "Teléfono", true);
+	$tabla->fields["TeleReci"]["isHiddenInList"] = true;
+	$tabla->fields["TeleReci"]["cssGroup"] = "form-group2";
+
+	$tabla->addField("DireReci", "text", 400, "Dirección", false);
+	$tabla->fields["DireReci"]["isHiddenInList"] = true;
+
+	//Entregado a
+	$tabla->addField("NombEntr", "text", 80, "Entregado a", false);
+	$tabla->fields["NombEntr"]["cssGroup"] = "form-group2";
+
+	$tabla->addField("TeleEntr", "text", 80, "Teléfono", false);
+	$tabla->fields["TeleEntr"]["isHiddenInList"] = true;
+	$tabla->fields["TeleEntr"]["cssGroup"] = "form-group2";
+
+	$tabla->addField("DireEntr", "text", 400, "Dirección", false);
+	$tabla->fields["DireEntr"]["isHiddenInList"] = true;
 
 	$config->tablas["cheques"] = $tabla;
+
+
+	/**
+	 * ADMINISTRADOR DE REPORTES
+	 */
+	$tabla = new Tabla("reportes", "reportes", "Administrador de Reportes", "el reporte", false);
+	$tabla->labelField = "NombRepo";
+
+	$tabla->jsFiles = ["admin/js/custom/adminReportes.js"];
+
+	$tabla->addFieldId("NumeRepo", "Número");
+	$tabla->addField("NombRepo", "text", 80, "Nombre");
+	$tabla->addField("SQLRepo", "textarea", 400, "SQL");
+	$tabla->fields["SQLRepo"]["isHiddenInList"] = true;
+
+	$tabla->addField("CantParams", "number", 0, "Cantidad de parámetros");
+	$tabla->fields["CantParams"]["isHiddenInList"] = true;
+
+	$tabla->addField("TipoParam", "select", 0, "Tipo de parámetros");
+	$tabla->fields["TipoParam"]["isHiddenInList"] = true;
+
+	$tabla->addField("Tabla", "text", 80, "Tabla", false);
+	$tabla->fields["Tabla"]["isHiddenInList"] = true;
+
+	$tabla->addField("Campo", "text", 80, "Campo", false);
+	$tabla->fields["Campo"]["isHiddenInList"] = true;
+
+	$tabla->addField("ColumnFoot", "number", 0, "Columna footer");
+	$tabla->fields["ColumnFoot"]["isHiddenInList"] = true;
+
+	$tabla->addField("FooterEsMoneda", "checkbox", 0, "Footer es moneda?");
+	$tabla->fields["FooterEsMoneda"]["isHiddenInList"] = true;
+
+	$tabla->addField("NumeEsta", "select", 0, "Estado", true, false, false, true, '1', '', 'estados', 'NumeEsta', 'NombEsta', '', 'NombEsta');
+
+	$config->tablas["reportes"] = $tabla;
+
 	?>
