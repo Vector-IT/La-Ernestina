@@ -20,7 +20,7 @@
 	//Datos de configuracion iniciales
 	$config = new VectorForms($dbhost, $dbschema, $dbuser, $dbpass, $raiz, "La Ernestina", "img/logo.png", true);
 	$config->tbLogin = 'usuarios';
-	$config->cssFiles = ["admin/css/custom.css"];
+	$config->cssFiles = ["admin/css/custom/custom.css"];
 
 	$_SESSION['imgCKEditor'] = '/VectorForms/admin/ckeditor/imgup';
 
