@@ -29,3 +29,12 @@ function cambiarEstado(strID) {
 		async:true
 	});
 }
+
+function iniciar() {
+	$("#search-FechCaja").parent().parent().parent().hide();
+}
+
+function verTodos() {
+	$("#search-FechCaja").val('TODOS');
+	listarcaja();
+}

@@ -18,14 +18,20 @@ class Caja extends Tabla {
 
         $strSQL = "SELECT c.NumeCaja, c.FechCaja, c.NombCaja, c.NumeTipoCaja, c.ImpoCaja, c.NumeEsta, c.NumeUser,";
         $strSQL.= $crlf." u.NombPers, tc.NombTipoCaja, tc.NumeTipoOper, e.NombEsta";
-        $strSQL.= $crlf." FROM caja c";
+        $strSQL.= $crlf." FROM (SELECT * FROM caja";
+        if ($strFiltro == "") {
+            $strSQL.= $crlf." WHERE FechCaja > DATE_ADD(SYSDATE(), INTERVAL -8 DAY)";
+        }
+        else {
+            if ($strFiltro != "FechCaja = 'TODOS'") {
+                $strSQL.= $crlf." WHERE ". $strFiltro;
+            }
+        }
+        $strSQL.= $crlf." ) c";
         $strSQL.= $crlf." INNER JOIN usuarios u ON c.NumeUser = u.NumeUser";
         $strSQL.= $crlf." INNER JOIN tiposcaja tc ON c.NumeTipoCaja = tc.NumeTipoCaja";
         $strSQL.= $crlf." INNER JOIN estados e ON c.NumeEsta = e.NumeEsta";
         
-        if ($strFiltro == "")
-            $strSQL.= $crlf." WHERE c.FechCaja > DATE_ADD(SYSDATE(), INTERVAL -8 DAY)";
-
         $strSQL.= $crlf." ORDER BY c.NumeCaja DESC";
 
         $tabla = $config->cargarTabla($strSQL);

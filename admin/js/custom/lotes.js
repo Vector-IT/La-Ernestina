@@ -5,8 +5,8 @@ $(document).ready(function() {
 });
 
 function cheqList() {
-    $("td[id^='NumeLote']").each(function (index, campo) {
-        var numeLote = $(campo).html();
+    $("tr input[id^='NumeLote']").each(function (index, campo) {
+        var numeLote = $(campo).val();
 
         if ($("#NumeClie"+numeLote).val() != "") {
             $("#btnAsigClie"+numeLote).hide();

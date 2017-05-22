@@ -189,8 +189,10 @@
 	$tabla->labelField = "NombCaja";
 	$tabla->allowDelete = false;
 	$tabla->allowEdit = false;
-	$tabla->searchFields = ["NombCaja", "NumeTipoCaja"];
+	$tabla->searchFields = ["NombCaja", "NumeTipoCaja", "FechCaja"];
 	$tabla->jsFiles = ["admin/js/custom/caja.js"];
+
+	$tabla->jsOnLoad = "iniciar();";
 
 	$tabla->btnForm = [
 		array(
@@ -219,11 +221,11 @@
 	/**
 	 * LOTES
 	 */
-	$tabla = new Lote("lotes", "lotes", "Lotes", "el Lote", true, "objeto/lotes/", "fa-map-o", "NombLote");
+	$tabla = new Lote("lotes", "lotes", "Lotes", "el Lote", true, "objeto/lotes/", "fa-map-o", "NumeLote");
 	$tabla->labelField = "NombLote";
 	$tabla->allowDelete = false;
 
-	$tabla->searchFields = ["NumeLote", "NombLote"];
+	$tabla->searchFields = ["NombLote"];
 
 	$tabla->btnList = [
 			array(
@@ -245,7 +247,7 @@
 
 	$tabla->modalList = ["php/modals/loteCliente.php"];
 
-	$tabla->addFieldId("NumeLote", "Número de lote");
+	$tabla->addFieldId("NumeLote", "Número de lote", true, true);
 	$tabla->addField("NombLote", "text", 100, "Nombre");
 	$tabla->addField("LoteCoor", "text", 80, "Coordenadas mapa");
 	$tabla->fields["LoteCoor"]["isHiddenInList"] = true;
