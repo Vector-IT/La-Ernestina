@@ -149,40 +149,6 @@
 	$config->tablas["tiposcaja"] = $tabla;
 
 	/**
-	 * INDEXACION DE CUOTAS
-	 */
-	$tabla = new Indexacion("indexaciones", "indexaciones", "Indexación de Cuotas", "el índice", true, "objeto/indexaciones/", "fa-percent");
-	$tabla->isSubItem = true;
-	$tabla->allowDelete = false;
-	$tabla->allowEdit = false;
-
-	$tabla->jsFiles = ["admin/js/custom/indexaciones.js"];
-
-	$tabla->jsOnLoad = "verEstado();";
-	$tabla->jsOnList = "verEstado();";
-
-	$tabla->btnList = [
-		array(
-			"id"=>'btnCambiarEstado',
-			"titulo"=>"Cambiar Estado",
-			"class"=>"btn-danger",
-			"onclick"=>"cambiarEstado"
-		)
-	];
-	
-	$tabla->addFieldId("NumeInde", "", true, true);
-	$tabla->addField("FechInde", "datetime", 0, "Fecha");
-	$tabla->fields["FechInde"]["showOnForm"] = false;
-	
-	$tabla->addField("PorcInde", "number", 0, "Porcentaje");
-	$tabla->fields["PorcInde"]["step"] = "0.01";
-
-	$tabla->addField("NumeEsta", "select", 0, "Estado", true, false, false, true, '1', '', 'estados', 'NumeEsta', 'NombEsta', '', 'NombEsta');	
-	$tabla->fields["NumeEsta"]["isHiddenInForm"] = true;
-
-	$config->tablas["indexaciones"] = $tabla;
-
-	/**
 	 * CAJA
 	 */
 	$tabla = new Caja("caja", "caja", "Caja", "el detalle", true, "objeto/caja/", "fa-money");
@@ -232,7 +198,12 @@
 				"id"=> "btnAsigClie",
 				"titulo"=> '<i class="fa fa-id-card-o fa-fw" aria-hidden="true"></i> Asignar Cliente',
 				"onclick"=> "asignarCliente",
-				"class"=> "btn-default"),
+				"class"=> "btn-primary"),
+			array(
+				"id"=> "btnBorrClie",
+				"titulo"=> '<i class="fa fa-times fa-fw" aria-hidden="true"></i> Borrar Cliente',
+				"onclick"=> "borrarCliente",
+				"class"=> "btn-danger"),
 			array(
 				"id"=> "btnVerCuot",
 				"titulo"=> 'Ver Cuotas',
@@ -249,7 +220,7 @@
 
 	$tabla->addFieldId("NumeLote", "Número de lote", true, true);
 	$tabla->addField("NombLote", "text", 100, "Nombre");
-	$tabla->addField("LoteCoor", "text", 80, "Coordenadas mapa");
+	$tabla->addField("LoteCoor", "text", 80, "Coordenadas mapa", false);
 	$tabla->fields["LoteCoor"]["isHiddenInList"] = true;
 
 	$tabla->addField("ValoLote", "number", 0, "Precio");
@@ -394,6 +365,39 @@
 	$tabla->fields["NumeEsta"]["isHiddenInForm"] = true;
 
 	$config->tablas["cuotaspagos"] = $tabla;
+
+	/**
+	 * INDEXACION DE CUOTAS
+	 */
+	$tabla = new Indexacion("indexaciones", "indexaciones", "Indexación de Cuotas", "el índice", true, "objeto/indexaciones/", "fa-percent");
+	$tabla->allowDelete = false;
+	$tabla->allowEdit = false;
+
+	$tabla->jsFiles = ["admin/js/custom/indexaciones.js"];
+
+	$tabla->jsOnLoad = "verEstado();";
+	$tabla->jsOnList = "verEstado();";
+
+	$tabla->btnList = [
+		array(
+			"id"=>'btnCambiarEstado',
+			"titulo"=>"Cambiar Estado",
+			"class"=>"btn-danger",
+			"onclick"=>"cambiarEstado"
+		)
+	];
+	
+	$tabla->addFieldId("NumeInde", "", true, true);
+	$tabla->addField("FechInde", "datetime", 0, "Fecha");
+	$tabla->fields["FechInde"]["showOnForm"] = false;
+	
+	$tabla->addField("PorcInde", "number", 0, "Porcentaje");
+	$tabla->fields["PorcInde"]["step"] = "0.01";
+
+	$tabla->addField("NumeEsta", "select", 0, "Estado", true, false, false, true, '1', '', 'estados', 'NumeEsta', 'NombEsta', '', 'NombEsta');	
+	$tabla->fields["NumeEsta"]["isHiddenInForm"] = true;
+
+	$config->tablas["indexaciones"] = $tabla;
 
 	/**
 	 * CLIENTES

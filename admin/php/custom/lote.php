@@ -70,6 +70,16 @@ class Lote extends Tabla
 
                 return $result;
                 break;
+                
+            case "Borrar Cliente":
+                $numeLote = $post["dato"]["NumeLote"];
+
+                $config->ejecutarCMD("DELETE FROM cuotaspagos WHERE CodiIden IN (SELECT CodiIden FROM cuotas WHERE NumeLote = ". $numeLote .")");
+                $config->ejecutarCMD("DELETE FROM cuotas WHERE NumeLote = ". $numeLote);
+                $result = $config->ejecutarCMD("UPDATE lotes SET NumeEstaLote = 1, NumeClie = null, CantCuot = null WHERE NumeLote = ". $numeLote);
+
+                return $result;
+                break;
         }
     }
 }

@@ -11,11 +11,12 @@ function cheqList() {
         if ($("#NumeClie"+numeLote).val() != "") {
             $("#btnAsigClie"+numeLote).hide();
 
-            if ($("#CantCuot"+numeLote).html() == "" || $("#CantCuot"+numeLote).html() == "0") {
+            if ($("#CantCuot"+numeLote).html() == "") {
                 $("#btnVerCuot"+numeLote).hide();
             }
         }
         else {
+            $("#btnBorrClie"+numeLote).hide();
             $("#btnVerCuot"+numeLote).hide();
         }
     });
@@ -32,6 +33,35 @@ function asignarCliente(NumeLote) {
     $("#ImpoAnti").prop("max", $("#ValoLote"+NumeLote).html());
 
 	$("#modalCliente").modal();
+}
+
+function borrarCliente(numeLote) {
+    $("#divMsj").hide();
+	$("#actualizando").show();
+    
+	$.post("php/tablaHandler.php", {
+            operacion: '100', 
+            tabla: 'lotes', 
+            field: 'Borrar Cliente', 
+            dato: {"NumeLote": numeLote}
+		},
+		function(data) {
+            if (data.valor === true) {
+                $("#txtHint").html("Datos actualizados!");
+                $("#divMsj").removeClass("alert-danger");
+				$("#divMsj").addClass("alert-success");
+
+                listarlotes();
+            }
+            else {
+                $("#txtHint").html(data.valor);
+                $("#divMsj").removeClass("alert-success");
+				$("#divMsj").addClass("alert-danger");
+            }
+            $("#actualizando").hide();
+			$("#divMsj").show();
+		}
+	);
 }
 
 function cerrarModal() {
