@@ -62,6 +62,8 @@ class Tabla
 
     public $modalList;
 
+	public $regUser;
+
     /**
      * Constructor de la clase Tabla
      * @param string $tabladb
@@ -120,6 +122,8 @@ class Tabla
         $this->searchFields = [];
 
         $this->modalList = [];
+
+		$this->regUser = false;
     }
 
     /**
@@ -1448,6 +1452,12 @@ class Tabla
 
             $strSQL = "INSERT INTO ". $this->tabladb;
 
+			//Registro el usuario
+			if ($this->regUser) {
+				$strCampos = "NumeUser";
+				$strValores = $_SESSION["NumeUser"];
+			}
+
             foreach ($datos as $name => $value) {
                 if (strcmp($this->IDField, $name) == 0) {
                     $value = $config->buscarDato("SELECT COALESCE(MAX($name), 0) + 1 Numero FROM $this->tabladb");
@@ -1490,6 +1500,11 @@ class Tabla
             $strID = "";
 
             $strSQL = "UPDATE ". $this->tabladb;
+
+			//Registro el usuario
+			if ($this->regUser) {
+				$strCampos = "NumeUser = ". $_SESSION["NumeUser"];
+			}
 
             foreach ($datos as $name => $value) {
                 if (strcmp($this->IDField, $name) != 0) {
