@@ -16,6 +16,8 @@ class Lote extends Tabla
                 $cantCuot = intval($post["dato"]["CantCuot"]);
                 $fechInic = $post["dato"]["FechInic"];
 
+                $cuotExtr = $post["dato"]["CuotExtr"];
+
                 if ($impoAnti < $valoLote) {
                     $numeEsta = "2";
                 } else {
@@ -42,6 +44,24 @@ class Lote extends Tabla
                     "NumeEstaCuot"=>"1"
                 );
                 $resCuota = $cuota->insertar($datos);
+
+                //Creo las cuotas extraordinarias
+                foreach($cuotExtr as $value) {
+                    $impoAnti+= $value;
+                    
+                    $datos = array(
+                        "CodiIden"=>"",
+                        "NumeCuot"=>"0",
+                        "FechCuot"=>$fecha->format("Y-m-d"),
+                        "NumeLote"=>$numeLote,
+                        "NumeTipoCuot"=>"3",
+                        "FechVenc"=>$fecha->format("Y-m-d"),
+                        "ImpoCuot"=>$value,
+                        "ImpoOtro"=>"0",
+                        "NumeEstaCuot"=>"1"
+                    );
+                    $resCuota = $cuota->insertar($datos);
+                }
 
                 //Creo las cuotas
                 if (intval($cantCuot) > 0) {

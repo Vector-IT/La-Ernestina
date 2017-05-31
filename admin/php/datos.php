@@ -33,6 +33,7 @@
 			new MenuItem("Salir del Sistema", 'logout.php', '', 'fa-sign-out', '', false, false)
 	];
 
+	$config->theme = 'dark';
 
 	/**
 	 * TABLAS
@@ -155,7 +156,7 @@
 	$tabla->labelField = "NombCaja";
 	$tabla->allowDelete = false;
 	$tabla->allowEdit = false;
-	$tabla->searchFields = ["NombCaja", "NumeTipoCaja", "FechCaja"];
+	$tabla->searchFields = ["NombCaja", "FechCaja", "NumeTipoCaja"];
 	$tabla->jsFiles = ["admin/js/custom/caja.js"];
 
 	$tabla->jsOnLoad = "iniciar();";
@@ -169,7 +170,7 @@
 	];
 	
 	$tabla->addFieldId("NumeCaja", "Número de caja");
-	$tabla->addField("FechCaja", "date", 0, "Fecha");
+	$tabla->addField("FechCaja", "date", 80, "Fecha");
 	$tabla->fields["FechCaja"]["isHiddenInForm"] = true;
 	
 	$tabla->addField("NumeUser", "select", 0, "Usuario", true, false, false, true, '', '', 'usuarios', 'NumeUser', 'NombPers');

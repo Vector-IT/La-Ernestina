@@ -31,7 +31,7 @@ function cambiarEstado(strID) {
 }
 
 function iniciar() {
-	$("#search-FechCaja").parent().parent().parent().hide();
+	//$("#search-FechCaja").parent().parent().parent().hide();
 }
 
 function verTodos() {

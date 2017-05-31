@@ -933,26 +933,30 @@ class Tabla
         $strSalida.= $crlf.'	$("#actualizando").show();';
         $strSalida.= $crlf.'	$("#divDatos").html("");';
         $strSalida.= $crlf.'';
-        $strSalida.= $crlf.'	var filtros = "";';
+        $strSalida.= $crlf.'	var filtros = {};';
+        // $strSalida.= $crlf.'	var filtros = "";';
 
         if (count($this->searchFields) > 0) {
             foreach ($this->searchFields as $field) {
                 $strSalida.= $crlf.'	if ($("#search-'.$field.'").val() != "") {';
-                $strSalida.= $crlf.'		if (filtros != "") {';
-                    $strSalida.= $crlf.'			filtros+= " AND ";';
-                $strSalida.= $crlf.'		}';
-
-                switch ($this->fields[$field]["type"]) {
-                    case "text":
-                        $strSalida.= $crlf.'		filtros+= "'.$field.' like \'%" + $("#search-'.$field.'").val() + "%\'";';
-                        break;
-
-                    default:
-                        $strSalida.= $crlf.'		filtros+= "'.$field.' = \'" + $("#search-'.$field.'").val() + "\'";';
-                        break;
-                }
-                
+                $strSalida.= $crlf.'        filtros["'.$field.'"] = $("#search-'.$field.'").val()';
                 $strSalida.= $crlf.'	}';
+
+                //$strSalida.= $crlf.'	if ($("#search-'.$field.'").val() != "") {';
+                // $strSalida.= $crlf.'        if (filtros != "") {';
+                //     $strSalida.= $crlf.'         filtros+= " AND ";';
+                // $strSalida.= $crlf.'        }';
+
+                // switch ($this->fields[$field]["type"]) {
+                //     case "text":
+                //         $strSalida.= $crlf.'        filtros+= "'.$field.' like \'%" + $("#search-'.$field.'").val() + "%\'";';
+                //         break;
+
+                //     default:
+                //         $strSalida.= $crlf.'		filtros+= "'.$field.' = \'" + $("#search-'.$field.'").val() + "\'";';
+                //         break;
+                // }
+                // $strSalida.= $crlf.'	}';
             }
 
             $strSalida.= $crlf.'';

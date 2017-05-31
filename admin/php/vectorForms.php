@@ -27,6 +27,8 @@ class VectorForms {
 	
 	public $imgCKEditor = '';
 
+	public $theme;
+
 	/**
 	 * Constructor de la clase Configuracion
 	 *
