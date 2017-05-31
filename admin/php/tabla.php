@@ -606,7 +606,7 @@ class Tabla
             foreach ($this->fields as $field) {
                 if ($field['type'] != "calcfield") {
                     if ($strFields != '') {
-                        $strFields.= ', ';
+                        $strFields.= $crlf.', ';
                     }
 
                     if ($field['formatDb'] == '') {
@@ -618,31 +618,49 @@ class Tabla
             }
             $strSQL.= $strFields;
 
-            $strSQL.= " FROM ". $this->tabladb;
+            $strSQL.= $crlf." FROM ". $this->tabladb;
 
             $filtro = '';
             if ($this->masterFieldId != '') {
                 if (isset($_REQUEST[$this->masterFieldId])) {
-                    $filtro.= " WHERE ". $this->masterFieldId ." = '" . $_REQUEST[$this->masterFieldId] ."'";
+                    $filtro.= $crlf. $this->masterFieldId ." = '" . $_REQUEST[$this->masterFieldId] ."'";
                 }
             }
 
             if ($strFiltro != "") {
-                if ($filtro == '') {
-                    $filtro.= " WHERE ";
-                } else {
-                    $filtro.= " AND ";
-                }
 
-                $filtro.= $strFiltro;
+                foreach ($strFiltro as $key => $value) {
+                    if ($filtro != "") {
+                        $filtro.= $crlf." AND ";
+                    }
+
+                    switch ($this->fields[$key]["type"]) {
+                        case "number":
+                            $filtro.= $crlf. $key." = ".$value;
+                            break;
+                        
+                        case "text":
+                        case "textarea":
+                            $filtro.= $crlf. $key." LIKE '%".$value."%'";
+                            break;
+
+                        default:
+                            $filtro.= $crlf. $key." = '".$value."'";
+                            break;
+                    }
+                    
+                }      
+
             }
 
-            $strSQL.= $filtro;
+            if ($filtro != "") {
+                $strSQL.= $crlf." WHERE ".$filtro;
+            }
 
             if ($order != '') {
-                $strSQL.= " ORDER BY ". $order;
+                $strSQL.= $crlf." ORDER BY ". $order;
             } elseif ($this->order != '') {
-                $strSQL.= " ORDER BY ". $this->order;
+                $strSQL.= $crlf." ORDER BY ". $this->order;
             }
 
             $tabla = $config->cargarTabla($strSQL);
