@@ -21,7 +21,7 @@ if (isset($_REQUEST["tb"])) {
             $tabla = $config->tablas[$_REQUEST["tb"]];
                 
             if ($tabla->numeCarg != '') {
-                if (intval($tabla->numeCarg) < intval($config->buscarDato("SELECT NumeCarg FROM usuarios WHERE NumeUser = ". $_SESSION["NumeUser"]))) {
+                if (intval($tabla->numeCarg) < intval($config->buscarDato("SELECT NumeCarg FROM ".$config->tbLogin." WHERE NumeUser = ". $_SESSION["NumeUser"]))) {
                     header($urlIndex);
                     die();
                 }

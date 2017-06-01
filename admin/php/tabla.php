@@ -62,7 +62,7 @@ class Tabla
 
     public $modalList;
 
-	public $regUser;
+    public $regUser;
 
     /**
      * Constructor de la clase Tabla
@@ -123,7 +123,7 @@ class Tabla
 
         $this->modalList = [];
 
-		$this->regUser = false;
+        $this->regUser = false;
     }
 
     /**
@@ -183,6 +183,7 @@ class Tabla
                 'isMasterID' => $isMasterID,
                 'onChange' => $onChange,
                 'itBlank' => $itBlank,
+                'itBlankText' => 'SELECCIONE...',
                 'hoursDisabled' => '',
                 'dtpOnRender' => '',
                 'txtAlign' => 'left',
@@ -230,6 +231,7 @@ class Tabla
                         'onChange' => '',
                         'showOnForm' => true,
                         'itBlank' => false,
+                        'itBlankText' => 'SELECCIONE...',
                         'hoursDisabled' => '',
                         'dtpOnRender' => '',
                         'txtAlign' => 'left',
@@ -280,6 +282,7 @@ class Tabla
                         'onChange' => '',
                         'showOnForm' => true,
                         'itBlank' => false,
+                        'itBlankText' => 'SELECCIONE...',
                         'hoursDisabled' => '',
                         'dtpOnRender' => '',
                         'txtAlign' => 'left',
@@ -406,14 +409,14 @@ class Tabla
                     case 'select':
                         $strSalida.= $crlf.'<select class="form-control input-sm ucase '.$field['cssControl'].'" id="'.$fname.'" '. ($field['required']?'required':'') .' '. ($field['readOnly']?'readonly':'') .' '. ($field['onChange'] !=''?'onchange="'.$field['onChange'].'"':'') .'>';
                         if ($field['lookupTable'] != '') {
-                            $strSalida.= $crlf. $config->cargarCombo($field['lookupTable'], $field['lookupFieldID'], $field['lookupFieldLabel'], $field['lookupConditions'], $field['lookupOrder'], $field['value'], ($prefix == ''? $field['itBlank']: true));
+                            $strSalida.= $crlf. $config->cargarCombo($field['lookupTable'], $field['lookupFieldID'], $field['lookupFieldLabel'], $field['lookupConditions'], $field['lookupOrder'], $field['value'], ($prefix == ''? $field['itBlank']: true), $field['itBlankText']);
                         }
                         $strSalida.= $crlf.'</select>';
                         break;
 
                     case 'selectmultiple':
                         $strSalida.= $crlf.'<select class="form-control input-sm ucase selectpicker '.$field['cssControl'].'" multiple id="'.$fname.'" '. ($field['required']?'required':'') .' title="SELECCIONE" '. ($field['readOnly']?'readonly':'') .' '. ($field['onChange'] !=''?'onchange="'.$field['onChange'].'"':'') .'>';
-                        $strSalida.= $crlf. $config->cargarCombo($field['lookupTable'], $field['lookupFieldID'], $field['lookupFieldLabel'], $field['lookupConditions'], $field['lookupOrder'], $field['value'], $field['itBlank']);
+                        $strSalida.= $crlf. $config->cargarCombo($field['lookupTable'], $field['lookupFieldID'], $field['lookupFieldLabel'], $field['lookupConditions'], $field['lookupOrder'], $field['value'], $field['itBlank'], $field['itBlankText']);
                         $strSalida.= $crlf.'</select>';
                         $strSalida.= $crlf.'<script type="text/javascript">';
                         $strSalida.= $crlf.'$("#'.$fname.'").selectpicker({
@@ -427,7 +430,7 @@ class Tabla
                     case 'datalist':
                         $strSalida.= $crlf.'<input class="form-control input-sm '.$field['cssControl'].'" list="lst-'.$fname.'" id="'.$fname.'" '. ($field['isID']?'disabled':'') .' '. ($field['required']?'required':'') .' '. ($field['size'] > 0?'size="'.$field['size'].'"':'') .' '. ($field['readOnly']?'readonly':'') .' '. ($field['onChange'] !=''?'onchange="'.$field['onChange'].'"':'') .'/>';
                         $strSalida.= $crlf.'<datalist id="lst-'.$fname.'">';
-                        $strSalida.= $crlf. $config->cargarCombo($field['lookupTable'], $field['lookupFieldLabel'], '', $field['lookupConditions'], $field['lookupOrder'], $field['value'], $field['itBlank']);
+                        $strSalida.= $crlf. $config->cargarCombo($field['lookupTable'], $field['lookupFieldLabel'], '', $field['lookupConditions'], $field['lookupOrder'], $field['value'], $field['itBlank'], $field['itBlankText']);
                         $strSalida.= $crlf.'</datalist>';
                         break;
 
@@ -632,7 +635,6 @@ class Tabla
             }
 
             if ($strFiltro != "") {
-
                 foreach ($strFiltro as $key => $value) {
                     if ($filtro != "") {
                         $filtro.= $crlf." AND ";
@@ -652,9 +654,7 @@ class Tabla
                             $filtro.= $crlf. $key." = '".$value."'";
                             break;
                     }
-                    
-                }      
-
+                }
             }
 
             if ($filtro != "") {
@@ -1452,11 +1452,11 @@ class Tabla
 
             $strSQL = "INSERT INTO ". $this->tabladb;
 
-			//Registro el usuario
-			if ($this->regUser) {
-				$strCampos = "NumeUser";
-				$strValores = $_SESSION["NumeUser"];
-			}
+            //Registro el usuario
+            if ($this->regUser) {
+                $strCampos = "NumeUser";
+                $strValores = $_SESSION["NumeUser"];
+            }
 
             foreach ($datos as $name => $value) {
                 if (strcmp($this->IDField, $name) == 0) {
@@ -1501,10 +1501,10 @@ class Tabla
 
             $strSQL = "UPDATE ". $this->tabladb;
 
-			//Registro el usuario
-			if ($this->regUser) {
-				$strCampos = "NumeUser = ". $_SESSION["NumeUser"];
-			}
+            //Registro el usuario
+            if ($this->regUser) {
+                $strCampos = "NumeUser = ". $_SESSION["NumeUser"];
+            }
 
             foreach ($datos as $name => $value) {
                 if (strcmp($this->IDField, $name) != 0) {
@@ -1523,6 +1523,19 @@ class Tabla
                             }
                             break;
 
+                        case "select":
+                            if ($strCampos != "") {
+                                $strCampos.= ", ";
+                            }
+
+                            if ($value != '') {
+                                $strCampos.= $name." = '".$value."'";
+                            } else {
+								$strCampos.= $name." = null";
+                            }
+
+                            break;
+
                         default:
                             if ($strCampos != "") {
                                 $strCampos.= ", ";
@@ -1531,7 +1544,7 @@ class Tabla
                             if ($this->fields[$name]['isMD5']) {
                                 $strCampos.= $name." = '".md5($value)."'";
                             } else {
-                                $strCampos.= $name." = '$value'";
+                                $strCampos.= $name." = '".$value."'";
                             }
                             break;
                     }
@@ -1593,50 +1606,6 @@ class Tabla
         } catch (Exception $e) {
             return false;
         }
-    }
-
-    public function cargarCombo1($tabla, $CampoNumero, $CampoTexto, $filtro = "", $orden = "", $seleccion = "", $itBlank = false, $itBlankText = 'Seleccione...')
-    {
-        global $config, $crlf;
-
-        $strSQL = "SELECT ". $CampoNumero;
-        if ($CampoTexto != "") {
-            $strSQL.= ",". $CampoTexto;
-        }
-        $strSQL.= " FROM ". $tabla;
-
-        if ($filtro != "") {
-            $strSQL.= " WHERE $filtro";
-        }
-
-        if ($orden != "") {
-            $strSQL.= " ORDER BY $orden";
-        }
-
-        $tabla = $config->cargarTabla($strSQL);
-
-        $strSalida = "";
-        if ($itBlank) {
-            $strSalida.= $crlf.'<option value="">'.$itBlankText.'</option>';
-        }
-
-        while ($fila = $tabla->fetch_assoc()) {
-            if ($CampoTexto != "") {
-                if (strcmp($fila[$CampoNumero], $seleccion) != "0") {
-                    $strSalida.= $crlf.'<option value="'.$fila[$CampoNumero].'">'.htmlentities($fila[$CampoTexto]).'</option>';
-                } else {
-                    $strSalida.= $crlf.'<option value="'.$fila[$CampoNumero].'" selected>'.htmlentities($fila[$CampoTexto]).'</option>';
-                }
-            } else {
-                if (strcmp($fila[$CampoNumero], $seleccion) != "0") {
-                    $strSalida.= $crlf.'<option value="'.$fila[$CampoNumero].'" />';
-                } else {
-                    $strSalida.= $crlf.'<option value="'.$fila[$CampoNumero].'" selected />';
-                }
-            }
-        }
-
-        return $strSalida;
     }
 
     public function customFunc($post)

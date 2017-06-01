@@ -188,7 +188,7 @@ class VectorForms {
 	 * Crear menu de opciones
 	 */
 	public function crearMenu() {
-		global $crlf;
+		global $crlf, $config;
 
 		$strSalida = '';
 		$strSeparador = $crlf.'<div class="separator"></div>';
@@ -231,7 +231,7 @@ class VectorForms {
 			foreach ($this->menuItems as $item) {
 				if (!$item->Used) {
 					if ($item->NumeCarg != '') {
-						$NumeCarg = intval($this->buscarDato("SELECT NumeCarg FROM usuarios WHERE NumeUser = ". $_SESSION["NumeUser"]));
+						$NumeCarg = intval($this->buscarDato("SELECT NumeCarg FROM ".$config->tbLogin." WHERE NumeUser = ". $_SESSION["NumeUser"]));
 							
 						if (intval($item->NumeCarg) < $NumeCarg) {
 							continue;
@@ -285,7 +285,7 @@ class VectorForms {
 			//Tablas
 			if ($tabla->showMenu) {
 				if ($tabla->numeCarg != '') {
-					$NumeCarg = intval($this->buscarDato("SELECT NumeCarg FROM usuarios WHERE NumeUser = ". $_SESSION["NumeUser"]));
+					$NumeCarg = intval($this->buscarDato("SELECT NumeCarg FROM ".$config->tbLogin." WHERE NumeUser = ". $_SESSION["NumeUser"]));
 		
 					if (intval($tabla->numeCarg) < $NumeCarg) {
 						continue;
@@ -334,7 +334,7 @@ class VectorForms {
 		foreach ($this->menuItems as $item) {
 			if ($item->Index == '' || !$item->Used) {
 				if ($item->NumeCarg != '') {
-					$NumeCarg = intval($this->buscarDato("SELECT NumeCarg FROM usuarios WHERE NumeUser = ". $_SESSION["NumeUser"]));
+					$NumeCarg = intval($this->buscarDato("SELECT NumeCarg FROM ".$config->tbLogin." WHERE NumeUser = ". $_SESSION["NumeUser"]));
 		
 					if (intval($item->NumeCarg) < $NumeCarg) {
 						continue;
