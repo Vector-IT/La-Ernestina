@@ -10,36 +10,36 @@
     $urlLogin = "Location:". "http://". $_SERVER['SERVER_NAME'] . ($_SERVER['SERVER_PORT'] != "80"? ":".$_SERVER['SERVER_PORT']: "") . $config->raiz ."admin/login.php?returnUrl=" . $_SERVER['REQUEST_URI'];
     $urlIndex = "Location:". "http://". $_SERVER['SERVER_NAME'] . ($_SERVER['SERVER_PORT'] != "80"? ":".$_SERVER['SERVER_PORT']: "") . $config->raiz ."admin/";
     
-if (!isset($_SESSION['is_logged_in'])) {
-    header($urlLogin);
-    die();
-}
-    
-if (isset($_REQUEST["tb"])) {
-    if ($_REQUEST["tb"] != "") {
-        if (isset($config->tablas[$_REQUEST["tb"]])) {
-            $tabla = $config->tablas[$_REQUEST["tb"]];
-                
-            if ($tabla->numeCarg != '') {
-                if (intval($tabla->numeCarg) < intval($config->buscarDato("SELECT NumeCarg FROM ".$config->tbLogin." WHERE NumeUser = ". $_SESSION["NumeUser"]))) {
-                    header($urlIndex);
-                    die();
-                }
-            }
-                
-            (isset($_REQUEST["id"]))? $item = $_REQUEST["id"]: $item = "";
-        } else {
-            header($urlIndex);
-            die();
-        }
-    } else {
-        header($urlIndex);
-        die();
-    }
-} else {
-    header($urlIndex);
-    die();
-}
+	if (!isset($_SESSION['is_logged_in'])) {
+	    header($urlLogin);
+	    die();
+	}
+	    
+	if (isset($_REQUEST["tb"])) {
+	    if ($_REQUEST["tb"] != "") {
+	        if (isset($config->tablas[$_REQUEST["tb"]])) {
+	            $tabla = $config->tablas[$_REQUEST["tb"]];
+	                
+	            if ($tabla->numeCarg != '') {
+	                if (intval($tabla->numeCarg) < intval($config->buscarDato("SELECT NumeCarg FROM ".$config->tbLogin." WHERE NumeUser = ". $_SESSION["NumeUser"]))) {
+	                    header($urlIndex);
+	                    die();
+	                }
+	            }
+	                
+	            (isset($_REQUEST["id"]))? $item = $_REQUEST["id"]: $item = "";
+	        } else {
+	            header($urlIndex);
+	            die();
+	        }
+	    } else {
+	        header($urlIndex);
+	        die();
+	    }
+	} else {
+	    header($urlIndex);
+	    die();
+	}
 
     header("Cache-Control: no-cache, no-store, must-revalidate"); // HTTP 1.1.
     header("Pragma: no-cache"); // HTTP 1.0.
@@ -95,6 +95,11 @@ if (isset($_REQUEST["tb"])) {
         if ($tabla->allowNew || $tabla->allowEdit) {
             $tabla->createForm();
         } else {
+			//Agrego el campo clave solamente para que sea necesario eliminar registros
+			if  ($tabla->allowDelete) {
+				$tabla->createFormHidden();
+			}
+
             //Botones opcionales
             if (count($tabla->btnForm) > 0) {
                 for ($I = 0; $I < count($tabla->btnForm); $I++) {
@@ -115,9 +120,11 @@ if (isset($_REQUEST["tb"])) {
         <?php $tabla->searchForm(); ?>
 
         <div id="divDatos" class="marginTop40">
-            <?php if ($tabla->listarOnLoad) {
-                $tabla->listar();
-} ?>
+            <?php 
+        	if ($tabla->listarOnLoad) {
+            	$tabla->listar();
+			} 
+			?>
         </div>
     </div>
     
@@ -127,8 +134,6 @@ if (isset($_REQUEST["tb"])) {
     }
     ?>
 
-    <?php
-        require_once 'php/footer.php';
-    ?>  
+    <?php require_once 'php/footer.php';?>
 </body>
 </html>

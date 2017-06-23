@@ -49,6 +49,7 @@ class VectorForms {
 		$this->titulo = $titulo;
 		$this->logo = $logo;
 		$this->showTitulo = $showTitulo;
+		$this->imgCKEditor = $raiz. 'admin/ckeditor/imgup';
 	}
 
 	/**
