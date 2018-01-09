@@ -1,5 +1,5 @@
 	<meta charset="UTF-8">
-	<meta name="author" content="Vector-IT" />
+	<meta name="author" content="Vector-IT - www.vector-it.com.ar" />
 	<meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0" />
 
 	<link rel="shortcut icon" href="<?php echo $config->raiz ?>admin/img/favicon.png" type="image/png" />

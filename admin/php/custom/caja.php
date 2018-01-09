@@ -27,11 +27,11 @@ class Caja extends Tabla
             $strSQL.= $crlf." WHERE FechCaja > DATE_ADD(SYSDATE(), INTERVAL -30 DAY)";
         } else {
             if (isset($strFiltro["FechCaja"])) {
-                if ($strFiltro["FechCaja"] != 'TODOS') {
+                if ($strFiltro["FechCaja"]["value"] != 'TODOS') {
                     if ($filtro != "") {
                         $filtro.= $crlf." AND ";
                     }
-                    $filtro.= "DATE_FORMAT(FechCaja, '%Y-%m') = '{$strFiltro["FechCaja"]}'";
+                    $filtro.= "DATE_FORMAT(FechCaja, '%Y-%m') = '{$strFiltro["FechCaja"]["value"]}'";
                 }
             }
 
@@ -39,14 +39,14 @@ class Caja extends Tabla
                 if ($filtro != "") {
                     $filtro.= $crlf." AND ";
                 }
-                $filtro.= "NombCaja LIKE '%{$strFiltro["NombCaja"]}%'";
+                $filtro.= "NombCaja LIKE '%{$strFiltro["NombCaja"]["value"]}%'";
             }
 
             if (isset($strFiltro["NumeTipoCaja"])) {
                 if ($filtro != "") {
                     $filtro.= $crlf." AND ";
                 }
-                $filtro.= "NumeTipoCaja = {$strFiltro["NumeTipoCaja"]}";
+                $filtro.= "NumeTipoCaja = {$strFiltro["NumeTipoCaja"]["value"]}";
             }
 
             if ($filtro != '') {

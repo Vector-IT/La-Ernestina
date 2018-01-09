@@ -156,7 +156,11 @@
 	$tabla->labelField = "NombCaja";
 	$tabla->allowDelete = false;
 	$tabla->allowEdit = false;
-	$tabla->searchFields = ["NombCaja", "FechCaja", "NumeTipoCaja"];
+	$tabla->searchFields = [
+		array("name"=> "NombCaja", "operator"=>"=", "join"=>"and"),
+		array("name"=> "FechCaja", "operator"=>"=", "join"=>"and"), 
+		array("name"=> "NumeTipoCaja", "operator"=>"=", "join"=>"and")
+	];
 	$tabla->jsFiles = ["admin/js/custom/caja.js"];
 
 	$tabla->jsOnLoad = "iniciar();";
@@ -192,7 +196,7 @@
 	$tabla->labelField = "NombLote";
 	$tabla->allowDelete = false;
 
-	$tabla->searchFields = ["NombLote"];
+	$tabla->searchFields = [array("name"=> "NombLote", "operator"=>"=", "join"=>"and")];
 
 	$tabla->btnList = [
 			array(
@@ -297,8 +301,8 @@
 	$config->tablas["cuotas"] = $tabla;
 
 	/**
-	 * CUOTASPAGOS
-	 */
+	* CUOTASPAGOS
+	*/
 	$tabla = new CuotaPago("cuotaspagos", "cuotaspagos", "Pagos de la Cuota", "el pago", false, "", "fa-map-o");
 	$tabla->masterTable = "cuotas";
 	$tabla->masterFieldId = "CodiIden";
@@ -406,17 +410,17 @@
 	$tabla = new Tabla("clientes", "clientes", "Clientes", "el Cliente", true, "objeto/clientes/", "fa-id-card-o");
 	$tabla->labelField = "NombClie";
 
-	$tabla->searchFields = array("NombClie");
+	$tabla->searchFields = [array("name"=> "NombClie", "operator"=>"=", "join"=>"and")];
 
-	$tabla->btnList = [
-			array(
-				"id"=>"btnVerClie",
-				"titulo"=> 'Ficha',
-				"onclick"=> "verCliente",
-				"class"=> "btn-default"),
-	];
+	// $tabla->btnList = [
+	// 		array(
+	// 			"id"=>"btnVerClie",
+	// 			"titulo"=> 'Ficha',
+	// 			"onclick"=> "verCliente",
+	// 			"class"=> "btn-default"),
+	// ];
 
-	$tabla->jsFiles = ['admin/js/custom/clientes.js'];
+	//$tabla->jsFiles = ['admin/js/custom/clientes.js'];
 
 	$tabla->addField("NumeClie", "number", 0, "Numero", false, true, true);
 	$tabla->fields["NumeClie"]["isHiddenInForm"] = true;
