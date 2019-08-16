@@ -518,10 +518,10 @@
 	
 	$tabla->addField("ObseCheq", "textarea", 400, "Observaciones", false);
 	$tabla->fields["ObseCheq"]["isHiddenInList"] = true;
-
-	$tabla->addField("NumeEsta", "select", 0, "Estado", true, false, false, true, '1', '', 'estados', 'NumeEsta', 'NombEsta', '', 'NombEsta');
 	$tabla->fields["ObseCheq"]["isHiddenInForm"] = true;
 	
+	$tabla->addField("NumeEsta", "select", 0, "Estado", true, false, false, true, '1', '', 'estados', 'NumeEsta', 'NombEsta', '', 'NombEsta');
+
 	//Recibido de 
 	$tabla->addField("NombReci", "text", 80, "Recibido de", true);
 	$tabla->fields["NombReci"]["cssGroup"] = "form-group2";
