@@ -1,8 +1,8 @@
 <?php
 	$dbhost = "localhost";
 	$dbschema = "ernestina";
-	$dbuser = "ernestina";
-	$dbpass = "ernestina";
+	$dbuser = "vuser";
+	$dbpass = "vpass";
 	
 	$raiz = "/La-Ernestina/";
 ?>

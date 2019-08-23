@@ -61,7 +61,7 @@
 
 					<div id="cuotasExtra"></div>
 					<div class="form-group form-group-sm text-center">
-						<button class="btn btn-primary" onclick="agregarCuota()"><i class="fa fa-plus-circle" aria-hidden="true"></i> Cuota extraordinaria</button>
+						<button type="button" class="btn btn-primary" onclick="agregarCuota()"><i class="fa fa-plus-circle" aria-hidden="true"></i> Cuota extraordinaria</button>
 					</div>
 
 				</div>

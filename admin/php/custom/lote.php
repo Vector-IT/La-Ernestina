@@ -16,7 +16,7 @@ class Lote extends Tabla
                 $cantCuot = intval($post["dato"]["CantCuot"]);
                 $fechInic = $post["dato"]["FechInic"];
 
-                $cuotExtr = $post["dato"]["CuotExtr"];
+                $cuotExtr = (isset($post["dato"]["CuotExtr"]) ? $post["dato"]["CuotExtr"] : []);
 
                 if ($impoAnti < $valoLote) {
                     $numeEsta = "2";

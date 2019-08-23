@@ -58,7 +58,7 @@ class Cuota extends Tabla
         global $config, $crlf;
 
         $cuotas = $config->buscarDato("SELECT SUM(ImpoCuot + ImpoOtro) FROM cuotas WHERE NumeLote = ".$_REQUEST[$this->masterFieldId]);
-        $pagos = $config->buscardato("SELECT SUM(ImpoPago) FROM cuotaspagos WHERE NumeEsta = 1 AND CodiIden IN (SELECT CodiIden FROM cuotas WHERE NumeLote = ".$_REQUEST[$this->masterFieldId].")");
+        $pagos = $config->buscardato("SELECT COALESCE(SUM(ImpoPago), 0) FROM cuotaspagos WHERE NumeEsta = 1 AND CodiIden IN (SELECT CodiIden FROM cuotas WHERE NumeLote = ".$_REQUEST[$this->masterFieldId].")");
         $saldo = number_format($cuotas - $pagos, 2, ".", "");
 
         echo $crlf.'<h4 id="txtSaldo" class="well well-sm text-right">Saldo: <span class="txtRojo">$ '.$saldo.'</span></h4>';
