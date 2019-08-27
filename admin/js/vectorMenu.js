@@ -1,26 +1,32 @@
+var $;
+var divActualizando;
+
 $(document).ready(function() {
-	$(".menuVector").vectorMenu({
-		trigger: ".btnMenu",
+	$('.menuVector').vectorMenu({
+		trigger: '.btnMenu',
 		duration: 200,
-		opacity: 0.7,
-		background: "#000",
-		closeWidth: "30px",
-		zindex: 3
+		opacity: 1,
+		background: 'rgba(35,35,35,0.8)',
+		closeWidth: '30px',
+		zindex: 4
 	});
 
 	$('.btnMenu').click(function() {
-		if ($(".menuVector").vectorMenu.isOpen())
-			$( ".btnMenu" ).html('<i class="fa fa-times"></i>');
-		else
-			$( ".btnMenu" ).html('<i class="fa fa-bars"></i>');
+		if ($('.menuVector').vectorMenu.isOpen()) {
+			$( '.btnMenu' ).html('<i class="fa fa-times"></i>');
+		}
+		else {
+			$( '.btnMenu' ).html('<i class="fa fa-bars"></i>');
+		}
 	});
 
-	$(".clickable").click(function () {
-		var url = $(this).data("url");
+	$('.clickable').click(function() {
+		var url = $(this).data('url');
 
-		var js = $(this).data("js");
+		var js = $(this).data('js');
 
 		var result;
+
 		//Ejecuto primero el js
 
 		if (js != undefined) {
@@ -30,88 +36,180 @@ $(document).ready(function() {
 		if ((url != undefined) && ((result == undefined) || (result == true))) {
 			location.href = url;
 		}
-
 	});
+
+	setInterval(ctrlSession, 30000);
 });
 
-function getVariable(variable){
-
-    var tipo = typeof variable;
-    var direccion = location.href;
-    var posicion = 0;
-
-    if (tipo == "string"){
-        posicion = direccion.indexOf("?");
-        posicion = direccion.indexOf(variable,posicion) + variable.length;
-    }
-    else if (tipo == "number"){
-        posicion=0;
-        for (var contador = 0 ; contador < variable + 1 ; contador++){
-            posicion = direccion.indexOf("=",++posicion);
-            if (posicion == -1)posicion=999;
-        }
-    }
-    if (direccion.charAt(posicion) == "="){
-        var final1 = direccion.indexOf("&",posicion);
-        if (final1 == -1){final1=direccion.length;};
-        return direccion.substring(posicion + 1,final1);
-    }
-}
-
-function borrar(campo) {
-	$("#hdn" + campo + "Clear").val("1");
-
-	$("#divPreview" + campo).html("");
-
-	$("#" + campo).replaceWith($("#" + campo).clone());
-
-	$("#btnBorrar" + campo).hide();
-}
-
-//Capturar teclas
-function callkeydownhandler(evnt) {
-	var ev = (evnt) ? evnt : event;
-	var code=(ev.which) ? ev.which : event.keyCode;
-
-	if (code == 45) {
-		if (!$($("form")[0]).is(':visible')) {
-			$("#btnNuevo").click();
+function ctrlSession() {
+	$.get(
+		vRaiz + 'admin/php/sessionCheck.php', 	//URL
+		{ 'js': true },							//Parametros
+		function(data) {						//Success
+			if (!data.estado) {
+				location.href = vRaiz + 'admin/login.php?timeout&returnUrl=' + encodeURIComponent(location.href);
+			}
 		}
+	);
+}
+
+function habilitar($input) {
+	$input.prop('disabled', false);
+}
+
+function deshabilitar($input) {
+	$input.prop('disabled', true);
+}
+
+function getVariable(variable) {
+	var tipo = typeof variable;
+	var direccion = location.href;
+	var posicion = 0;
+
+	if (tipo == 'string') {
+		posicion = direccion.indexOf('?');
+		posicion = direccion.indexOf(variable, posicion) + variable.length;
+	}
+	else if (tipo == 'number') {
+		posicion = 0;
+		for (var contador = 0; contador < variable + 1; contador++) {
+			posicion = direccion.indexOf('=', ++posicion);
+			if (posicion == -1) {
+				posicion = 999;
+			}
+		}
+	}
+	if (direccion.charAt(posicion) == '=') {
+		var final1 = direccion.indexOf('&', posicion);
+		if (final1 == -1) {final1 = direccion.length;};
+		return direccion.substring(posicion + 1, final1);
+	}
+	else {
+		return null;
 	}
 }
 
-if (window.document.addEventListener) {
-   window.document.addEventListener("keydown", callkeydownhandler, false);
-} else {
-   window.document.attachEvent("onkeydown", callkeydownhandler);
+function borrar(campo) {
+	$('#hdn' + campo + '-Clear').val('1');
+
+	$('#divPreview' + campo).html('');
+
+	$('#' + campo).replaceWith($('#' + campo).clone().val(''));
+
+	$('#btnBorrar' + campo).hide();
 }
 
-(function ( $ ) {
+//Capturar teclas
+if (window.document.addEventListener) {
+	window.document.addEventListener('keyup', callkeydownhandler, false);
+} else {
+	window.document.attachEvent('onkeyup', callkeydownhandler);
+}
+
+function callkeydownhandler(evnt) {
+	var ev = (evnt) ? evnt : event;
+	var code = (ev.which) ? ev.which : event.keyCode;
+
+	switch (code) {
+	case 27:
+		if ($($('form')[0]).is(':visible')) {
+			ev.preventDefault();
+			if (!swal.isVisible()) {
+				$('button[type="reset"]').click();
+			}
+		}
+		break;
+	case 45:
+		if (!$($('form')[0]).is(':visible')) {
+			$('#btnNuevo').click();
+		}
+		break;
+	}
+}
+
+//Función para detectar si un elemento es visible dentro del rango de scroll
+function isScrolledIntoView(elem) {
+	var docViewTop = $(window).scrollTop();
+	var docViewBottom = docViewTop + $(window).height();
+
+	var elemTop = $(elem).offset().top;
+	var elemBottom = elemTop + $(elem).height();
+
+	return ((elemBottom <= docViewBottom) && (elemTop >= docViewTop));
+}
+
+// Crear Notificaciones
+function actualizando(options) {
+	var settings = $.extend({
+		icon: 'fa fa-sync-alt fa-fw fa-spin',
+		title: '',
+		message: txtActualizando
+	}, options );
+
+	divActualizando = $.notify(
+		settings,
+		{
+			type: 'info',
+			allow_dismiss: false,
+			delay: 0
+		}
+	);
+}
+
+function notifySuccess(msjOptions, options) {
+	var msjSettings = $.extend({
+		icon: 'fas fa-check',
+		title: '',
+		message: 'Datos actualizados!'
+	}, msjOptions );
+
+	var settings = $.extend({
+		type: 'success'
+	}, options );
+
+	$.notify(msjSettings, settings);
+}
+
+function notifyDanger(msjOptions, options) {
+	var msjSettings = $.extend({
+		icon: 'fas fa-ban',
+		title: 'Error al actualizar los datos.',
+		message: ''
+	}, msjOptions );
+
+	var settings = $.extend({
+		type: 'danger'
+	}, options );
+
+	$.notify(msjSettings, settings);
+}
+
+(function( $ ) {
 	$.fn.vectorMenu = function( options ) {
 
 		//Opciones de configuracion por defecto
 		var settings = $.extend({
-            width: "250px",
-            widthMobile: "200px",
-            trigger: '#btnMenu',
-            easing: "linear",
-            effect: "slide",
-            duration: 600,
-            startVisible: false,
-            startVisibleMobile: false,
-            opacity: 0.6,
-            background: "#000",
-            closeWidth: "0",
-            closeWidthMobile: "0",
-            itemPadding: "10px 5px",
-            itemColor: "#FFF",
-            itemColorHover: "#000",
-            itemBackground: "",
-            itemBackgroundHover: "rgba(255, 255, 255, 0.8)",
-            zindex: 1,
-            setStyleItem: true,
-            htmlBackgroundColor: "#FFF"
-        }, options );
+			width: '250px',
+			widthMobile: '200px',
+			trigger: '#btnMenu',
+			easing: 'linear',
+			effect: 'slide',
+			duration: 600,
+			startVisible: false,
+			startVisibleMobile: false,
+			opacity: 0.6,
+			background: '#000',
+			closeWidth: '0',
+			closeWidthMobile: '0',
+			itemPadding: '10px 5px',
+			itemColor: '#FFF',
+			itemColorHover: '#000',
+			itemBackground: '',
+			itemBackgroundHover: 'rgba(235, 235, 235, 1)',
+			zindex: 1,
+			setStyleItem: true,
+			htmlBackgroundColor: '#FFF'
+		}, options );
 
 		//Variable del control del menu
 		var vsMenu = $(this);
@@ -120,38 +218,39 @@ if (window.document.addEventListener) {
 
 		//Creo la funcion que devuelve si el menu esta abierto o no
 		var isOpen = false;
-		$.fn.vectorMenu.isOpen = function () {
+		$.fn.vectorMenu.isOpen = function() {
 			return isOpen;
 		};
 
 		//Creo la funcion para re-dibujar el menu si se redimensiona la pantalla
-		$.fn.vectorMenu.reDraw = function () {
+		$.fn.vectorMenu.reDraw = function() {
 			settings = $.extend({
-	            width: "250px",
-	            widthMobile: "200px",
-	            trigger: '#btnMenu',
-	            easing: "linear",
-	            effect: "slide",
-	            duration: 600,
-	            startVisible: false,
-	            startVisibleMobile: false,
-	            opacity: 0.6,
-	            background: "#000",
-	            closeWidth: "0",
-	            closeWidthMobile: "0",
-	            itemPadding: "10px 5px",
-	            itemColor: "#FFF",
-	            itemColorHover: "#000",
-	            itemBackground: "",
-	            itemBackgroundHover: "rgba(255, 255, 255, 0.8)",
-	            zindex: 1,
-	            setStyleItem: true,
-	            htmlBackgroundColor: "#FFF"
-	        }, options );
+				width: '250px',
+				widthMobile: '200px',
+				trigger: '#btnMenu',
+				easing: 'linear',
+				effect: 'slide',
+				duration: 600,
+				startVisible: false,
+				startVisibleMobile: false,
+				opacity: 0.6,
+				background: '#000',
+				closeWidth: '0',
+				closeWidthMobile: '0',
+				itemPadding: '10px 5px',
+				itemColor: '#FFF',
+				itemColorHover: '#000',
+				itemBackground: '',
+				itemBackgroundHover: 'rgba(235, 235, 235, 1)',
+				zindex: 1,
+				setStyleItem: true,
+				htmlBackgroundColor: '#FFF'
+			}, options );
 
 			//Verifico si estoy en un movil
 			var mob = false;
-			if ( /Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)){
+			// if ( /Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || $(window).width() <= 768) {
+			if ($(window).width() <= 768) {
 				mob = true;
 			}
 
@@ -160,182 +259,171 @@ if (window.document.addEventListener) {
 				settings.startVisible = settings.startVisibleMobile;
 			}
 
-			if (!mob)
+			if (!mob) {
 				auxWidth = settings.width;
-			else
+			}
+			else {
 				auxWidth = settings.widthMobile;
-
+			}
 
 			//Seteo de estilos al menu
 			vsMenu.css({
-				position: "fixed",
+				position: 'fixed',
 				top: 0,
 				bottom: 0,
 				left: 0,
 				width: auxWidth,
 				opacity: settings.opacity,
-				display: "none",
-				"padding-top": "50px",
+				display: 'none',
+				'padding-top': '50px',
 				background: settings.background,
-				"z-index": settings.zindex
+				'z-index': settings.zindex
 			});
 
 			//Seteo estilos de submenu
-			vsMenu.find(".submenu > ul").css({
+			vsMenu.find('.submenu > ul').css({
 				background: settings.background,
-				border:"none",
-				color:"white",
-				"border-radius":"0",
-				top:"inherit",
-				left:"100%",
-				margin:"-30px 0 0",
-				padding:"0",
-				"min-width":auxWidth,
-				"border-left": "1px solid #707070",
-			});
-			
-			vsMenu.find(".item > ul > li").css({
-				padding: "10px 5px"
+				border: 'none',
+				color: 'white',
+				'border-radius': '0',
+				top: 'inherit',
+				left: '100%',
+				margin: '-40px 0 0',
+				padding: '0',
+				'min-width': auxWidth,
+				'border-left': '1px solid #707070'
 			});
 
+			// vsMenu.find('.item > ul > li').css({
+			// 	padding: '10px 5px'
+			// });
 
-			vsMenu.find("div").css("display", "block");
+			vsMenu.find('div:not(.flRight)').css('display', 'block');
 
 			//Si es necesario lo abro completa o parcialmente
-			if (settings.startVisible || settings.closeWidth != "0")
+			if (settings.startVisible || settings.closeWidth != '0') {
 				$(settings.trigger).click();
+			}
 		};
 
-		if (settings.effect == "push") {
-			$("body").css({
-				"transition": "left " + settings.duration + "ms ease-in",
-				"overflow-x": "hidden",
-				"position": "relative",
-				"left": "0"
+		if (settings.effect == 'push') {
+			$('body').css({
+				'transition': 'left ' + settings.duration + 'ms ease-in',
+				'overflow-x': 'hidden',
+				'position': 'relative',
+				'left': '0'
 			});
 
-			$("html").css({
-				"background-color": settings.htmlBackgroundColor
+			$('html').css({
+				'background-color': settings.htmlBackgroundColor
 			});
 		}
 
-		vsMenu.find(".submenu").hover(
+		vsMenu.find('.submenu').hover(
 			function() {
 				$(this).children('ul').stop().fadeToggle();
 			}
 		);
-		
+
 		//Seteo de estilos a los items en estado normal
 		if (settings.setStyleItem) {
-			vsMenu.find(".item").css({
+			vsMenu.find('.item').css({
 				background: settings.itemBackground,
 				color: settings.itemColor,
-				padding: settings.itemPadding,
-				cursor: "pointer",
-				margin: 0,
+
+				cursor: 'pointer',
+				margin: 0
 			});
+			vsMenu.find('a').css({
+				padding: settings.itemPadding
+			// 	background: settings.itemBackground,
+			// 	color: settings.itemColor
+			});
+
 			//Seteo de estilos a los items en estado hover
-			vsMenu.find(".item, .submenu > ul > li").hover(
+			vsMenu.find('.item, .submenu > ul > li').hover(
+
 				//hover
 				function() {
 					$(this).css({
 						background: settings.itemBackgroundHover,
 						color: settings.itemColorHover
 					});
+					// $(this).find('li > a').css({
+					// 	background: settings.itemBackgroundHover,
+					// 	color: settings.itemColorHover
+					// });
 				},
+
 				//normal
 				function() {
 					$(this).css({
 						background: settings.itemBackground,
 						color: settings.itemColor
 					});
+					// $(this).find('a').css({
+					// 	background: settings.itemBackground,
+					// 	color: settings.itemColor
+					// });
 				}
 			);
 		}
 
 		//Seteo estilos a los separadores
-		vsMenu.find(".separator").css({
-			height: "5px",
-			"margin-bottom": "5px",
-			"border-bottom": "1px solid"
+		vsMenu.find('.separator').css({
+			// height: '5px',
+			// 'margin-bottom': '5px',
+			'border-bottom': '1px solid'
 		});
 
 		//Click en el boton disparador
 		$(settings.trigger).click(function() {
-			//Al cerrar el menu queda un poco abierto
-			var mLeft = parseInt(settings.closeWidth.replace("px", "")) - parseInt(auxWidth.replace("px", "")) + "px";
 
-			if (vsMenu.css("display") == "none") {
+			//Al cerrar el menu queda un poco abierto
+			var mLeft = parseInt(settings.closeWidth.replace('px', '')) - parseInt(auxWidth.replace('px', '')) + 'px';
+
+			if (vsMenu.css('display') == 'none') {
 				vsMenu.css({
-					"margin-left": "-" + auxWidth,
-					display: "block"
+					'margin-left': '-' + auxWidth,
+					display: 'block'
 				});
 			}
 
-			if (vsMenu.css("margin-left") == mLeft) {
+			if (vsMenu.css('margin-left') == mLeft) {
+
 				//LO ABRO
 				isOpen = true;
 
-				if (settings.effect == "push")
-					$("body").css({"left" : auxWidth });
+				if (settings.effect == 'push') {
+					$('body').css({ 'left': auxWidth });
+				}
 
-				vsMenu.animate({"margin-left": 0}, settings.duration, settings.easing);
+				vsMenu.animate({ 'margin-left': 0 }, settings.duration, settings.easing);
 			}
 			else {
+
 				//LO CIERRO
 				isOpen = false;
 
-				if (settings.effect == "push")
-					$("body").css({"left" : 0 });
+				if (settings.effect == 'push') {
+					$('body').css({ 'left': 0 });
+				}
 
-				vsMenu.animate({"margin-left": mLeft}, settings.duration, settings.easing);
+				vsMenu.animate({ 'margin-left': mLeft }, settings.duration, settings.easing);
 			}
 
-			vsMenu.find(".menuVector-content").css({
-				"height": vsMenu.height() + "px",
-				"overflow": "auto",
-				"margin-right": vsMenu.find(".menuVector-content")[0].clientWidth - vsMenu.find(".menuVector-content")[0].offsetWidth + "px"
+			vsMenu.find('.menuVector-content').css({
+				'height': vsMenu.height() + 'px',
+				'overflow': 'auto',
+				'margin-right': vsMenu.find('.menuVector-content')[0].clientWidth - vsMenu.find('.menuVector-content')[0].offsetWidth + 'px'
 			});
 
 		});
 
 		//Click en el item
-		vsMenu.find(".item, .submenu > ul > li").click(function() {
-			if ((settings.closeWidth == "0") || (vsMenu.css("margin-left") == "0px")){
+		vsMenu.find('.item, .submenu > ul > li').click(function() {
+			if ((settings.closeWidth == '0') || (vsMenu.css('margin-left') == '0px')) {
 				$(settings.trigger).click();
-
-				var item = $(this);
-
-				setTimeout(function(){
-					var result;
-					if (item.attr("data-js") != null) {
-						result = eval(item.attr("data-js"));
-					}
-
-					if ((item.attr("data-url") != null) && ((result == undefined) || (result == true))) {
-						if (item.attr("data-url") != "") {
-							location.href = item.attr("data-url");
-							return false;
-						}
-					}
-				},
-					settings.duration
-				);
-			}
-			else {
-				var item = $(this);
-				var result;
-				if (item.attr("data-js") != null) {
-					result = eval(item.attr("data-js"));
-				}
-
-				if ((item.attr("data-url") != null) && ((result == undefined) || (result == true))) {
-					if (item.attr("data-url") != "") {
-						location.href = item.attr("data-url");
-						return false;
-					}
-				}
-
 			}
 		});
 
@@ -345,8 +433,8 @@ if (window.document.addEventListener) {
 		$(window).resize(function() {
 			vsMenu.vectorMenu.reDraw();
 		});
-	}
-}( jQuery ));
+	};
+})( jQuery );
 
 
 //jQuery UI easing

@@ -9,10 +9,15 @@ class imgbrowse {
   protected $imgdr = '';     // current folder (in $root) with images
 
   function __construct() {
-    session_start();
-	require_once '../../../php/datos.php';
+	session_start();
+	require_once __DIR__.'/../../../php/datos.php';
 
-    $this->root = $config->imgCKEditor;
+	$this->root = $config->imgCKEditor;
+
+	$aux = $_SERVER['DOCUMENT_ROOT'] . $config->imgCKEditor;
+	if (!file_exists($aux) && !is_dir($aux)) {
+		mkdir($aux);
+	}
 
     if(isset($_POST['imgroot'])) $this->root = trim(strip_tags($_POST['imgroot']));
     $this->root = trim($this->root, '/') .'/';
@@ -30,21 +35,32 @@ class imgbrowse {
     }
 
     // get protocol and host name to add absolute path in <img src>
-    $protocol = (($_SERVER['HTTPS'] == 'off') || empty($_SERVER['HTTPS'])) ? 'http://' : 'https://';
-    $site = $protocol. $_SERVER['SERVER_NAME'] . ':' . $_SERVER['SERVER_PORT'] . '/';
+    // $protocol = !empty($_SERVER['HTTPS']) ? 'https://' : 'http://';
+	// $site = $protocol. $_SERVER['SERVER_NAME'] .'/';
+	switch ($_SERVER['SERVER_PORT']) {
+		case '80':
+			$site = "http://". $_SERVER['SERVER_NAME']. '/';
+		break;
+
+		case '443':
+			$site = "https://". $_SERVER['SERVER_NAME']. '/';
+		break;
+
+		default:
+			$site = "http://". $_SERVER['SERVER_NAME'] .':'. $_SERVER['SERVER_PORT']. '/';
+		break;
+	}
 
     // traverse the $obdr
     foreach($obdr as $fileobj) {
       $name = $fileobj->getFilename();
 
       // if image file, else, directory (but not . or ..), add data in $re
-      if($fileobj->isFile() && in_array($fileobj->getExtension(), $this->imgext))
-      	$re['imgs'] .= '<span><img src="'. $site . $this->root . $this->imgdr . $name .'" alt="'. $name .'" height="50" />'. $name .'</span>';
-      else if($fileobj->isDir() && !$fileobj->isDot())
-      	$re['menu'] .= '<li><span title="'. $this->imgdr . $name .'">'. $name .'</span></li>';
+      if($fileobj->isFile() && in_array($fileobj->getExtension(), $this->imgext)) $re['imgs'] .= '<span><img src="'. $site . $this->root . $this->imgdr . $name .'" alt="'. $name .'" height="50" />'. $name .'</span>';
+      else if($fileobj->isDir() && !$fileobj->isDot()) $re['menu'] .= '<li><span title="'. $this->imgdr . $name .'">'. $name .'</span></li>';
     }
     if($re['menu'] != '') $re['menu'] = '<ul>'. $re['menu'] .'</ul>';
-    if($re['imgs'] == '') $re['imgs'] = '<h1>Sin Im&aacute;genes</h1>';
+    if($re['imgs'] == '') $re['imgs'] = '<h1>No Images</h1>';
     return $re;
   }
 }

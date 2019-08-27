@@ -3,7 +3,7 @@
 
 	ini_set("log_errors", 1);
 	ini_set("error_log", "php-error.log");
-	
+
 	require_once 'datosdb.php';
 	require_once 'vectorForms.php';
 
@@ -20,20 +20,30 @@
 	//Datos de configuracion iniciales
 	$config = new VectorForms($dbhost, $dbschema, $dbuser, $dbpass, $raiz, "La Ernestina", "img/logo.png", true);
 	$config->tbLogin = 'usuarios';
+	// $config->theme = 'dark';
+
 	$config->cssFiles = ["admin/css/custom/custom.css"];
 
-	$_SESSION['imgCKEditor'] = '/VectorForms/admin/ckeditor/imgup';
+	$_SESSION[$nombSistema.'_debug'] = '1';
+
+	// CARGO
+	if (isset($_SESSION["NumeUser"])) {
+		$numeUser = $_SESSION["NumeUser"];
+        $numeCarg = intval($config->buscarDato("SELECT NumeCarg FROM ".$config->tbLogin." WHERE NumeUser = ". $_SESSION["NumeUser"]));
+	}
+	else {
+		$numeUser = '';
+		$numeCarg = PHP_INT_MAX;
+	}
 
 	/**
 	 * Items de menu adicionales
 	 */
 	$config->menuItems = [
 			new MenuItem("Configuraciones", '', '', 'fa-cogs', 1, true, false),
-			new MenuItem("Reportes", 'reportes.php', '', 'fa-slideshare', '', false, false),
-			new MenuItem("Salir del Sistema", 'logout.php', '', 'fa-sign-out', '', false, false)
+			new MenuItem("Reportes", 'reports.php', '', 'fab fa-slideshare', '', false, false),
+			new MenuItem("Salir del Sistema", 'logout.php', '', 'fa-sign-out-alt', '', false, false)
 	];
-
-	$config->theme = 'dark';
 
 	/**
 	 * TABLAS
@@ -42,7 +52,7 @@
 	/**
 	 * USUARIOS
 	 */
-	$tabla = new Tabla("usuarios", "usuarios", "Usuarios", "el Usuario", true, "objeto/usuarios", "fa-users");
+	$tabla = new Tabla("usuarios", "usuarios", "Usuarios", "el Usuario", true, "objeto/usuarios.php", "fa-users");
 	$tabla->labelField = "NombPers";
 	$tabla->numeCarg = 1;
 	$tabla->isSubItem = true;
@@ -62,7 +72,7 @@
 	/**
 	 * BANCOS
 	 */
-	$tabla = new Tabla("bancos", "bancos", "Bancos", "el Banco", true, "objeto/bancos/", "fa-bank");
+	$tabla = new Tabla("bancos", "bancos", "Bancos", "el Banco", true, "objeto/bancos.php", "fas fa-university");
 	$tabla->labelField = "NombBanc";
 	$tabla->isSubItem = true;
 
@@ -77,7 +87,7 @@
 	/**
 	 * VENDEDORES
 	 */
-	$tabla = new Tabla("vendedores", "vendedores", "Vendedores", "el Vendedor", true, "objeto/vendedores/", "fa-male");
+	$tabla = new Tabla("vendedores", "vendedores", "Vendedores", "el Vendedor", true, "objeto/vendedores.php", "fa-male");
 	$tabla->labelField = "NombVend";
 	$tabla->isSubItem = true;
 
@@ -92,7 +102,7 @@
 	/**
 	 * TIPOS DE PAGOS
 	 */
-	$tabla = new Tabla("tipospagos", "tipospagos", "Formas de Pago", "la Forma de Pago", true, "objeto/tipospagos/", "fa-credit-card");
+	$tabla = new Tabla("tipospagos", "tipospagos", "Formas de Pago", "la Forma de Pago", true, "objeto/tipospagos.php", "fa-credit-card");
 	$tabla->labelField = "NombTipoPago";
 	$tabla->isSubItem = true;
 	$tabla->allowDelete = false;
@@ -110,7 +120,7 @@
 	/**
 	 * ESTADOS LOTES
 	 */
-	$tabla = new Tabla("estadoslotes", "estadoslotes", "Estados de lotes", "el Estado", false, "objeto/estadoslotes/", "fa-wrench");
+	$tabla = new Tabla("estadoslotes", "estadoslotes", "Estados de lotes", "el Estado", false, "objeto/estadoslotes.php", "fa-wrench");
 	$tabla->labelField = "NombEstaLote";
 	$tabla->isSubItem = true;
 
@@ -123,7 +133,7 @@
 	/**
 	 * PROVINCIAS
 	 */
-	$tabla = new Tabla("provincias", "provincias", "Provincias", "la provincia", true, "objeto/provincias/", "fa-linode");
+	$tabla = new Tabla("provincias", "provincias", "Provincias", "la provincia", true, "objeto/provincias.php", "fab fa-linode");
 	$tabla->labelField = "NombProv";
 	$tabla->isSubItem = true;
 	$tabla->allowDelete = false;
@@ -138,7 +148,7 @@
 	/**
 	 * TIPOS DE CAJA
 	 */
-	$tabla = new Tabla("tiposcaja", "tiposcaja", "Tipos de operaciones de caja", "el registro", true, "objeto/tiposcaja/", "fa-sitemap");
+	$tabla = new Tabla("tiposcaja", "tiposcaja", "Tipos de operaciones de caja", "el registro", true, "objeto/tiposcaja.php", "fa-sitemap");
 	$tabla->isSubItem = true;
 	$tabla->labelField = "NombTipoCaja";
 
@@ -152,31 +162,28 @@
 	/**
 	 * CAJA
 	 */
-	$tabla = new Caja("caja", "caja", "Caja", "el detalle", true, "objeto/caja/", "fa-money");
+	$tabla = new Caja("caja", "caja", "Caja", "el detalle", true, "objeto/caja.php", "fas fa-money-bill");
 	$tabla->labelField = "NombCaja";
 	$tabla->allowDelete = false;
 	$tabla->allowEdit = false;
+
 	$tabla->searchFields = [
-		array("name"=> "NombCaja", "operator"=>"=", "join"=>"and"),
-		array("name"=> "FechCaja", "operator"=>"=", "join"=>"and"), 
-		array("name"=> "NumeTipoCaja", "operator"=>"=", "join"=>"and")
+		new SearchField("NombCaja"),
+		new SearchField("FechCaja"),
+		new SearchField("NumeTipoCaja", "=", "AND", "caja.NumeTipoCaja")
 	];
 	$tabla->jsFiles = ["admin/js/custom/caja.js"];
 
 	$tabla->jsOnLoad = "iniciar();";
 
 	$tabla->btnForm = [
-		array(
-			"titulo"=> '<i class="fa fa-th fa-fw" aria-hidden="true"></i> Ver Todos',
-			"class"=> "btn-primary",
-			"onclick"=> "verTodos()"
-		)
+		new btnListItem('btnVerTodos', '', '<i class="fa fa-th fa-fw" aria-hidden="true"></i> Ver Todos', 'btn-primary', 'button', '', 'verTodos()')
 	];
-	
+
 	$tabla->addFieldId("NumeCaja", "Número de caja");
 	$tabla->addField("FechCaja", "date", 80, "Fecha");
 	$tabla->fields["FechCaja"]["isHiddenInForm"] = true;
-	
+
 	$tabla->addField("NumeUser", "select", 0, "Usuario", true, false, false, true, '', '', 'usuarios', 'NumeUser', 'NombPers');
 	$tabla->fields["NumeUser"]["isHiddenInForm"] = true;
 
@@ -192,7 +199,7 @@
 	/**
 	 * LOTES
 	 */
-	$tabla = new Lote("lotes", "lotes", "Lotes", "el Lote", true, "objeto/lotes/", "fa-map-o", "NumeLote");
+	$tabla = new Lote("lotes", "lotes", "Lotes", "el Lote", true, "objeto/lotes.php", "far fa-paper-plane", "NumeLote");
 	$tabla->labelField = "NombLote";
 	$tabla->allowDelete = false;
 
@@ -233,10 +240,10 @@
 
 	$tabla->addField("NumeEstaLote", "select", 0, "Estado", true, false, false, true, '1', '', 'estadoslotes', 'NumeEstaLote', 'NombEstaLote');
 	$tabla->fields["NumeEstaLote"]["showOnForm"] = false;
-	
+
 	$tabla->addField("NumeClie", "select", 100, "Cliente", false, false, false, true, '', '', 'clientes', 'NumeClie', 'NombClie', 'NumeEsta = 1', 'NombClie');
 	$tabla->fields["NumeClie"]["showOnForm"] = false;
-	
+
 	$tabla->addField("CantCuot", "number", 0, "Cantidad de Cuotas");
 	$tabla->fields["CantCuot"]["showOnForm"] = false;
 	$tabla->fields["CantCuot"]["txtAlign"] = "right";
@@ -374,7 +381,7 @@
 	/**
 	 * INDEXACION DE CUOTAS
 	 */
-	$tabla = new Indexacion("indexaciones", "indexaciones", "Indexación de Cuotas", "el índice", true, "objeto/indexaciones/", "fa-percent");
+	$tabla = new Indexacion("indexaciones", "indexaciones", "Indexación de Cuotas", "el índice", true, "objeto/indexaciones.php", "fa-percent");
 	$tabla->allowDelete = false;
 	$tabla->allowEdit = false;
 
@@ -391,15 +398,15 @@
 			"onclick"=>"cambiarEstado"
 		)
 	];
-	
+
 	$tabla->addFieldId("NumeInde", "", true, true);
 	$tabla->addField("FechInde", "datetime", 0, "Fecha");
 	$tabla->fields["FechInde"]["showOnForm"] = false;
-	
+
 	$tabla->addField("PorcInde", "number", 0, "Porcentaje");
 	$tabla->fields["PorcInde"]["step"] = "0.01";
 
-	$tabla->addField("NumeEsta", "select", 0, "Estado", true, false, false, true, '1', '', 'estados', 'NumeEsta', 'NombEsta', '', 'NombEsta');	
+	$tabla->addField("NumeEsta", "select", 0, "Estado", true, false, false, true, '1', '', 'estados', 'NumeEsta', 'NombEsta', '', 'NombEsta');
 	$tabla->fields["NumeEsta"]["isHiddenInForm"] = true;
 
 	$config->tablas["indexaciones"] = $tabla;
@@ -407,7 +414,7 @@
 	/**
 	 * CLIENTES
 	 */
-	$tabla = new Tabla("clientes", "clientes", "Clientes", "el Cliente", true, "objeto/clientes/", "fa-id-card-o");
+	$tabla = new Tabla("clientes", "clientes", "Clientes", "el Cliente", true, "objeto/clientes.php", "far fa-id-card");
 	$tabla->labelField = "NombClie";
 
 	$tabla->searchFields = [array("name"=> "NombClie", "operator"=>"=", "join"=>"and")];
@@ -467,7 +474,7 @@
 	/**
 	 * CHEQUES
 	 */
-	$tabla = new Cheque("cheques", "cheques", "Cheques", "el Cheque", true, "objeto/cheques/", "fa-credit-card");
+	$tabla = new Cheque("cheques", "cheques", "Cheques", "el Cheque", true, "objeto/cheques.php", "fa-credit-card");
 	$tabla->labelField = "NumeCheq";
 
 	$tabla->allowDelete = false;
@@ -480,12 +487,12 @@
 			"onclick"=>"cambiarEstado"
 		)
 	];
-	
+
 	$tabla->jsFiles = ["admin/js/custom/cheques.js"];
 	$tabla->jsOnList = "verEstado();";
 	$tabla->jsOnNew = "onNew();";
 	$tabla->jsOnEdit = "onEdit();";
-	
+
 	$tabla->addFieldId("CodiCheq", "CodiCheq", true, true);
 	$tabla->addField("NumeCheq", "number", 80, "Número");
 	$tabla->addField("EsPropio", "checkbox", 0, "Es propio?");
@@ -515,14 +522,14 @@
 
 	$tabla->addField("ImpoCheq", "number", 0, "Importe");
 	$tabla->fields["ImpoCheq"]["step"] = "0.01";
-	
+
 	$tabla->addField("ObseCheq", "textarea", 400, "Observaciones", false);
 	$tabla->fields["ObseCheq"]["isHiddenInList"] = true;
 	$tabla->fields["ObseCheq"]["isHiddenInForm"] = true;
-	
+
 	$tabla->addField("NumeEsta", "select", 0, "Estado", true, false, false, true, '1', '', 'estados', 'NumeEsta', 'NombEsta', '', 'NombEsta');
 
-	//Recibido de 
+	//Recibido de
 	$tabla->addField("NombReci", "text", 80, "Recibido de", true);
 	$tabla->fields["NombReci"]["cssGroup"] = "form-group2";
 

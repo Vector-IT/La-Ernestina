@@ -6,7 +6,7 @@ class Caja extends Tabla
     public function customFunc($post)
     {
         global $config;
-        
+
         switch ($post['field']) {
             case "NumeEsta":
                 return $config->ejecutarCMD("UPDATE caja SET NumeEsta = NOT NumeEsta WHERE NumeCaja = ". $post["dato"]["NumeCaja"]);
@@ -14,9 +14,9 @@ class Caja extends Tabla
         }
     }
 
-    public function listar($strFiltro = "", $conBotones = true, $btnList = [], $order = '')
+    public function listar($strFiltro = "", $conBotones = true, $btnList = [], $order = '', $pagina = 1, $strFiltroSQL = '', $conCheckboxes = false)
     {
-        global $config, $crlf;
+        global $config, $crlf, $nombSistema;
 
         $filtro = "";
 
@@ -57,10 +57,14 @@ class Caja extends Tabla
         $strSQL.= $crlf." INNER JOIN usuarios u ON c.NumeUser = u.NumeUser";
         $strSQL.= $crlf." INNER JOIN tiposcaja tc ON c.NumeTipoCaja = tc.NumeTipoCaja";
         $strSQL.= $crlf." INNER JOIN estados e ON c.NumeEsta = e.NumeEsta";
-        
+
         $strSQL.= $crlf." ORDER BY c.NumeCaja DESC";
 
-        $tabla = $config->cargarTabla($strSQL);
+		$tabla = $config->cargarTabla($strSQL);
+
+		if (isset($_SESSION[$nombSistema. "_debug"])) {
+			$resultado["sql"] = $strSQL;
+		}
 
         $strSalida = '';
 
@@ -76,7 +80,7 @@ class Caja extends Tabla
 
         if ($tabla) {
             if ($tabla->num_rows > 0) {
-                $strSalida.= $crlf.'<table class="table table-striped table-bordered table-hover table-condensed table-responsive">';
+                $strSalida.= $crlf.'<table class="table table-striped table-bordered table-hover table-condensed table-sm">';
 
                 $strSalida.= $crlf.'<tr>';
                 $strSalida.= $crlf.'<th>Número</th>';
@@ -84,24 +88,24 @@ class Caja extends Tabla
                 $strSalida.= $crlf.'<th>Usuario</th>';
                 $strSalida.= $crlf.'<th>Descripción</th>';
                 $strSalida.= $crlf.'<th>Tipo de operación</th>';
-                $strSalida.= $crlf.'<th>Crédito</th>';
-                $strSalida.= $crlf.'<th>Débito</th>';
+                $strSalida.= $crlf.'<th class="text-right">Crédito</th>';
+                $strSalida.= $crlf.'<th class="text-right">Débito</th>';
                 $strSalida.= $crlf.'<th>Estado</th>';
                 $strSalida.= $crlf.'<th></th>';
                 $strSalida.= $crlf.'</tr>';
 
                 while ($fila = $tabla->fetch_assoc()) {
                     $col = 0;
-                    
+
                     $strSalida.= $crlf.'<tr class="'.($fila["NumeEsta"] != "1"?'txtTachado':'').'">';
-                    
+
                     $strSalida.= $crlf.'<td id="NumeCaja'. $fila[$this->IDField].'">'.$fila['NumeCaja'].'</td>';
                     $strSalida.= $crlf.'<td id="FechCaja'. $fila[$this->IDField].'">'.$fila['FechCaja'].'</td>';
-                    
+
                     $strSalida.= $crlf.'<td class="ucase">'.$fila["NombPers"];
                     $strSalida.= $crlf.'<input type="hidden" id="NumeUser'. $fila[$this->IDField].'" value="'.$fila["NumeUser"].'" />';
                     $strSalida.= $crlf.'</td>';
-                    
+
                     $strSalida.= $crlf.'<td id="NombCaja'. $fila[$this->IDField].'" class="ucase">'.$fila['NombCaja'].'</td>';
 
                     $strSalida.= $crlf.'<td class="ucase">'.$fila["NombTipoCaja"];
@@ -109,11 +113,11 @@ class Caja extends Tabla
                     $strSalida.= $crlf.'</td>';
 
                     if ($fila["NumeTipoOper"] == "1") {
-                        $strSalida.= $crlf.'<td class="txtBold">$ '.$fila['ImpoCaja'].'<span class="hide" id="ImpoCaja'. $fila[$this->IDField].'">'.$fila['ImpoCaja'].'</span></td>';
+                        $strSalida.= $crlf.'<td class="txtBold text-right">$ '.$fila['ImpoCaja'].'<span class="d-none" id="ImpoCaja'. $fila[$this->IDField].'">'.$fila['ImpoCaja'].'</span></td>';
                         $strSalida.= $crlf.'<td></td>';
                     } else {
                         $strSalida.= $crlf.'<td></td>';
-                        $strSalida.= $crlf.'<td class="txtBold txtRojo">$ '.$fila['ImpoCaja'].'<span class="hide" id="ImpoCaja'. $fila[$this->IDField].'">'.$fila['ImpoCaja'].'</span></td>';
+                        $strSalida.= $crlf.'<td class="txtBold txtRojo text-right">$ '.$fila['ImpoCaja'].'<span class="d-none" id="ImpoCaja'. $fila[$this->IDField].'">'.$fila['ImpoCaja'].'</span></td>';
                     }
 
                     $strSalida.= $crlf.'<td id="NombEsta'.$fila[$this->IDField].'" class="ucase">'.$fila["NombEsta"];
@@ -126,20 +130,26 @@ class Caja extends Tabla
                     } else {
                         $strSalida.= $crlf.'<td class="text-center"><button class="btn btn-sm btn-success" onclick="cambiarEstado(\''.$fila[$this->IDField].'\')">ACTIVAR</button></td>';
                     }
-                    
+
                     $strSalida.= $crlf.'</tr>';
                 }
 
-                $strSalida.= $crlf.'</table>';
+				$strSalida.= $crlf.'</table>';
+
+				$tabla->data_seek(0);
             } else {
-                $strSalida.= "<h3>No hay datos para mostrar</h3>";
+                $resultado["num_rows"] = 0;
+				$strSalida.= "<h3>".gral_nodata."</h3>";
             }
-            $tabla->free();
         } else {
-            $strSalida.= "<h3>No hay datos para mostrar</h3>";
+            $resultado["num_rows"] = 0;
+			$strSalida.= "<h3>".gral_nodata."</h3>";
         }
-            
-        echo $strSalida;
+
+		$resultado["tabla"] = $tabla;
+		$resultado["html"] = $strSalida;
+
+		return $resultado;
     }
 
     public function insertar($datos)
@@ -152,7 +162,7 @@ class Caja extends Tabla
         return parent::insertar($datos);
     }
 
-    protected function createField($field, $prefix = '')
+    public function createField2($field, $prefix = '', $conBuscador = false)
     {
         global $crlf, $config;
 

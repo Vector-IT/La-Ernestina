@@ -1,0 +1,31 @@
+{
+    "env": {
+        "browser": true
+    },
+    "extends": "jquery",
+    "rules": {
+        "indent": [
+            "error",
+            "tab"
+        ],
+        "linebreak-style": [
+            "error",
+            "windows"
+        ],
+        "quotes": [
+            "error",
+            "single"
+        ],
+        "semi": [
+            "error",
+            "always"
+		],
+		"max-len": "off",
+		"space-in-parens": "off",
+		"computed-property-spacing": "off",
+		"eol-last": "off",
+		"brace-style": "off",
+		"eqeqeq": "off",
+		"lines-around-comment": "off"
+	}
+}

@@ -10,24 +10,38 @@ namespace VectorForms;
  */
 require_once 'tabla.php';
 
+/**
+ * Clase de configuracions de vForms
+ *
+ * @author Vector-IT
+ *
+ */
 class VectorForms {
-	private $dbhost;
-	private $db;
-	private $dbuser;
-	private $dbpass;
+	private $dbhost;          // String - Host de servidor de base de datos
+	private $db;              // String - Esquema de base de datos
+	private $dbuser;          // String - Usuario de base de datos
+	private $dbpass;          // String - Contraseña de acceso de usuario de base de datos
 
-	public $raiz;
-	public $titulo;
-	public $logo;
-	public $tablas;
-	public $showTitulo;
-	public $menuItems = [];
-	
-	public $cssFiles = [];
-	
-	public $imgCKEditor = '';
+	public $raiz;             // String - Ruta de instalacion del sistema
+	public $titulo;           // String - Titulo del sistema
+	public $logo;	          // String - Ruta relativa del logo del sistema
+	public $showTitulo;       // Boolean - Se muestra el titulo?
 
-	public $theme;
+	public $tbLogin;          // String - Tabla de base de datos utilizada para el login de usuarios
+
+	public $tablas;           // Array de objetos Tabla
+	public $menuItems;        // Array de objetos de Menu
+
+	public $cssFiles;         // Array de rutas de archivos css
+	public $jsFiles;          // Array de rutas de archivos js
+
+	public $imgCKEditor;      // String - Ruta de almacenamiento de archivos de CKEditor
+
+	public $theme;            // String - Tema de colores de bootstrap
+
+	public $numeCargReportes; // Integer - Cargo para ver reportes
+
+	public $showLangs;        // Boolean - Mostrar radios de selección de idioma
 
 	/**
 	 * Constructor de la clase Configuracion
@@ -40,7 +54,7 @@ class VectorForms {
 	 * @param string $title
 	 * @param string $logo
 	 */
-	public function __construct($dbhost='', $db='', $dbuser='', $dbpass='', $raiz='', $titulo='', $logo='', $showTitulo=true) {
+	public function __construct($dbhost='', $db='', $dbuser='', $dbpass='', $raiz='', $titulo='', $logo='', $showTitulo=true, $tbLogin = 'usuarios') {
 		$this->dbhost = $dbhost;
 		$this->db = $db;
 		$this->dbuser = $dbuser;
@@ -49,7 +63,15 @@ class VectorForms {
 		$this->titulo = $titulo;
 		$this->logo = $logo;
 		$this->showTitulo = $showTitulo;
+		$this->tbLogin = $tbLogin;
+		$this->tablas = [];
+		$this->menuItems = [];
+		$this->cssFiles = [];
+		$this->jsFiles = [];
 		$this->imgCKEditor = $raiz. 'admin/ckeditor/imgup';
+		$this->theme = '';
+		$this->numeCargReportes = '';
+		$this->showLangs = true;
 	}
 
 	/**
@@ -64,23 +86,30 @@ class VectorForms {
 		return $conn;
 	}
 
-
 	/**
 	 * Ejecutar comando en la BD
 	 *
 	 * @param string $strSQL
 	 * @return boolean|string
 	 */
-	public function ejecutarCMD($strSQL) {
+	public function ejecutarCMD($strSQL, $returnID = false) {
 		$conn = $this->newConn();
 		$strError = "";
 
 		if (!$conn->query($strSQL))
 			$strError = $conn->error;
+			if ($returnID) {
+				$id = $conn->insert_id;
+			}
 			$conn->close();
 
 			if ($strError == "") {
-				return true;
+                if (!$returnID) {
+                    return true;
+                }
+				else {
+					return $id;
+				}
 			}
 			else {
 				return $strError;
@@ -100,7 +129,7 @@ class VectorForms {
 		$strSalida = "";
 
 		if (!($tabla = $conn->query($strSQL))) {
-			$strSalida = "Error al realizar la consulta.";
+			$strSalida = gral_queryerror;
 		}
 		else {
 			if ($tabla->num_rows > 0) {
@@ -125,49 +154,54 @@ class VectorForms {
 		return $strSalida;
 	}
 
-	public function cargarCombo($tabla, $CampoNumero, $CampoTexto, $filtro = "", $orden = "", $seleccion = "", $itBlank = false, $itBlankText = 'Seleccione...')
-    {
-        global $crlf;
+	/**
+	 * Carga un control de tipo select o selectmultiple
+	 */
+	public function cargarCombo($tabla, $CampoNumero, $CampoTexto, $filtro = "", $orden = "", $seleccion = "", $itBlank = false, $itBlankText = gral_select, $tablaAlias = "")
+	{
+		global $crlf;
 
-        $strSQL = "SELECT ". $CampoNumero;
-        if ($CampoTexto != "") {
-            $strSQL.= ",". $CampoTexto;
-        }
-        $strSQL.= " FROM ". $tabla;
+		$strSQL = "SELECT ". $CampoNumero;
+		if ($CampoTexto != "") {
+			$strSQL.= ",". $CampoTexto;
+		}
+		$strSQL.= " FROM ". $tabla ." ". $tablaAlias;
 
-        if ($filtro != "") {
-            $strSQL.= " WHERE $filtro";
-        }
+		if ($filtro != "") {
+			$strSQL.= " WHERE $filtro";
+		}
 
-        if ($orden != "") {
-            $strSQL.= " ORDER BY $orden";
-        }
+		if ($orden != "") {
+			$strSQL.= " ORDER BY $orden";
+		}
 
-        $tabla = $this->cargarTabla($strSQL);
+		$tabla = $this->cargarTabla($strSQL);
 
-        $strSalida = "";
-        if ($itBlank) {
-            $strSalida.= $crlf.'<option value="">'.$itBlankText.'</option>';
-        }
+		$strSalida = "";
 
-        while ($fila = $tabla->fetch_assoc()) {
-            if ($CampoTexto != "") {
-                if (strcmp($fila[$CampoNumero], $seleccion) != "0") {
-                    $strSalida.= $crlf.'<option value="'.$fila[$CampoNumero].'">'.htmlentities($fila[$CampoTexto]).'</option>';
+		if ($itBlank) {
+			$strSalida.= $crlf.'<option value="">'.$itBlankText.'</option>';
+		}
+
+        if ($tabla) {
+            while ($fila = $tabla->fetch_assoc()) {
+                if ($CampoTexto != "") {
+                    if (strcmp($fila[$CampoNumero], $seleccion) != "0") {
+                        $strSalida.= $crlf.'<option value="'.$fila[$CampoNumero].'">'.htmlentities($fila[$CampoTexto]).'</option>';
+                    } else {
+                        $strSalida.= $crlf.'<option value="'.$fila[$CampoNumero].'" selected>'.htmlentities($fila[$CampoTexto]).'</option>';
+                    }
                 } else {
-                    $strSalida.= $crlf.'<option value="'.$fila[$CampoNumero].'" selected>'.htmlentities($fila[$CampoTexto]).'</option>';
-                }
-            } else {
-                if (strcmp($fila[$CampoNumero], $seleccion) != "0") {
-                    $strSalida.= $crlf.'<option value="'.$fila[$CampoNumero].'" />';
-                } else {
-                    $strSalida.= $crlf.'<option value="'.$fila[$CampoNumero].'" selected />';
+                    if (strcmp($fila[$CampoNumero], $seleccion) != "0") {
+                        $strSalida.= $crlf.'<option value="'.$fila[$CampoNumero].'" />';
+                    } else {
+                        $strSalida.= $crlf.'<option value="'.$fila[$CampoNumero].'" selected />';
+                    }
                 }
             }
         }
-
-        return $strSalida;
-    }
+		return $strSalida;
+	}
 
 	/**
 	 * Ejecutar query en la BD y devolver el resultado
@@ -186,6 +220,39 @@ class VectorForms {
 	}
 
 	/**
+	 * Sumar tiempos
+	 */
+	public function sum_time($time1, $time2) {
+		$times = array($time1, $time2);
+		$seconds = 0;
+		foreach ($times as $time) {
+			list($hour,$minute,$second) = explode(':', $time);
+			$seconds += $hour*3600;
+			$seconds += $minute*60;
+			$seconds += $second;
+		}
+		$hours = floor($seconds/3600);
+		$seconds -= $hours*3600;
+		$minutes  = floor($seconds/60);
+		$seconds -= $minutes*60;
+		// return "{$hours}:{$minutes}:{$seconds}";
+		return sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
+	}
+
+	/**
+	 * Tiempo a decimal
+	 */
+	function time_to_decimal($time) {
+		if ($time != '') {
+			$hms = explode(":", $time);
+			return ($hms[0] + ($hms[1]/60) + ($hms[2]/3600));
+		}
+		else {
+			return '0';
+		}
+	}
+
+	/**
 	 * Crear menu de opciones
 	 */
 	public function crearMenu() {
@@ -193,32 +260,38 @@ class VectorForms {
 
 		$strSalida = '';
 		$strSeparador = $crlf.'<div class="separator"></div>';
-		
-		$strItem = $crlf.'<div class="item" data-url="#url#" data-toggle="tooltip" data-placement="right" title="#titulo#">';
+
+		$strItem = $crlf.'<div class="item" data-toggle="tooltip" data-placement="right" title="#titulo#">';
+		$strItem.= $crlf.'<a href="#url#">';
 		$strItem.= $crlf.'#titulo#';
 		$strItem.= $crlf.'<div class="flRight"><i class="fa #icono# fa-fw"></i></div>';
+		$strItem.= $crlf.'</a>';
 		$strItem.= $crlf.'</div>';
 
-		$strSubMenuInicio = $crlf.'<div class="item submenu" data-url="#url#" data-toggle="tooltip" data-placement="top" title="#titulo#">';
+		$strSubMenuInicio = $crlf.'<div class="item submenu" data-toggle="tooltip" data-placement="top" title="#titulo#">';
+		$strSubMenuInicio.= $crlf.'<a href="#url#">';
 		$strSubMenuInicio.= $crlf.'#titulo#';
 		$strSubMenuInicio.= $crlf.'<div class="flRight"><i class="fa #icono# fa-fw"></i></div>';
+		$strSubMenuInicio.= $crlf.'</a>';
 		$strSubMenuInicio.= $crlf.'<ul class="dropdown-menu">';
-		
+
 		$strSubMenuFin = $crlf.'</ul>';
 		$strSubMenuFin.= $crlf.'</div>';
-		
-		$strSubItem = $crlf.'<li data-url="#url#">';;
+
+		$strSubItem = $crlf.'<li data-url="#url#">';
+		$strSubItem.= $crlf.'<a href="#url#">';
 		$strSubItem.= $crlf.'#titulo#';
 		$strSubItem.= $crlf.'<div class="flRight"><i class="fa #icono# fa-fw"></i></div>';
+		$strSubItem.= $crlf.'</a>';
 		$strSubItem.= $crlf.'</li>';
-		
+
 		$strSalida.= $crlf.'<div id="sidebar" class="menuVector">';
 		$strSalida.= $crlf.'<div class="absolute top5 right3">';
-		$strSalida.= $crlf.'<button class="btnMenu btn btn-default btn-xs noMobile" data-toggle="tooltip" data-placement="right" title="Men&uacute;"><i class="fa fa-bars"></i></button>';
+		$strSalida.= $crlf.'<button class="btnMenu btn btn-light btn-sm noMobile" data-toggle="tooltip" data-placement="right" title="'. gral_menu .'"><i class="fa fa-bars"></i></button>';
 		$strSalida.= $crlf.'</div>';
 		$strSalida.= $crlf.'<div id="sidebar-content" class="menuVector-content">';
 
-		$strSalida.= str_replace("#titulo#", "Inicio", str_replace("#icono#", "fa-home", str_replace("#url#", $this->raiz."admin/", $strItem)));
+		$strSalida.= str_replace("#titulo#", gral_home, str_replace("#icono#", "fa-home", str_replace("#url#", $this->raiz."admin/", $strItem)));
 		$strSalida.= $strSeparador;
 
 		$I = 1;
@@ -229,163 +302,26 @@ class VectorForms {
 
 		foreach ($this->tablas as $tabla) {
 			//Items de menu adicionales
-			foreach ($this->menuItems as $item) {
-				if (!$item->Used) {
-					if ($item->NumeCarg != '') {
-						$NumeCarg = intval($this->buscarDato("SELECT NumeCarg FROM ".$config->tbLogin." WHERE NumeUser = ". $_SESSION["NumeUser"]));
-							
-						if (intval($item->NumeCarg) < $NumeCarg) {
-							continue;
-						}
-					}
-						
-					if (intval($item->Index) == $I) {
-						if ($item->Submenu) {
-							if ($submenu) {
-								$strSalida.= $strSubMenuFin;
-								$strSalida.= $strSeparador;
-							}
+			$strSalida.= $this->crearItemMenuAdic($I, $submenu, true, $strItem, $strSubMenuInicio, $strSubMenuFin, $strSubItem, $strSeparador);
 
-							$submenu = true;
-							
-							$strSalida.= str_replace("#titulo#", $item->Titulo,
-											str_replace("#icono#", $item->Icono,
-											str_replace("#url#", $item->Url, $strSubMenuInicio)));
-
-							$item->Used = true;
-						}
-						else {
-							if ($item->Subitem) {
-								$strSalida.= str_replace("#titulo#", $item->Titulo,
-												str_replace("#icono#", $item->Icono,
-												str_replace("#url#", $item->Url, $strSubItem)));
-								$strSalida.= $strSeparador;
-
-								$item->Used = true;
-							}
-							else {
-								if ($submenu) {
-									$strSalida.= $strSubMenuFin;
-									$strSalida.= $strSeparador;
-									$submenu = false;
-								}
-								
-								$strSalida.= str_replace("#titulo#", $item->Titulo, 
-												str_replace("#icono#", $item->Icono, 
-												str_replace("#url#", $item->Url, $strItem)));
-
-								$strSalida.= $strSeparador;
-								$item->Used = true;
-								$I++;
-							}
-						}
-					}
-				}
-			}
-				
 			//Tablas
 			if ($tabla->showMenu) {
-				if ($tabla->numeCarg != '') {
-					$NumeCarg = intval($this->buscarDato("SELECT NumeCarg FROM ".$config->tbLogin." WHERE NumeUser = ". $_SESSION["NumeUser"]));
-		
-					if (intval($tabla->numeCarg) < $NumeCarg) {
+				if ($tabla->numeCarg !== '') {
+					$numeCarg = intval($this->buscarDato("SELECT NumeCarg FROM ".$config->tbLogin." WHERE NumeUser = ". $_SESSION["NumeUser"]));
+
+					if (intval($tabla->numeCarg) < $numeCarg) {
 						continue;
 					}
 				}
-		
-				if ($tabla->isSubMenu) {
-					if ($submenu) {
-						$strSalida.= $strSubMenuFin;
-						$strSalida.= $strSeparador;
-					}
 
-					$submenu = true;
-					
-					$strSalida.= str_replace("#titulo#", $tabla->titulo,
-									str_replace("#icono#", $tabla->icono,
-									str_replace("#url#", $tabla->url, $strSubMenuInicio)));
-
-					$I++;
-				}
-				else {
-					if ($tabla->isSubItem) {
-						$strSalida.= str_replace("#titulo#", $tabla->titulo,
-										str_replace("#icono#", $tabla->icono,
-										str_replace("#url#", $tabla->url, $strSubItem)));
-						$strSalida.= $strSeparador;
-					}
-					else {
-						if ($submenu) {
-							$strSalida.= $strSubMenuFin;
-							$strSalida.= $strSeparador;
-							$submenu = false;
-						}
-							
-						$strSalida.= str_replace("#titulo#", $tabla->titulo,
-										str_replace("#icono#", $tabla->icono,
-										str_replace("#url#", $tabla->url, $strItem)));
-
-						$strSalida.= $strSeparador;
-						$I++;
-					}
-				}
+				$strSalida.= $this->crearItemMenuTabla($I, $submenu, $tabla, $strItem, $strSubMenuInicio, $strSubMenuFin, $strSubItem, $strSeparador);
 			}
 		}
-		
-		foreach ($this->menuItems as $item) {
-			if ($item->Index == '' || !$item->Used) {
-				if ($item->NumeCarg != '') {
-					$NumeCarg = intval($this->buscarDato("SELECT NumeCarg FROM ".$config->tbLogin." WHERE NumeUser = ". $_SESSION["NumeUser"]));
-		
-					if (intval($item->NumeCarg) < $NumeCarg) {
-						continue;
-					}
-				}
-				
-				if ($item->Submenu) {
-					if ($submenu) {
-						$strSalida.= $strSubMenuFin;
-						$strSalida.= $strSeparador;
-					}
 
-					$submenu = true;
-					
-					$strSalida.= str_replace("#titulo#", $item->Titulo,
-									str_replace("#icono#", $item->Icono,
-									str_replace("#url#", $item->Url, $strSubMenuInicio)));
+		//Items adicionales no usados que no tienen indice
+		$I = '';
+		$strSalida.= $this->crearItemMenuAdic($I, $submenu, false, $strItem, $strSubMenuInicio, $strSubMenuFin, $strSubItem, $strSeparador);
 
-					$item->Used = true;
-				}
-				else {
-					if ($item->Subitem) {
-						$strSalida.= str_replace("#titulo#", $item->Titulo,
-										str_replace("#icono#", $item->Icono,
-										str_replace("#url#", $item->Url, $strSubItem)));
-						$strSalida.= $strSeparador;
-
-						$item->Used = true;
-					}
-					else {
-						if ($submenu) {
-							$strSalida.= $strSubMenuFin;
-							$strSalida.= $strSeparador;
-							$submenu = false;
-						}
-						
-						$strSalida.= str_replace("#titulo#", $item->Titulo, 
-										str_replace("#icono#", $item->Icono, 
-										str_replace("#url#", $item->Url, $strItem)));
-
-						$strSalida.= $strSeparador;
-						$item->Used = true;
-					}
-				}
-
-				// $strSalida.= str_replace("#titulo#", $item->Titulo, str_replace("#icono#", $item->Icono, str_replace("#url#", $item->Url, $strItem)));
-				// $strSalida.= $strSeparador;
-			}
-		}
-		
 		if ($submenu) {
 			$strSalida.= $strSubMenuFin;
 			$strSalida.= $strSeparador;
@@ -394,16 +330,193 @@ class VectorForms {
 		$strSalida.= $crlf.'</div>';
 		$strSalida.= $crlf.'</div>';
 
-		$strSalida.= $crlf.'<button class="btnMenu btn btn-default btn-xs fixed top5 left5 noDesktop" title="Men&uacute;"><i class="fa fa-bars"></i></button>';
+		$strSalida.= $crlf.'<button class="btnMenu btn btn-light btn-sm fixed top5 left5 noDesktop" title="'. gral_menu .'"><i class="fa fa-bars"></i></button>';
 
 		echo $strSalida;
 	}
 
+	/**
+	 * Crea un item de menu proveniente de un objeto Tabla
+	 */
+	protected function crearItemMenuTabla(&$I, &$submenu, $tabla, $strItem, $strSubMenuInicio, $strSubMenuFin, $strSubItem, $strSeparador) {
+		global $config, $crlf;
 
-	public function getTabla($name) {
-		return $this->tablas[$name];
+		$strSalida = '';
+
+		if ($tabla->isSubMenu) {
+			if ($submenu) {
+				$strSalida.= $strSubMenuFin;
+				$strSalida.= $strSeparador;
+			}
+
+			$submenu = true;
+
+			$strAux = str_replace("#titulo#", $tabla->titulo, $strSubMenuInicio);
+			$strAux = str_replace("#icono#", $tabla->icono, $strAux);
+			if ($tabla->url != '') {
+				$strAux = str_replace("#url#", $tabla->url, $strAux);
+			}
+			else {
+				$strAux = str_replace('href="#url#"', '', $strAux);
+			}
+
+			$strSalida.= $strAux;
+
+			$I++;
+		}
+		else {
+			if ($tabla->isSubItem) {
+				if ($tabla->menuIndex != 0 && $tabla->menuIndex != $I) {
+					$I++;
+					$strSalida.= $this->crearItemMenuAdic($I, $submenu, $strItem, true, $strSubMenuInicio, $strSubMenuFin, $strSubItem, $strSeparador);
+				}
+
+				$strAux = str_replace("#titulo#", $tabla->titulo, $strSubItem);
+				$strAux = str_replace("#icono#", $tabla->icono, $strAux);
+				if ($tabla->url != '') {
+					$strAux = str_replace("#url#", $tabla->url, $strAux);
+				}
+				else {
+					$strAux = str_replace('href="#url#"', '', $strAux);
+				}
+
+				$strSalida.= $strAux;
+				$strSalida.= $strSeparador;
+
+			}
+			else {
+				if ($submenu) {
+					$strSalida.= $strSubMenuFin;
+					$strSalida.= $strSeparador;
+					$submenu = false;
+				}
+
+				$strAux = str_replace("#titulo#", $tabla->titulo, $strItem);
+				$strAux = str_replace("#icono#", $tabla->icono, $strAux);
+				if ($tabla->url != '') {
+					$strAux = str_replace("#url#", $tabla->url, $strAux);
+				}
+				else {
+					$strAux = str_replace('href="#url#"', '', $strAux);
+				}
+
+				$strSalida.= $strAux;
+				$strSalida.= $strSeparador;
+
+				$I++;
+			}
+		}
+
+		return $strSalida;
 	}
 
+	/**
+	 * Crea un item de menu proveniente del objeto VectorForms
+	 */
+	protected function crearItemMenuAdic(&$I, &$submenu, $blnCheckIndex = true, $strItem, $strSubMenuInicio, $strSubMenuFin, $strSubItem, $strSeparador) {
+		global $config, $crlf;
+
+		$strSalida = '';
+
+		foreach ($this->menuItems as $item) {
+			if (!$item->Used) {
+				if ($item->NumeCarg !== '') {
+					$numeCarg = intval($this->buscarDato("SELECT NumeCarg FROM ".$config->tbLogin." WHERE NumeUser = ". $_SESSION["NumeUser"]));
+
+					if (intval($item->NumeCarg) < $numeCarg) {
+						continue;
+					}
+				}
+
+				if (intval($item->Index) == $I || !$blnCheckIndex) {
+					if ($item->Submenu) {
+						if ($submenu) {
+							$strSalida.= $strSubMenuFin;
+							$strSalida.= $strSeparador;
+						}
+
+						$submenu = true;
+
+						$strAux = str_replace("#titulo#", $item->Titulo, $strSubMenuInicio);
+						$strAux = str_replace("#icono#", $item->Icono, $strAux);
+						if ($item->Url != '') {
+							$strAux = str_replace("#url#", $item->Url, $strAux);
+						}
+						else {
+							$strAux = str_replace('href="#url#"', '', $strAux);
+						}
+
+						$strSalida.= $strAux;
+
+						$item->Used = true;
+					}
+					else {
+						if ($item->Subitem) {
+							$strAux = str_replace("#titulo#", $item->Titulo, $strSubItem);
+							$strAux = str_replace("#icono#", $item->Icono, $strAux);
+							if ($item->Url != '') {
+								$strAux = str_replace("#url#", $item->Url, $strAux);
+							}
+							else {
+								$strAux = str_replace('href="#url#"', '', $strAux);
+							}
+
+							$strSalida.= $strAux;
+							$strSalida.= $strSeparador;
+
+							$item->Used = true;
+						}
+						else {
+							if ($submenu) {
+								$strSalida.= $strSubMenuFin;
+								$strSalida.= $strSeparador;
+								$submenu = false;
+							}
+
+							$strAux = str_replace("#titulo#", $item->Titulo, $strItem);
+							$strAux = str_replace("#icono#", $item->Icono, $strAux);
+
+							if ($item->Url != '') {
+								$strAux = str_replace("#url#", $item->Url, $strAux);
+							}
+							else {
+								$strAux = str_replace('href="#url#"', '', $strAux);
+							}
+
+							$strSalida.= $strAux;
+							$strSalida.= $strSeparador;
+
+							$item->Used = true;
+
+							if ($blnCheckIndex) {
+								$I++;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return $strSalida;
+	}
+
+	/**
+	 * Obtiene objeto Tabla
+	 * @param string $name
+	 * @return Tabla|null
+	 */
+	public function getTabla($name) {
+		if (isset($this->tablas[$name])) {
+			return $this->tablas[$name];
+		}
+		else {
+			return null;
+		}
+	}
+
+	/**
+	 * Obtiene string aleatorio
+	 */
 	public function get_random_string($valid_chars, $length)
 	{
 		// start with an empty random string
@@ -429,8 +542,41 @@ class VectorForms {
 		// return our finished random string
 		return $random_string;
 	}
+
+	/**
+	 * Insert a value or key/value pair after a specific key in an array.  If key doesn't exist, value is appended
+	 * to the end of the array.
+	 *
+	 * @param array $array
+	 * @param string $key
+	 * @param array $new
+	 *
+	 * @return array
+	 */
+	public function array_insert_after( array $array, $key, array $new ) {
+		$keys = array_keys( $array );
+		$index = array_search( $key, $keys );
+		$pos = false === $index ? count( $array ) : $index + 1;
+
+		return array_merge( array_slice( $array, 0, $pos ), $new, array_slice( $array, $pos ) );
+	}
+
+	/**
+	 * Leer Configuración
+	 *
+	 * @param string $nombConf
+	 */
+	public function getConfig($nombConf) {
+		return $this->buscarDato("SELECT ValoConf FROM configuraciones WHERE NombConf = '{$nombConf}'");
+	}
 }
 
+/**
+ * Clase de item de menu
+ *
+ * @author Vector-IT
+ *
+ */
 class MenuItem {
 	public $Titulo;
 	public $Url;
@@ -460,6 +606,115 @@ class MenuItem {
 		$this->Submenu = $submenu;
 		$this->Subitem = $subitem;
 		$this->Used = false;
+	}
+}
+
+/**
+ * Clase btnListItem
+ * Item de lista de botones en el registro de una tabla
+ */
+class btnListItem {
+	public $id;
+	public $titulo;
+	public $texto;
+	public $class;
+	public $type;
+	public $href;
+	public $onclick;
+	public $numeCarg;
+	public $cond;
+	public $attribs;
+
+	/**
+	 * Constructor
+	 *
+	 * @param string $id
+	 * @param string $titulo - Titulo de la columna
+	 * @param string $texto - Texto del botón
+	 * @param string $class - clase de css
+	 * @param string $type - Tipo de boton (a, button)
+	 * @param string $href - URL del link
+	 * @param string $onclick - Evento OnClick
+	 * @param string $attribs - Atributos
+	 */
+	public function __construct($id, $titulo, $texto, $class='btn-secondary', $type='button', $href='', $onclick='', $numeCarg = '', $cond = 'return true;', $attribs = '') {
+		$this->id = $id;
+		$this->titulo = $titulo;
+		$this->texto = $texto;
+		$this->class = $class;
+		$this->type = $type;
+		$this->href = $href;
+		$this->onclick = $onclick;
+		$this->numeCarg = $numeCarg;
+		$this->cond = $cond;
+		$this->attribs = $attribs;
+	}
+}
+
+/**
+ * Clase de para setear los campos footer
+ */
+class FooterField {
+	public $name;
+	public $funcion;
+	public $col;
+	public $count;
+	public $value;
+	public $cond;
+
+	/**
+	 * Constructor
+	 *
+	 * @param string $name - Nombre
+	 * @param string $funcion - Funcion de agrupamiento (COUNT, SUM, /AVG)
+	 * @param boolean $esMoneda - Booleano si el campo es o no moneda
+	 */
+	public function __construct($name, $funcion = 'SUM', $cond = '') {
+		$this->name = $name;
+		$this->funcion = $funcion;
+		$this->cond = $cond;
+
+		$this->count = 0;
+		$this->value = 0;
+	}
+}
+
+/**
+ * Clase de campo busqueda
+ *
+ * @author Vector-IT
+ *
+ */
+class SearchField {
+	public $name;
+	public $searchName;
+	public $operator;
+	public $join;
+	public $conBuscador;
+	public $label;
+	public $value;
+	public $controlAlias;
+	public $type;
+
+	/**
+	 * Constructor
+	 *
+	 * @param string $name - Nombre
+	 * @param string $searchName - Expresion SQL
+	 * @param string $operator - Operador de comparación (=)
+	 * @param string $join - Operador de encadenamiento con otros filtros (AND)
+	 * @param string $type - Tipo de campo de busqueda
+	 */
+	public function __construct($name, $operator = '=', $join = 'AND', $searchName = '', $conBuscador = false, $label = null, $value = null, $controlAlias = null, $type = null) {
+		$this->name = $name;
+		$this->operator = $operator;
+		$this->join = $join;
+		$this->searchName = ($searchName != ''? $searchName: $name);
+		$this->conBuscador = $conBuscador;
+		$this->label = $label;
+		$this->value = $value;
+		$this->controlAlias = $controlAlias;
+		$this->type = $type;
 	}
 }
 ?>

@@ -10,7 +10,7 @@ class CuotaPago extends Tabla
         switch ($post['field']) {
             case "NumeEsta":
                 $result = $config->ejecutarCMD("UPDATE cuotaspagos SET NumeEsta = NOT NumeEsta WHERE NumePago = ". $post["dato"]["NumePago"]);
-                
+
                 $cuota = $config->buscarDato("SELECT SUM(ImpoCuot + ImpoOtro) FROM cuotas WHERE CodiIden = ".$post["dato"]["CodiIden"]);
                 $pagos = $config->buscardato("SELECT SUM(ImpoPago) FROM cuotaspagos WHERE NumeEsta = 1 AND CodiIden = ".$post["dato"]["CodiIden"]);
                 $saldo = $cuota - $pagos;
@@ -48,7 +48,7 @@ class CuotaPago extends Tabla
 
     public function insertar($datos) {
         Global $config;
-        
+
         $result = parent::insertar($datos);
 
         $cuota = $config->buscarDato("SELECT SUM(ImpoCuot + ImpoOtro) FROM cuotas WHERE CodiIden = ".$datos["CodiIden"]);
@@ -76,7 +76,7 @@ class CuotaPago extends Tabla
         return $result;
     }
 
-    public function listar($strFiltro = "", $conBotones = true, $btnList = [], $order = '')
+    public function listar($strFiltro = "", $conBotones = true, $btnList = [], $order = '', $pagina = 1, $strFiltroSQL = '', $conCheckboxes = false)
     {
         global $config, $crlf;
 

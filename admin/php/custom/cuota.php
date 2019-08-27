@@ -6,7 +6,7 @@ class Cuota extends Tabla
     public function customFunc($post)
     {
         global $config;
-        
+
         switch ($post['field']) {
             case "ImpoPago":
                 return $config->buscarDato("SELECT COALESCE(SUM(ImpoPago), 0) FROM cuotaspagos WHERE NumeEsta = 1 AND CodiIden = ". $post["dato"]);
@@ -14,7 +14,7 @@ class Cuota extends Tabla
         }
     }
 
-    public function editar($datos)
+    public function editar($datos, $idViejo)
     {
         global $config;
 
@@ -52,8 +52,8 @@ class Cuota extends Tabla
 
         return $result;
     }
-    
-    public function listar($strFiltro = "", $conBotones = true, $btnList = [], $order = '')
+
+    public function listar($strFiltro = "", $conBotones = true, $btnList = [], $order = '', $pagina = 1, $strFiltroSQL = '', $conCheckboxes = false)
     {
         global $config, $crlf;
 

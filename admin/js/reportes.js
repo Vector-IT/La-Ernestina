@@ -1,54 +1,76 @@
-$(document).ready(function () {
-    $("#actualizando").hide();
-
-    $("#frmReportes").submit(function() {
-        aceptar();
-    });
-});
+var $;
+$( document ).ready( function() {
+	$('#frmReportes').submit( function() {
+		aceptar();
+	} );
+} );
 
 function buscarParametros() {
-    if ($("#NumeRepo").val() == "") {
-        $("#divParametros").html("");
-        $("#btnAceptar").addClass("hide");
-    }
-    else {
-        $("#actualizando").show();
+	if ( $('#NumeRepo').val() === '') {
+		$('#divParametros').html('');
+		$('#btnAceptar').hide();
+	} else {
+		actualizando();
 
-        $.post("php/reportes.php",
-            {
-                "operacion": 1, 
-                "NumeRepo": $("#NumeRepo").val()            
-            },
-            function (data, textStatus, jqXHR) {
-                $("#actualizando").hide();
-                $("#btnAceptar").removeClass("hide");
+		$.post('php/reportes.php',
+			{
+				'operacion': 1,
+				'NumeRepo': $('#NumeRepo').val()
+			},
+			function(data) {
+				data = JSON.parse(data);
 
-                $("#divParametros").html(data);
-            },
-            "html"
-        );
-    }
+				divActualizando.close();
+				$('#btnAceptar').show();
+
+				$('#divParametros').html(data.html);
+			},
+			'html'
+		);
+	}
 }
 
 function aceptar() {
-    $("#actualizando").show();
+	actualizando();
 
-    var params = [];
-    $("#divParametros input").each(function() {
-        params.push(this.value);
-    });
+	var params = [];
+	$('#divParametros .form-control').each(function() {
+		params.push(this.value);
+	} );
 
-    $.post("php/reportes.php",
-        {
-            "operacion": 2, 
-            "NumeRepo": $("#NumeRepo").val(),
-            "Params": params
-        },
-        function (data, textStatus, jqXHR) {
-            $("#actualizando").hide();
+	$.ajax({
+		type: 'get',
+		url: 'php/reportes.php',
+		data: {
+			'operacion': 2,
+			'NumeRepo': $('#NumeRepo').val(),
+			'Params': params
+		},
+		success: function(response) {
+			divActualizando.close();
 
-            $("#divDatos").html(data);
-        },
-        "html"
-    );
+			$('#divDatos').html(response.html);
+
+			if (response.sql != undefined) {
+				console.log(response.sql);
+			}
+
+			$('#frmReportes').fadeToggle();
+			$('#btnVerFiltros').fadeToggle();
+		},
+		async: true
+	});
+}
+
+function exportarExcel() {
+	$('#tblReporte').table2excel({
+		exclude: '.noXLS',
+		name: $('#txtTitulo').text(),
+		filename: $('#txtTitulo').text()
+	});
+}
+
+function verFiltros() {
+	$('#frmReportes').fadeToggle();
+	$('#btnVerFiltros').fadeToggle();
 }
