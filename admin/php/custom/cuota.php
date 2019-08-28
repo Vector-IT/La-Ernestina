@@ -61,8 +61,10 @@ class Cuota extends Tabla
         $pagos = $config->buscardato("SELECT COALESCE(SUM(ImpoPago), 0) FROM cuotaspagos WHERE NumeEsta = 1 AND CodiIden IN (SELECT CodiIden FROM cuotas WHERE NumeLote = ".$_REQUEST[$this->masterFieldId].")");
         $saldo = number_format($cuotas - $pagos, 2, ".", "");
 
-        echo $crlf.'<h4 id="txtSaldo" class="well well-sm text-right">Saldo: <span class="txtRojo">$ '.$saldo.'</span></h4>';
-        parent::listar($strFiltro, $conBotones, $btnList, $order);
-        echo $crlf.'<h4 id="txtSaldo" class="well well-sm text-right">Saldo: <span class="txtRojo">$ '.$saldo.'</span></h4>';
+		$salida = parent::listar($strFiltro, $conBotones, $btnList, $order);
+		$salida['html'] = $crlf.'<h4 id="txtSaldo" class="well well-sm text-right">Saldo: <span class="txtRojo">$ '.$saldo.'</span></h4>'. $salida['html'];
+		$salida['html'].= $crlf.'<h4 id="txtSaldo" class="well well-sm text-right">Saldo: <span class="txtRojo">$ '.$saldo.'</span></h4>';
+
+		return $salida;
     }
 }

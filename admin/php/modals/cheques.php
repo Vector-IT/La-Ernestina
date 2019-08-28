@@ -1,1 +1,1 @@
-<a id="modalCheques" data-fancybox data-src="objeto/cheques&menu=0&header=0" href="javascript:;" class="hide">Cheques</a>
+<a id="modalCheques" data-fancybox data-src="objeto/cheques.php?menu=0&header=0" href="javascript:;" class="d-none">Cheques</a>

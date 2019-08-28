@@ -203,24 +203,14 @@
 	$tabla->labelField = "NombLote";
 	$tabla->allowDelete = false;
 
-	$tabla->searchFields = [array("name"=> "NombLote", "operator"=>"=", "join"=>"and")];
+	$tabla->searchFields = [
+		new SearchField('NombLote', 'LIKE')
+	];
 
 	$tabla->btnList = [
-			array(
-				"id"=> "btnAsigClie",
-				"titulo"=> '<i class="fa fa-id-card-o fa-fw" aria-hidden="true"></i> Asignar Cliente',
-				"onclick"=> "asignarCliente",
-				"class"=> "btn-primary"),
-			array(
-				"id"=> "btnBorrClie",
-				"titulo"=> '<i class="fa fa-times fa-fw" aria-hidden="true"></i> Borrar Cliente',
-				"onclick"=> "borrarCliente",
-				"class"=> "btn-danger"),
-			array(
-				"id"=> "btnVerCuot",
-				"titulo"=> 'Ver Cuotas',
-				"onclick"=> "verCuotas",
-				"class"=> "btn-default"),
+		new btnListItem('btnAsigClie', 'Asignar Cliente', '<i class="fa fa-id-card-o fa-fw"></i>', 'btn-primary', 'button', '', 'asignarCliente'),
+		new btnListItem('btnBorrClie', 'Borrar Cliente', '<i class="fa fa-times fa-fw"></i>', 'btn-danger', 'button', '', 'borrarCliente'),
+		new btnListItem('btnVerCuot', 'Ver Cuotas', '<i class="far fa-map"></i>', 'btn-secondary', 'button', '', 'verCuotas')
 	];
 
 	$tabla->jsFiles = ["admin/js/custom/lotes.js"];
@@ -228,7 +218,7 @@
 	$tabla->jsOnLoad = "cheqList();";
 	$tabla->jsOnList = "cheqList();";
 
-	$tabla->modalList = ["php/modals/loteCliente.php"];
+	$tabla->includeList = ["php/modals/loteCliente.php"];
 
 	$tabla->addFieldId("NumeLote", "Número de lote", true, true);
 	$tabla->addField("NombLote", "text", 100, "Nombre");
@@ -253,19 +243,14 @@
 	/**
 	 * CUOTAS
 	 */
-	$tabla = new Cuota("cuotas", "cuotas", "Cuotas", "la Cuota", false, "", "fa-map-o");
+	$tabla = new Cuota("cuotas", "cuotas", "Cuotas", "la Cuota", false, "", "far fa-map");
 	$tabla->labelField = "NumeCuot";
 	$tabla->masterTable = "lotes";
 	$tabla->masterFieldId = "NumeLote";
 	$tabla->masterFieldName = "NombLote";
 
 	$tabla->btnList = [
-		array(
-			"id"=>"btnPagos",
-			"titulo"=>"Ver Pagos",
-			"class"=>"btn-primary",
-			"onclick"=>"verPagos"
-		)
+		new btnListItem('btnPagos', 'Ver Pagos', '<i class="fas fa-cash-register fa-fw"></i>', 'btn-primary', 'button', '', 'verPagos')
 	];
 
 	$tabla->jsFiles = ["admin/js/custom/cuotas.js"];
@@ -310,7 +295,7 @@
 	/**
 	* CUOTASPAGOS
 	*/
-	$tabla = new CuotaPago("cuotaspagos", "cuotaspagos", "Pagos de la Cuota", "el pago", false, "", "fa-map-o");
+	$tabla = new CuotaPago("cuotaspagos", "cuotaspagos", "Pagos de la Cuota", "el pago", false, "", "fas fa-cash-register");
 	$tabla->masterTable = "cuotas";
 	$tabla->masterFieldId = "CodiIden";
 	$tabla->masterFieldName = "NumeCuot";
@@ -318,23 +303,14 @@
 	$tabla->allowDelete = false;
 
 	$tabla->btnForm = [
-		array(
-			"titulo"=> '<i class="fa fa-credit-card fa-fw" aria-hidden="true"></i> Cheques',
-			"class"=> 'btn-primary',
-			"onclick"=> "abrirCheques();"
-		)
+		new btnListItem('btnCheques', '', '<i class="fa fa-credit-card fa-fw"></i> Cheques', 'btn-primary', 'button', '', 'abrirCheques();')
 	];
 
 	$tabla->btnList = [
-		array(
-			"id"=>'btnCambiarEstado',
-			"titulo"=>"Cambiar Estado",
-			"class"=>"btn-danger",
-			"onclick"=>"cambiarEstado"
-		)
+		new btnListItem('btnCambiarEstado', 'Cambiar Estado', '<i class="fas fa-retweet fa-fw"></i>', 'btn-warning', 'button', '', 'cambiarEstado')
 	];
 
-	$tabla->modalList = ["php/modals/cheques.php"];
+	$tabla->includeList = ["php/modals/cheques.php"];
 
 	$tabla->jsFiles = [
 		"admin/js/custom/cuotaspagos.js",
@@ -391,12 +367,7 @@
 	$tabla->jsOnList = "verEstado();";
 
 	$tabla->btnList = [
-		array(
-			"id"=>'btnCambiarEstado',
-			"titulo"=>"Cambiar Estado",
-			"class"=>"btn-danger",
-			"onclick"=>"cambiarEstado"
-		)
+		new btnListItem('btnCambiarEstado', 'Cambiar Estado', '<i class="fas fa-retweet fa-fw"></i>', 'btn-warning', 'button', '', 'cambiarEstado')
 	];
 
 	$tabla->addFieldId("NumeInde", "", true, true);
@@ -417,17 +388,9 @@
 	$tabla = new Tabla("clientes", "clientes", "Clientes", "el Cliente", true, "objeto/clientes.php", "far fa-id-card");
 	$tabla->labelField = "NombClie";
 
-	$tabla->searchFields = [array("name"=> "NombClie", "operator"=>"=", "join"=>"and")];
-
-	// $tabla->btnList = [
-	// 		array(
-	// 			"id"=>"btnVerClie",
-	// 			"titulo"=> 'Ficha',
-	// 			"onclick"=> "verCliente",
-	// 			"class"=> "btn-default"),
-	// ];
-
-	//$tabla->jsFiles = ['admin/js/custom/clientes.js'];
+	$tabla->searchFields = [
+		new SearchField('NombClie', 'LIKE')
+	];
 
 	$tabla->addField("NumeClie", "number", 0, "Numero", false, true, true);
 	$tabla->fields["NumeClie"]["isHiddenInForm"] = true;
@@ -480,12 +443,7 @@
 	$tabla->allowDelete = false;
 
 	$tabla->btnList = [
-		array(
-			"id"=>'btnCambiarEstado',
-			"titulo"=>"Cambiar Estado",
-			"class"=>"btn-danger",
-			"onclick"=>"cambiarEstado"
-		)
+		new btnListItem('btnCambiarEstado', 'Cambiar estado', '<i class="fas fa-retweet fa-fw"></i>', 'btn-warning', 'button', '', 'cambiarEstado')
 	];
 
 	$tabla->jsFiles = ["admin/js/custom/cheques.js"];

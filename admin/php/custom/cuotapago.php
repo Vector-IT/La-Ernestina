@@ -84,7 +84,9 @@ class CuotaPago extends Tabla
         $pagos = $config->buscardato("SELECT SUM(ImpoPago) FROM cuotaspagos WHERE NumeEsta = 1 AND CodiIden = ".$_REQUEST[$this->masterFieldId]);
         $saldo = number_format($cuota - $pagos, 2, ".", "");
 
-        echo $crlf.'<h4 class="well well-sm text-right">Saldo: <span class="txtRojo">$ <span id="txtSaldo">'.$saldo.'</span></span></h4>';
-        parent::listar($strFiltro, $conBotones, $btnList, $order);
+        $salida = parent::listar($strFiltro, $conBotones, $btnList, $order);
+		$salida['html'] = '<h4 class="well well-sm text-right">Saldo: <span class="txtRojo">$ <span id="txtSaldo">'.$saldo.'</span></span></h4>' . $salida['html'];
+
+		return $salida;
     }
 }
