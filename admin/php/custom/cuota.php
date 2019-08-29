@@ -20,35 +20,35 @@ class Cuota extends Tabla
 
         $result = parent::editar($datos);
 
-        $numeLote = $config->buscarDato("SELECT NumeLote FROM cuotas WHERE CodiIden = ". $datos["CodiIden"]);
+        $numeProd = $config->buscarDato("SELECT NumeProd FROM cuotas WHERE CodiIden = ". $datos["CodiIden"]);
 
-        $total = intval($config->buscarDato("SELECT COUNT(*) FROM cuotas WHERE NumeLote = ".$numeLote));
-        $pagadas = intval($config->buscarDato("SELECT COUNT(*) FROM cuotas WHERE NumeLote = ".$numeLote." AND NumeEstaCuot = 3"));
-        $pagoparcial = intval($config->buscarDato("SELECT COUNT(*) FROM cuotas WHERE NumeLote = ".$numeLote." AND NumeEstaCuot = 2"));
+        $total = intval($config->buscarDato("SELECT COUNT(*) FROM cuotas WHERE NumeProd = ".$numeProd));
+        $pagadas = intval($config->buscarDato("SELECT COUNT(*) FROM cuotas WHERE NumeProd = ".$numeProd." AND NumeEstaCuot = 3"));
+        $pagoparcial = intval($config->buscarDato("SELECT COUNT(*) FROM cuotas WHERE NumeProd = ".$numeProd." AND NumeEstaCuot = 2"));
 
         $datos2 = [];
-        $datos2["NumeLote"] = $numeLote;
+        $datos2["NumeProd"] = $numeProd;
 
         $saldo = $total - $pagadas - $pagoparcial;
 
         if ($saldo == 0) {
             if ($pagoparcial == 0) { //TODAS PAGADAS
-                $datos2["NumeEstaLote"] = "4";
+                $datos2["NumeEstaProd"] = "4";
             }
             else {
-                $datos2["NumeEstaLote"] = "3";
+                $datos2["NumeEstaProd"] = "3";
             }
         }
         else {
             if (($pagadas + $pagoparcial) <= 1) {
-                $datos2["NumeEstaLote"] = "2";
+                $datos2["NumeEstaProd"] = "2";
             }
             else {
-                $datos2["NumeEstaLote"] = "3";
+                $datos2["NumeEstaProd"] = "3";
             }
         }
-        $lote = $config->getTabla("lotes");
-        $lote->editar($datos2);
+        $producto = $config->getTabla("productos");
+        $producto->editar($datos2);
 
         return $result;
     }
@@ -57,8 +57,8 @@ class Cuota extends Tabla
     {
         global $config, $crlf;
 
-        $cuotas = $config->buscarDato("SELECT SUM(ImpoCuot + ImpoOtro) FROM cuotas WHERE NumeLote = ".$_REQUEST[$this->masterFieldId]);
-        $pagos = $config->buscardato("SELECT COALESCE(SUM(ImpoPago), 0) FROM cuotaspagos WHERE NumeEsta = 1 AND CodiIden IN (SELECT CodiIden FROM cuotas WHERE NumeLote = ".$_REQUEST[$this->masterFieldId].")");
+        $cuotas = $config->buscarDato("SELECT SUM(ImpoCuot + ImpoOtro) FROM cuotas WHERE NumeProd = ".$_REQUEST[$this->masterFieldId]);
+        $pagos = $config->buscardato("SELECT COALESCE(SUM(ImpoPago), 0) FROM cuotaspagos WHERE NumeEsta = 1 AND CodiIden IN (SELECT CodiIden FROM cuotas WHERE NumeProd = ".$_REQUEST[$this->masterFieldId].")");
         $saldo = number_format($cuotas - $pagos, 2, ".", "");
 
 		$salida = parent::listar($strFiltro, $conBotones, $btnList, $order);

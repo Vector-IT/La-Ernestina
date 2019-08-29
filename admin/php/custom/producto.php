@@ -1,34 +1,34 @@
 <?php
 namespace VectorForms;
 
-class Lote extends Tabla
+class Producto extends Tabla
 {
     public function customFunc($post)
     {
         global $config;
-        
+
         switch ($post['field']) {
             case "Asignar Cliente":
-                $numeLote = $post["dato"]["NumeLote"];
+                $numeProd = $post["dato"]["NumeProd"];
                 $numeClie = $post["dato"]["NumeClie"];
-                $valoLote = floatval($config->buscarDato("SELECT ValoLote FROM lotes WHERE NumeLote = ". $numeLote));
+                $valoProd = floatval($config->buscarDato("SELECT ValoProd FROM productos WHERE NumeProd = ". $numeProd));
                 $impoAnti = floatval($post["dato"]["ImpoAnti"]);
                 $cantCuot = intval($post["dato"]["CantCuot"]);
                 $fechInic = $post["dato"]["FechInic"];
 
                 $cuotExtr = (isset($post["dato"]["CuotExtr"]) ? $post["dato"]["CuotExtr"] : []);
 
-                if ($impoAnti < $valoLote) {
+                if ($impoAnti < $valoProd) {
                     $numeEsta = "2";
                 } else {
                     $numeEsta = "4";
                     $cantCuot = "0";
                 }
-                
-                $result = $config->ejecutarCMD("UPDATE lotes SET NumeEstaLote = ".$numeEsta.", NumeClie = ".$numeClie.", CantCuot = ".$cantCuot." WHERE NumeLote = ". $numeLote);
+
+                $result = $config->ejecutarCMD("UPDATE productos SET NumeEstaProd = ".$numeEsta.", NumeClie = ".$numeClie.", CantCuot = ".$cantCuot." WHERE NumeProd = ". $numeProd);
 
                 $cuota = $config->getTabla("cuotas");
-                
+
                 $fecha = new \DateTime($fechInic);
 
                 //Creo el anticipo
@@ -36,7 +36,7 @@ class Lote extends Tabla
                     "CodiIden"=>"",
                     "NumeCuot"=>"0",
                     "FechCuot"=>$fecha->format("Y-m-d"),
-                    "NumeLote"=>$numeLote,
+                    "NumeProd"=>$numeProd,
                     "NumeTipoCuot"=>"1",
                     "FechVenc"=>$fecha->format("Y-m-d"),
                     "ImpoCuot"=>$impoAnti,
@@ -48,12 +48,12 @@ class Lote extends Tabla
                 //Creo las cuotas extraordinarias
                 foreach($cuotExtr as $value) {
                     $impoAnti+= $value;
-                    
+
                     $datos = array(
                         "CodiIden"=>"",
                         "NumeCuot"=>"0",
                         "FechCuot"=>$fecha->format("Y-m-d"),
-                        "NumeLote"=>$numeLote,
+                        "NumeProd"=>$numeProd,
                         "NumeTipoCuot"=>"3",
                         "FechVenc"=>$fecha->format("Y-m-d"),
                         "ImpoCuot"=>$value,
@@ -65,9 +65,9 @@ class Lote extends Tabla
 
                 //Creo las cuotas
                 if (intval($cantCuot) > 0) {
-                    $saldo = $valoLote - $impoAnti;
+                    $saldo = $valoProd - $impoAnti;
                     $impoCuot = number_format($saldo / $cantCuot, 2, ".", "");
-                    
+
                     $fechVenc = new \DateTime($fecha->format("Y-m-"). "10");
 
                     for ($numeCuot = 1; $numeCuot <= $cantCuot; $numeCuot++) {
@@ -77,7 +77,7 @@ class Lote extends Tabla
                             "CodiIden"=>"",
                             "NumeCuot"=>$numeCuot,
                             "FechCuot"=>$fecha->format("Y-m-d"),
-                            "NumeLote"=>$numeLote,
+                            "NumeProd"=>$numeProd,
                             "NumeTipoCuot"=>"2",
                             "FechVenc"=>$fechVenc->format("Y-m-d"),
                             "ImpoCuot"=>$impoCuot,
@@ -90,13 +90,13 @@ class Lote extends Tabla
 
                 return $result;
                 break;
-                
-            case "Borrar Cliente":
-                $numeLote = $post["dato"]["NumeLote"];
 
-                $config->ejecutarCMD("DELETE FROM cuotaspagos WHERE CodiIden IN (SELECT CodiIden FROM cuotas WHERE NumeLote = ". $numeLote .")");
-                $config->ejecutarCMD("DELETE FROM cuotas WHERE NumeLote = ". $numeLote);
-                $result = $config->ejecutarCMD("UPDATE lotes SET NumeEstaLote = 1, NumeClie = null, CantCuot = null WHERE NumeLote = ". $numeLote);
+            case "Borrar Cliente":
+                $numeProd = $post["dato"]["NumeProd"];
+
+                $config->ejecutarCMD("DELETE FROM cuotaspagos WHERE CodiIden IN (SELECT CodiIden FROM cuotas WHERE NumeProd = ". $numeProd .")");
+                $config->ejecutarCMD("DELETE FROM cuotas WHERE NumeProd = ". $numeProd);
+                $result = $config->ejecutarCMD("UPDATE productos SET NumeEstaProd = 1, NumeClie = null, CantCuot = null WHERE NumeProd = ". $numeProd);
 
                 return $result;
                 break;

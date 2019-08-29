@@ -4,11 +4,11 @@
 			<form class="form-horizontal" method="post" onsubmit="cerrarModal();">
 				<div class="modal-header">
 					<!--<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>-->
-					<h4 class="modal-title">Asignar cliente al lote <span id="txtNombLote"></span></h4>
+					<h4 class="modal-title">Asignar cliente al producto <span id="txtNombProd"></span></h4>
 				</div>
 
 				<div class="modal-body">
-                    <input type="hidden" id="hdnNumeLote">
+                    <input type="hidden" id="hdnNumeProd">
 
 					<div class="form-group form-group-sm">
 						<label for="NumeClie" class="control-label col-md-2">Cliente:</label>

@@ -8,7 +8,7 @@
 	require_once 'vectorForms.php';
 
 	require_once 'custom/caja.php';
-	require_once 'custom/lote.php';
+	require_once 'custom/producto.php';
 	require_once 'custom/cuota.php';
 	require_once 'custom/cuotapago.php';
 	require_once 'custom/cheque.php';
@@ -18,7 +18,7 @@
 	$crlf = "\n";
 
 	//Datos de configuracion iniciales
-	$config = new VectorForms($dbhost, $dbschema, $dbuser, $dbpass, $raiz, "La Ernestina", "img/logo.png", true);
+	$config = new VectorForms($dbhost, $dbschema, $dbuser, $dbpass, $raiz, "Sistema", "", true);
 	$config->tbLogin = 'usuarios';
 	// $config->theme = 'dark';
 
@@ -118,17 +118,17 @@
 	$config->tablas["tipospagos"] = $tabla;
 
 	/**
-	 * ESTADOS LOTES
+	 * ESTADOS PRODUCTOS
 	 */
-	$tabla = new Tabla("estadoslotes", "estadoslotes", "Estados de lotes", "el Estado", false, "objeto/estadoslotes.php", "fa-wrench");
-	$tabla->labelField = "NombEstaLote";
+	$tabla = new Tabla("estadosproductos", "estadosproductos", "Estados de productos", "el Estado", false, "objeto/estadosproductos.php", "fa-wrench");
+	$tabla->labelField = "NombEstaProd";
 	$tabla->isSubItem = true;
 
-	$tabla->addField("NumeEstaLote", "number", 0, "Número", false, true, true);
-	$tabla->addField("NombEstaLote", "text", 100, "Nombre");
-	$tabla->fields["NombEstaLote"]["cssControl"] = "ucase";
+	$tabla->addField("NumeEstaProd", "number", 0, "Número", false, true, true);
+	$tabla->addField("NombEstaProd", "text", 100, "Nombre");
+	$tabla->fields["NombEstaProd"]["cssControl"] = "ucase";
 
-	$config->tablas["estadoslotes"] = $tabla;
+	$config->tablas["estadosproductos"] = $tabla;
 
 	/**
 	 * PROVINCIAS
@@ -197,14 +197,14 @@
 	$config->tablas["caja"] = $tabla;
 
 	/**
-	 * LOTES
+	 * PRODUCTOS
 	 */
-	$tabla = new Lote("lotes", "lotes", "Lotes", "el Lote", true, "objeto/lotes.php", "far fa-paper-plane", "NumeLote");
-	$tabla->labelField = "NombLote";
+	$tabla = new Producto("productos", "Productos", "Productos", "el Producto", true, "objeto/productos.php", "far fa-paper-plane", "NumeProd");
+	$tabla->labelField = "NombProd";
 	$tabla->allowDelete = false;
 
 	$tabla->searchFields = [
-		new SearchField('NombLote', 'LIKE')
+		new SearchField('NombProd', 'LIKE')
 	];
 
 	$tabla->btnList = [
@@ -213,23 +213,21 @@
 		new btnListItem('btnVerCuot', 'Ver Cuotas', '<i class="far fa-map"></i>', 'btn-secondary', 'button', '', 'verCuotas')
 	];
 
-	$tabla->jsFiles = ["admin/js/custom/lotes.js"];
+	$tabla->jsFiles = ["admin/js/custom/productos.js"];
 
 	$tabla->jsOnLoad = "cheqList();";
 	$tabla->jsOnList = "cheqList();";
 
-	$tabla->includeList = ["php/modals/loteCliente.php"];
+	$tabla->includeList = ["php/modals/prodCliente.php"];
 
-	$tabla->addFieldId("NumeLote", "Número de lote", true, true);
-	$tabla->addField("NombLote", "text", 100, "Nombre");
-	$tabla->addField("LoteCoor", "text", 80, "Coordenadas mapa", false);
-	$tabla->fields["LoteCoor"]["isHiddenInList"] = true;
+	$tabla->addFieldId("NumeProd", "Número de producto", true, true);
+	$tabla->addField("NombProd", "text", 100, "Nombre");
 
-	$tabla->addField("ValoLote", "number", 0, "Precio");
-	$tabla->fields["ValoLote"]["txtAlign"] = "right";
+	$tabla->addField("ValoProd", "number", 0, "Precio");
+	$tabla->fields["ValoProd"]["txtAlign"] = "right";
 
-	$tabla->addField("NumeEstaLote", "select", 0, "Estado", true, false, false, true, '1', '', 'estadoslotes', 'NumeEstaLote', 'NombEstaLote');
-	$tabla->fields["NumeEstaLote"]["showOnForm"] = false;
+	$tabla->addField("NumeEstaProd", "select", 0, "Estado", true, false, false, true, '1', '', 'estadosproductos', 'NumeEstaProd', 'NombEstaProd');
+	$tabla->fields["NumeEstaProd"]["showOnForm"] = false;
 
 	$tabla->addField("NumeClie", "select", 100, "Cliente", false, false, false, true, '', '', 'clientes', 'NumeClie', 'NombClie', 'NumeEsta = 1', 'NombClie');
 	$tabla->fields["NumeClie"]["showOnForm"] = false;
@@ -238,16 +236,16 @@
 	$tabla->fields["CantCuot"]["showOnForm"] = false;
 	$tabla->fields["CantCuot"]["txtAlign"] = "right";
 
-	$config->tablas["lotes"] = $tabla;
+	$config->tablas["productos"] = $tabla;
 
 	/**
 	 * CUOTAS
 	 */
 	$tabla = new Cuota("cuotas", "cuotas", "Cuotas", "la Cuota", false, "", "far fa-map");
 	$tabla->labelField = "NumeCuot";
-	$tabla->masterTable = "lotes";
-	$tabla->masterFieldId = "NumeLote";
-	$tabla->masterFieldName = "NombLote";
+	$tabla->masterTable = "productos";
+	$tabla->masterFieldId = "NumeProd";
+	$tabla->masterFieldName = "NombProd";
 
 	$tabla->btnList = [
 		new btnListItem('btnPagos', 'Ver Pagos', '<i class="fas fa-cash-register fa-fw"></i>', 'btn-primary', 'button', '', 'verPagos')
@@ -263,9 +261,9 @@
 	$tabla->addField("FechCuot", "date", 0, "Fecha de creación");
 	$tabla->fields["FechCuot"]["showOnForm"] = false;
 
-	$tabla->addField("NumeLote", "select", 0, "Lote", true, false, false, true, '', '', 'lotes', 'NumeLote', 'NombLote');
-	$tabla->fields["NumeLote"]["showOnForm"] = false;
-	$tabla->fields["NumeLote"]["showOnList"] = false;
+	$tabla->addField("NumeProd", "select", 0, "Producto", true, false, false, true, '', '', 'productos', 'NumeProd', 'NombProd');
+	$tabla->fields["NumeProd"]["showOnForm"] = false;
+	$tabla->fields["NumeProd"]["showOnList"] = false;
 
 	$tabla->addField("NumeTipoCuot", "select", 0, "Tipo", true, false, false, true, '', '', 'tiposcuotas', 'NumeTipoCuot', 'NombTipoCuot');
 	$tabla->fields["NumeTipoCuot"]["showOnForm"] = false;
