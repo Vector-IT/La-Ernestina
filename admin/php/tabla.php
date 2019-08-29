@@ -1811,13 +1811,13 @@ class Tabla
 				}
 
 				// EDITAR
-				global $item;
+				global $item, $itemFila;
 
 				if ($item != "") {
 					$strSalida.= $crlf.'	listar'. $this->tabladb .'("'. $item .'", {}, editar'. $this->tabladb .');';
 				}
 				else {
-					$strSalida.= $crlf.'	listar'. $this->tabladb .'();';
+					$strSalida.= $crlf.'	listar'. $this->tabladb .'("'. $itemFila .'");';
 				}
 			}
 		}

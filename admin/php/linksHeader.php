@@ -23,7 +23,7 @@
 		if (isset($_SESSION['Theme'])) {
 			echo $crlf.'<link rel="stylesheet" href="'.$config->raiz.'admin/css/bootstrap-'. $_SESSION["Theme"] .'.css?1">';
 		}
-		elseif (!isset($_SESSION['is_logged_in_'. $nombSistema])) {
+		if (!isset($_SESSION['is_logged_in_'. $nombSistema]) && basename($_SERVER['PHP_SELF']) == "login.php") {
 			echo $crlf.'<link rel="stylesheet" href="'.$config->raiz.'admin/css/bootstrap-dark.css?1">';
 		}
 	?>

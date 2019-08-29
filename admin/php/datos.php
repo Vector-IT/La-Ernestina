@@ -57,15 +57,34 @@
 	$tabla->numeCarg = 1;
 	$tabla->isSubItem = true;
 
-	$tabla->addField("NumeUser", "number", 0, "Número", false, true, true);
+	$tabla->btnList = [
+		new \VectorForms\btnListItem('btnResetPwd', 'Reset PWD', '<i class="fas fa-user-secret"></i>', 'btn-secondary', 'button', '', 'resetearPwd')
+	];
+
+	$tabla->addFieldId("NumeUser", "Número");
 	$tabla->addField("NombPers", "text", 200, "Nombre Completo");
 	$tabla->addField("NombUser", "text", 0, "Usuario");
-	$tabla->fields['NombUser']['classControl'] = "ucase";
+	$tabla->fields['NombUser']['attrControl'] = [
+		'onkeyup'=>'this.value = this.value.toUpperCase();'
+	];
 
 	$tabla->addField("NombPass", "password", 0, "Contraseña", true, false, false, false);
 	$tabla->fields["NombPass"]['isMD5'] = true;
-	$tabla->addField("NumeCarg", "select", 0, "Cargo", true, false, false, true, '', '', 'cargos', 'NumeCarg', 'NombCarg', '', 'NombCarg');
-	$tabla->addField("NumeEsta", "select", 0, "Estado", true, false, false, true, '1', '', 'estados', 'NumeEsta', 'NombEsta', '', 'NombEsta');
+
+	$tabla->addField("FechPass", "number", 0, "Ult. modificación de password");
+	$tabla->fields['FechPass']['showOnList'] = false;
+	$tabla->fields['FechPass']['showOnForm'] = false;
+
+	$tabla->addField('FlagExpiPass', 'checkbox', 0, 'Expiración de contraseña');
+
+	$tabla->addField("FechUltiEntr", "datetime", 0, "Ult. acceso al sistema");
+	$tabla->fields['FechUltiEntr']['showOnForm'] = false;
+
+	$tabla->addFieldSelect("NumeCarg", 40, "Cargo", true, '', 'cargos', '', 'NumeCarg', 'NombCarg', '', '', 'NombCarg');
+
+	$tabla->addFieldSelect("NumeEsta", 0, "Estado", true, '1', 'estados', '', 'NumeEsta', 'NombEsta', '', '', 'NombEsta');
+	$tabla->fields["NumeEsta"]["condFormat"] = 'return ($fila[$field["name"]] == 0);';
+	$tabla->fields["NumeEsta"]["classFormat"] = 'txtRed';
 
 	$config->tablas["usuarios"] = $tabla;
 
@@ -160,6 +179,19 @@
 	$config->tablas["tiposcaja"] = $tabla;
 
 	/**
+	 * TIPOS SEGUIMIENTOS
+	 */
+	$tabla = new Tabla("tiposseguimientos", "tiposseguimientos", "Tipos de Seguimiento", "el Tipo de Seguimiento", true, "objeto/tiposseguimientos.php", "fa-cog");
+	$tabla->labelField = "NombTipoSegu";
+	$tabla->numeCarg = 1;
+	$tabla->isSubItem = true;
+
+	$tabla->addFieldId("NumeTipoSegu", "Número");
+	$tabla->addField("NombTipoSegu", "text", 100, "Nombre");
+
+	$config->tablas["tiposseguimientos"] = $tabla;
+
+	/**
 	 * CAJA
 	 */
 	$tabla = new Caja("caja", "caja", "Caja", "el detalle", true, "objeto/caja.php", "fas fa-money-bill");
@@ -199,7 +231,7 @@
 	/**
 	 * PRODUCTOS
 	 */
-	$tabla = new Producto("productos", "Productos", "Productos", "el Producto", true, "objeto/productos.php", "far fa-paper-plane", "NumeProd");
+	$tabla = new Producto("productos", "productos", "Productos", "el Producto", true, "objeto/productos.php", "far fa-paper-plane", "NumeProd");
 	$tabla->labelField = "NombProd";
 	$tabla->allowDelete = false;
 
@@ -210,7 +242,9 @@
 	$tabla->btnList = [
 		new btnListItem('btnAsigClie', 'Asignar Cliente', '<i class="fa fa-id-card-o fa-fw"></i>', 'btn-primary', 'button', '', 'asignarCliente'),
 		new btnListItem('btnBorrClie', 'Borrar Cliente', '<i class="fa fa-times fa-fw"></i>', 'btn-danger', 'button', '', 'borrarCliente'),
-		new btnListItem('btnVerCuot', 'Ver Cuotas', '<i class="far fa-map"></i>', 'btn-secondary', 'button', '', 'verCuotas')
+		new btnListItem('btnVerCuot', 'Ver Cuotas', '<i class="far fa-map"></i>', 'btn-secondary', 'button', '', 'verCuotas'),
+		new btnListItem('btnVerSeguimientos', "Seguimientos", '<i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>', "btn-info", 'a', "objeto/seguimientos.php?NumeProd", ""),
+		new btnListItem('btnVerObligaciones', "Obligaciones", '<i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>', "btn-info", 'a', "objeto/obligaciones.php?NumeProd", "", '1'),
 	];
 
 	$tabla->jsFiles = ["admin/js/custom/productos.js"];
@@ -509,6 +543,82 @@
 
 	$config->tablas["cheques"] = $tabla;
 
+	/**
+	 * SEGUIMIENTOS DE PRODUCTOS
+	 */
+	$tabla = new Tabla("seguimientos", "seguimientos", "Seguimientos", "el registro", false, "objeto/seguimientos.php", "far fa-calendar-alt");
+	$tabla->masterTable = "productos";
+	$tabla->masterFieldId = "NumeProd";
+	$tabla->masterFieldIdMaster = "NumeProd";
+	$tabla->masterFieldName = "NombProd";
+	$tabla->order = "FechSegu";
+
+	$tabla->regUser = true;
+
+	$tabla->allowDelete = false;
+
+	// $tabla->btnForm = [
+	// 	new \VectorForms\btnListItem('btnVerProducto', 'Ver Producto', '<i class="far fa-file-alt"></i> Ver Producto', 'btn-info', 'button', '', "window.open('ver/productos.php?id=' + getVariable('NumeProd'));")
+	// ];
+
+	$tabla->addFieldId("NumeSegu", "Número", true, true);
+	$tabla->addField("NumeProd", "number", 0, "Producto");
+	$tabla->fields["NumeProd"]["isHiddenInList"] = true;
+	$tabla->fields["NumeProd"]["isHiddenInForm"] = true;
+
+	$tabla->addField("FechSegu", "date", 0, "Fecha");
+
+	$tabla->addFieldSelect("NumeUser", 0, 'Usuario', true, '', 'usuarios', '', 'NumeUser', 'NombPers');
+	$tabla->fields["NumeUser"]["showOnForm"] = false;
+
+	$tabla->addFieldSelect("NumeTipoSegu", 0, 'Tipo de seguimiento', true, '', 'tiposseguimientos', '', 'NumeTipoSegu', 'NombTipoSegu');
+
+	// $tabla->addFieldSelect("NumeEstaSegu", 0, "Estado", true, '', 'estadosseguimientos', '', 'NumeEstaSegu', 'NombEstaSegu', '', '', 'NombEstaSegu');
+	// $tabla->fields["NumeEstaSegu"]["condFormat"] = 'return ($fila[$field["name"]] == 0);';
+	// $tabla->fields["NumeEstaSegu"]["classFormat"] = 'txtRed';
+
+	$tabla->addField("ObseSegu", "textarea", 100, "Observaciones");
+
+	$config->tablas["seguimientos"] = $tabla;
+
+	/**
+	 * OBLIGACIONES DE PRODUCTOS
+	 */
+	$tabla = new Tabla("obligaciones", "obligaciones", "Obligaciones", "el registro", false, "objeto/obligaciones.php", "far fa-calendar-alt");
+	$tabla->masterTable = "productos";
+	$tabla->masterFieldId = "NumeProd";
+	$tabla->masterFieldIdMaster = "NumeProd";
+	$tabla->masterFieldName = "NombProd";
+	$tabla->order = "FechSegu";
+	$tabla->numeCarg = 1;
+
+	$tabla->regUser = true;
+
+	$tabla->allowDelete = false;
+
+	// $tabla->btnForm = [
+	// 	new \VectorForms\btnListItem('btnVerProducto', 'Ver Producto', '<i class="far fa-file-alt"></i> Ver Producto', 'btn-info', 'button', '', "window.open('ver/productos.php?id=' + getVariable('NumeProd'));")
+	// ];
+
+	$tabla->addFieldId("NumeObli", "Número", true, true);
+	$tabla->addField("NumeProd", "number", 0, "Producto");
+	$tabla->fields["NumeProd"]["isHiddenInList"] = true;
+	$tabla->fields["NumeProd"]["isHiddenInForm"] = true;
+
+	$tabla->addField("FechSegu", "date", 0, "Fecha");
+
+	$tabla->addFieldSelect("NumeUser", 0, 'Usuario', true, '', 'usuarios', '', 'NumeUser', 'NombPers');
+	$tabla->fields["NumeUser"]["showOnForm"] = false;
+
+	$tabla->addFieldSelect("NumeTipoSegu", 0, 'Tipo de obligacion', true, '', 'tiposseguimientos', '', 'NumeTipoSegu', 'NombTipoSegu');
+
+	// $tabla->addFieldSelect("NumeEstaSegu", 0, "Estado", true, '', 'estadosseguimientos', '', 'NumeEstaSegu', 'NombEstaSegu', '', '', 'NombEstaSegu');
+	// $tabla->fields["NumeEstaSegu"]["condFormat"] = 'return ($fila[$field["name"]] == 0);';
+	// $tabla->fields["NumeEstaSegu"]["classFormat"] = 'txtRed';
+
+	$tabla->addField("ObseSegu", "textarea", 100, "Observaciones");
+
+	$config->tablas["obligaciones"] = $tabla;
 
 	/**
 	 * ADMINISTRADOR DE REPORTES

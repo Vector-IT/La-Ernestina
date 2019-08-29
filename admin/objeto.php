@@ -33,6 +33,7 @@
 	            }
 
 	            (isset($_REQUEST["id"]))? $item = $_REQUEST["id"]: $item = "";
+	            (isset($_REQUEST["idFila"]))? $itemFila = $_REQUEST["idFila"]: $itemFila = "";
 	        } else {
 	            header($urlIndex);
 	            die();
