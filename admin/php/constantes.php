@@ -4,7 +4,7 @@
 	$tiempoSesion = 30;
 	$diasPassword = 90;
 
-	$nombSistema = "Roma-Motos";
+	$nombSistema = "CRM";
 
 	$formatDateDB = '%Y-%m-%d';
 	$formatDateJS = 'Y-MM-DD';

@@ -20,7 +20,7 @@ $(document).ready(function() {
 });
 
 function cambiarEstado(strID) {
-	$('#actualizando').show();
+	actualizando();
 
 	$.ajax({
 		type: 'POST',
@@ -33,18 +33,12 @@ function cambiarEstado(strID) {
 		},
 		success: function(data) {
 			if (data.valor === true) {
-				$('#txtHint').html('Datos actualizados!');
-				$('#divMsj').removeClass('alert-danger');
-				$('#divMsj').addClass('alert-success');
+				notifySuccess();
 
 				listarcheques();
 			} else {
-				$('#txtHint').html(data.valor);
-				$('#divMsj').removeClass('alert-success');
-				$('#divMsj').addClass('alert-danger');
+				notifyDanger({ Title: data.valor });
 			}
-			$('#actualizando').hide();
-			$('#divMsj').show();
 		},
 		async: true
 	});

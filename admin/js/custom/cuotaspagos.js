@@ -166,3 +166,29 @@ function validar() {
 
 	return true;
 }
+
+function calcularIntereses() {
+	actualizando();
+	var codiIden = getVariable('CodiIden');
+
+	$.post(
+		'php/tablaHandler.php',
+		{
+			operacion: '100',
+			tabla: 'cuotas',
+			field: 'CalcInterses',
+			CodiIden: codiIden
+		},
+		function(data) {
+			divActualizando.close();
+
+			if (data.valor === true) {
+				notifySuccess();
+
+				listarcuotaspagos();
+			} else {
+				notifyDanger();
+			}
+		}
+	);
+}

@@ -240,11 +240,9 @@
 	];
 
 	$tabla->btnList = [
-		new btnListItem('btnAsigClie', 'Asignar Cliente', '<i class="fa fa-id-card-o fa-fw"></i>', 'btn-primary', 'button', '', 'asignarCliente'),
+		new btnListItem('btnAsigClie', 'Asignar Cliente', '<i class="fas fa-plus-circle fa-fw"></i>', 'btn-success', 'button', '', 'asignarCliente'),
 		new btnListItem('btnBorrClie', 'Borrar Cliente', '<i class="fa fa-times fa-fw"></i>', 'btn-danger', 'button', '', 'borrarCliente'),
-		new btnListItem('btnVerCuot', 'Ver Cuotas', '<i class="far fa-map"></i>', 'btn-secondary', 'button', '', 'verCuotas'),
-		new btnListItem('btnVerSeguimientos', "Seguimientos", '<i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>', "btn-info", 'a', "objeto/seguimientos.php?NumeProd", ""),
-		new btnListItem('btnVerObligaciones', "Obligaciones", '<i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>', "btn-info", 'a', "objeto/obligaciones.php?NumeProd", "", '1'),
+		new btnListItem('btnVerCuot', 'Ver Cuotas', '<i class="far fa-map"></i>', 'btn-secondary', 'a', 'objeto/cuotas.php?NumeProd'),
 	];
 
 	$tabla->jsFiles = ["admin/js/custom/productos.js"];
@@ -259,6 +257,7 @@
 
 	$tabla->addField("ValoProd", "number", 0, "Precio");
 	$tabla->fields["ValoProd"]["txtAlign"] = "right";
+	$tabla->fields["ValoProd"]["txtBefore"] = "$ ";
 
 	$tabla->addField("NumeEstaProd", "select", 0, "Estado", true, false, false, true, '1', '', 'estadosproductos', 'NumeEstaProd', 'NombEstaProd');
 	$tabla->fields["NumeEstaProd"]["showOnForm"] = false;
@@ -270,6 +269,11 @@
 	$tabla->fields["CantCuot"]["showOnForm"] = false;
 	$tabla->fields["CantCuot"]["txtAlign"] = "right";
 
+	$tabla->addField("InteresDiario", "number", 0, "Interés diario");
+	$tabla->fields["InteresDiario"]["showOnForm"] = false;
+	$tabla->fields["InteresDiario"]["txtAlign"] = "right";
+	$tabla->fields["InteresDiario"]["txtAfter"] = "%";
+
 	$config->tablas["productos"] = $tabla;
 
 	/**
@@ -280,10 +284,9 @@
 	$tabla->masterTable = "productos";
 	$tabla->masterFieldId = "NumeProd";
 	$tabla->masterFieldName = "NombProd";
+	$tabla->order = 'FechVenc, NumeCuot';
 
-	$tabla->btnList = [
-		new btnListItem('btnPagos', 'Ver Pagos', '<i class="fas fa-cash-register fa-fw"></i>', 'btn-primary', 'button', '', 'verPagos')
-	];
+	$tabla->btnList[] = new btnListItem('btnPagos', 'Ver Pagos', '<i class="fas fa-cash-register fa-fw"></i>', 'btn-primary', 'a', 'objeto/cuotaspagos.php?CodiIden');
 
 	$tabla->jsFiles = ["admin/js/custom/cuotas.js"];
 
@@ -308,14 +311,17 @@
 	$tabla->addField("ImpoCuot", "number", 0, "Importe de cuota pura", true, true);
 	$tabla->fields["ImpoCuot"]["step"] = "0.01";
 	$tabla->fields["ImpoCuot"]["txtAlign"] = "right";
+	$tabla->fields["ImpoCuot"]["txtBefore"] = "$ ";
 
 	$tabla->addField("ImpoOtro", "number", 0, "Interés", true, true);
 	$tabla->fields["ImpoOtro"]["step"] = "0.01";
 	$tabla->fields["ImpoOtro"]["txtAlign"] = "right";
+	$tabla->fields["ImpoOtro"]["txtBefore"] = "$ ";
 
 	$tabla->addField("ImpoPago", "calcfield", 0, "Importe Pagado");
 	$tabla->fields["ImpoPago"]["showOnForm"] = false;
 	$tabla->fields["ImpoPago"]["txtAlign"] = "right";
+	$tabla->fields["ImpoPago"]["txtBefore"] = "$ ";
 
 	$tabla->addField("ObseCuot", "textarea", 200, "Observaciones", false);
 	$tabla->fields["ObseCuot"]["isHiddenInList"] = true;
@@ -334,9 +340,8 @@
 	$tabla->allowEdit = false;
 	$tabla->allowDelete = false;
 
-	$tabla->btnForm = [
-		new btnListItem('btnCheques', '', '<i class="fa fa-credit-card fa-fw"></i> Cheques', 'btn-primary', 'button', '', 'abrirCheques();')
-	];
+	$tabla->btnForm[] = new btnListItem('btnCheques', 'Cheques', '<i class="fa fa-credit-card fa-fw"></i> Cheques', 'btn-primary', 'button', '', 'abrirCheques();');
+	$tabla->btnForm[] = new btnListItem('btnActualizar', 'Calcular Interés', '<i class="fas fa-percentage fa-fw"></i> Calcular Interés', 'btn-success', 'button', '', 'calcularIntereses()');
 
 	$tabla->btnList = [
 		new btnListItem('btnCambiarEstado', 'Cambiar Estado', '<i class="fas fa-retweet fa-fw"></i>', 'btn-warning', 'button', '', 'cambiarEstado')
@@ -377,6 +382,7 @@
 	$tabla->addField("ImpoPago", "number", 0, "Importe");
 	$tabla->fields["ImpoPago"]["step"] = "0.01";
 	$tabla->fields["ImpoPago"]["txtAlign"] = "right";
+	$tabla->fields["ImpoPago"]["txtBefore"] = "$ ";
 
 	$tabla->addField("ObsePago", "textarea", 200, "Observaciones", false);
 	$tabla->fields["ObsePago"]["isHiddenInList"] = true;
@@ -389,30 +395,30 @@
 	/**
 	 * INDEXACION DE CUOTAS
 	 */
-	$tabla = new Indexacion("indexaciones", "indexaciones", "Indexación de Cuotas", "el índice", true, "objeto/indexaciones.php", "fa-percent");
-	$tabla->allowDelete = false;
-	$tabla->allowEdit = false;
+	// $tabla = new Indexacion("indexaciones", "indexaciones", "Indexación de Cuotas", "el índice", true, "objeto/indexaciones.php", "fa-percent");
+	// $tabla->allowDelete = false;
+	// $tabla->allowEdit = false;
 
-	$tabla->jsFiles = ["admin/js/custom/indexaciones.js"];
+	// $tabla->jsFiles = ["admin/js/custom/indexaciones.js"];
 
-	$tabla->jsOnLoad = "verEstado();";
-	$tabla->jsOnList = "verEstado();";
+	// $tabla->jsOnLoad = "verEstado();";
+	// $tabla->jsOnList = "verEstado();";
 
-	$tabla->btnList = [
-		new btnListItem('btnCambiarEstado', 'Cambiar Estado', '<i class="fas fa-retweet fa-fw"></i>', 'btn-warning', 'button', '', 'cambiarEstado')
-	];
+	// $tabla->btnList = [
+	// 	new btnListItem('btnCambiarEstado', 'Cambiar Estado', '<i class="fas fa-retweet fa-fw"></i>', 'btn-warning', 'button', '', 'cambiarEstado')
+	// ];
 
-	$tabla->addFieldId("NumeInde", "", true, true);
-	$tabla->addField("FechInde", "datetime", 0, "Fecha");
-	$tabla->fields["FechInde"]["showOnForm"] = false;
+	// $tabla->addFieldId("NumeInde", "", true, true);
+	// $tabla->addField("FechInde", "datetime", 0, "Fecha");
+	// $tabla->fields["FechInde"]["showOnForm"] = false;
 
-	$tabla->addField("PorcInde", "number", 0, "Porcentaje");
-	$tabla->fields["PorcInde"]["step"] = "0.01";
+	// $tabla->addField("PorcInde", "number", 0, "Porcentaje");
+	// $tabla->fields["PorcInde"]["step"] = "0.01";
 
-	$tabla->addField("NumeEsta", "select", 0, "Estado", true, false, false, true, '1', '', 'estados', 'NumeEsta', 'NombEsta', '', 'NombEsta');
-	$tabla->fields["NumeEsta"]["isHiddenInForm"] = true;
+	// $tabla->addField("NumeEsta", "select", 0, "Estado", true, false, false, true, '1', '', 'estados', 'NumeEsta', 'NombEsta', '', 'NombEsta');
+	// $tabla->fields["NumeEsta"]["isHiddenInForm"] = true;
 
-	$config->tablas["indexaciones"] = $tabla;
+	// $config->tablas["indexaciones"] = $tabla;
 
 	/**
 	 * CLIENTES
@@ -423,6 +429,8 @@
 	$tabla->searchFields = [
 		new SearchField('NombClie', 'LIKE')
 	];
+
+	$tabla->btnList[] = new btnListItem('btnVerSeguimientos', "Seguimientos", '<i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>', "btn-info", 'a', "objeto/seguimientos.php?NumeClie", "");
 
 	$tabla->addField("NumeClie", "number", 0, "Numero", false, true, true);
 	$tabla->fields["NumeClie"]["isHiddenInForm"] = true;
@@ -465,6 +473,42 @@
 	$tabla->addField("NumeEsta", "select", 0, "Estado", true, false, false, true, '1', '', 'estados', 'NumeEsta', 'NombEsta', '', 'NombEsta');
 
 	$config->tablas["clientes"] = $tabla;
+
+	/**
+	 * SEGUIMIENTOS DE PRODUCTOS
+	 */
+	$tabla = new Tabla("seguimientos", "seguimientos", "Seguimientos", "el registro", false, "objeto/seguimientos.php", "far fa-calendar-alt");
+	$tabla->masterTable = "productos";
+	$tabla->masterFieldId = "NumeClie";
+	$tabla->masterFieldIdMaster = "NumeClie";
+	$tabla->masterFieldName = "NombClie";
+	$tabla->order = "FechSegu";
+
+	$tabla->regUser = true;
+
+	$tabla->allowDelete = false;
+
+
+	$tabla->addFieldId("NumeSegu", "Número", true, true);
+	$tabla->addField("NumeClie", "number", 0, "Cliente");
+	$tabla->fields["NumeClie"]["isHiddenInList"] = true;
+	$tabla->fields["NumeClie"]["isHiddenInForm"] = true;
+
+	$tabla->addField("FechSegu", "date", 0, "Fecha");
+
+	$tabla->addFieldSelect("NumeUser", 0, 'Usuario', true, '', 'usuarios', '', 'NumeUser', 'NombPers');
+	$tabla->fields["NumeUser"]["showOnForm"] = false;
+
+	$tabla->addFieldSelect("NumeTipoSegu", 0, 'Tipo de seguimiento', true, '', 'tiposseguimientos', '', 'NumeTipoSegu', 'NombTipoSegu');
+
+	// $tabla->addFieldSelect("NumeEstaSegu", 0, "Estado", true, '', 'estadosseguimientos', '', 'NumeEstaSegu', 'NombEstaSegu', '', '', 'NombEstaSegu');
+	// $tabla->fields["NumeEstaSegu"]["condFormat"] = 'return ($fila[$field["name"]] == 0);';
+	// $tabla->fields["NumeEstaSegu"]["classFormat"] = 'txtRed';
+
+	$tabla->addField("ObseSegu", "textarea", 100, "Observaciones");
+
+	$config->tablas["seguimientos"] = $tabla;
+
 
 	/**
 	 * CHEQUES
@@ -544,51 +588,9 @@
 	$config->tablas["cheques"] = $tabla;
 
 	/**
-	 * SEGUIMIENTOS DE PRODUCTOS
-	 */
-	$tabla = new Tabla("seguimientos", "seguimientos", "Seguimientos", "el registro", false, "objeto/seguimientos.php", "far fa-calendar-alt");
-	$tabla->masterTable = "productos";
-	$tabla->masterFieldId = "NumeProd";
-	$tabla->masterFieldIdMaster = "NumeProd";
-	$tabla->masterFieldName = "NombProd";
-	$tabla->order = "FechSegu";
-
-	$tabla->regUser = true;
-
-	$tabla->allowDelete = false;
-
-	// $tabla->btnForm = [
-	// 	new \VectorForms\btnListItem('btnVerProducto', 'Ver Producto', '<i class="far fa-file-alt"></i> Ver Producto', 'btn-info', 'button', '', "window.open('ver/productos.php?id=' + getVariable('NumeProd'));")
-	// ];
-
-	$tabla->addFieldId("NumeSegu", "Número", true, true);
-	$tabla->addField("NumeProd", "number", 0, "Producto");
-	$tabla->fields["NumeProd"]["isHiddenInList"] = true;
-	$tabla->fields["NumeProd"]["isHiddenInForm"] = true;
-
-	$tabla->addField("FechSegu", "date", 0, "Fecha");
-
-	$tabla->addFieldSelect("NumeUser", 0, 'Usuario', true, '', 'usuarios', '', 'NumeUser', 'NombPers');
-	$tabla->fields["NumeUser"]["showOnForm"] = false;
-
-	$tabla->addFieldSelect("NumeTipoSegu", 0, 'Tipo de seguimiento', true, '', 'tiposseguimientos', '', 'NumeTipoSegu', 'NombTipoSegu');
-
-	// $tabla->addFieldSelect("NumeEstaSegu", 0, "Estado", true, '', 'estadosseguimientos', '', 'NumeEstaSegu', 'NombEstaSegu', '', '', 'NombEstaSegu');
-	// $tabla->fields["NumeEstaSegu"]["condFormat"] = 'return ($fila[$field["name"]] == 0);';
-	// $tabla->fields["NumeEstaSegu"]["classFormat"] = 'txtRed';
-
-	$tabla->addField("ObseSegu", "textarea", 100, "Observaciones");
-
-	$config->tablas["seguimientos"] = $tabla;
-
-	/**
 	 * OBLIGACIONES DE PRODUCTOS
 	 */
-	$tabla = new Tabla("obligaciones", "obligaciones", "Obligaciones", "el registro", false, "objeto/obligaciones.php", "far fa-calendar-alt");
-	$tabla->masterTable = "productos";
-	$tabla->masterFieldId = "NumeProd";
-	$tabla->masterFieldIdMaster = "NumeProd";
-	$tabla->masterFieldName = "NombProd";
+	$tabla = new Tabla("obligaciones", "obligaciones", "Obligaciones", "el registro", true, "objeto/obligaciones.php", "far fa-calendar-alt");
 	$tabla->order = "FechSegu";
 	$tabla->numeCarg = 1;
 
@@ -601,9 +603,6 @@
 	// ];
 
 	$tabla->addFieldId("NumeObli", "Número", true, true);
-	$tabla->addField("NumeProd", "number", 0, "Producto");
-	$tabla->fields["NumeProd"]["isHiddenInList"] = true;
-	$tabla->fields["NumeProd"]["isHiddenInForm"] = true;
 
 	$tabla->addField("FechSegu", "date", 0, "Fecha");
 

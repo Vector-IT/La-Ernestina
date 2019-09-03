@@ -80,12 +80,20 @@ class CuotaPago extends Tabla
     {
         global $config, $crlf;
 
-        $cuota = $config->buscarDato("SELECT SUM(ImpoCuot + ImpoOtro) FROM cuotas WHERE CodiIden = ".$_REQUEST[$this->masterFieldId]);
-        $pagos = $config->buscardato("SELECT SUM(ImpoPago) FROM cuotaspagos WHERE NumeEsta = 1 AND CodiIden = ".$_REQUEST[$this->masterFieldId]);
-        $saldo = number_format($cuota - $pagos, 2, ".", "");
+        $cuota = $config->buscarDato("SELECT ImpoCuot + ImpoOtro Importe, FechVenc FROM cuotas WHERE CodiIden = ".$_REQUEST[$this->masterFieldId]);
+		$pagos = $config->buscardato("SELECT SUM(ImpoPago) FROM cuotaspagos WHERE NumeEsta = 1 AND CodiIden = ".$_REQUEST[$this->masterFieldId]);
 
-        $salida = parent::listar($strFiltro, $conBotones, $btnList, $order);
-		$salida['html'] = '<h4 class="well well-sm text-right">Saldo: <span class="txtRojo">$ <span id="txtSaldo">'.$saldo.'</span></span></h4>' . $salida['html'];
+        $saldo = number_format($cuota["Importe"] - $pagos, 2, ".", "");
+
+		$strSalida = '';
+		$strSalida.= $crlf.'<div class="row">';
+		$strSalida.= $crlf.'<div class="col-md-6"><h4>Vencimiento: '.$cuota["FechVenc"].'</h4></div>';
+		$strSalida.= $crlf.'<div class="col-md-6"><h4 class="well well-sm text-right">Saldo: <span class="txtRojo">$ <span id="txtSaldo">'.$saldo.'</span></span></h4></div>';
+		$strSalida.= $crlf.'</div>';
+
+		$salida = parent::listar($strFiltro, $conBotones, $btnList, $order);
+
+		$salida['html'] = $strSalida . $salida['html'];
 
 		return $salida;
     }

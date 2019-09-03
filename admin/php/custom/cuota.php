@@ -10,7 +10,23 @@ class Cuota extends Tabla
         switch ($post['field']) {
             case "ImpoPago":
                 return $config->buscarDato("SELECT COALESCE(SUM(ImpoPago), 0) FROM cuotaspagos WHERE NumeEsta = 1 AND CodiIden = ". $post["dato"]);
-                break;
+			break;
+
+			case 'CalcInterses':
+				$cuota = $config->buscarDato("SELECT NumeProd, DATEDIFF(SYSDATE(), FechVenc) Dias FROM cuotas WHERE CodiIden = ". $post["CodiIden"]);
+				$intereses = \floatval($config->buscarDato("SELECT InteresDiario FROM productos WHERE NumeProd = ". $cuota["NumeProd"]));
+
+				if ($intereses != 0) {
+					if ($cuota["Dias"] >= 0) {
+						$strSQL = "UPDATE cuotas SET ImpoOtro = {$cuota["Dias"]} * (ImpoCuot * {$intereses} / 100) WHERE CodiIden = ". $post["CodiIden"];
+					}
+					else {
+						$strSQL = "UPDATE cuotas SET ImpoOtro = 0 - ({$cuota["Dias"]} * (ImpoCuot * {$intereses} / 100)) WHERE CodiIden = ". $post["CodiIden"];
+					}
+					$result = $config->ejecutarCMD($strSQL);
+					return $result;
+				}
+			break;
         }
     }
 
