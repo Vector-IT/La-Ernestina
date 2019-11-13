@@ -80,13 +80,67 @@
 	$tabla->addField("FechUltiEntr", "datetime", 0, "Ult. acceso al sistema");
 	$tabla->fields['FechUltiEntr']['showOnForm'] = false;
 
-	$tabla->addFieldSelect("NumeCarg", 40, "Cargo", true, '', 'cargos', '', 'NumeCarg', 'NombCarg', '', '', 'NombCarg');
+	$tabla->addFieldSelect("NumeCarg", 40, "Cargo", true, '', 'cargos', '', 'NumeCarg', 'NombCarg', '', '', 'NumeCarg');
 
 	$tabla->addFieldSelect("NumeEsta", 0, "Estado", true, '1', 'estados', '', 'NumeEsta', 'NombEsta', '', '', 'NombEsta');
 	$tabla->fields["NumeEsta"]["condFormat"] = 'return ($fila[$field["name"]] == 0);';
 	$tabla->fields["NumeEsta"]["classFormat"] = 'txtRed';
 
 	$config->tablas["usuarios"] = $tabla;
+
+	/**
+	 * GRUPOS DE VENTA
+	 */
+	$tabla = new Tabla('gruposventa', 'gruposventa', 'Grupos de Venta', 'el Grupo de Venta', true, 'objeto/gruposventa.php', 'far fa-object-ungroup', 'NombGrup');
+	$tabla->labelField = 'NombGrup';
+	$tabla->numeCarg = 2;
+	$tabla->isSubItem = true;
+
+	$tabla->btnList[] = new btnListItem('btnUsuarios', 'Integrantes', '<i class="fas fa-users"></i>', 'btn-secondary', 'a', 'objeto/gruposventadetalles.php?NumeGrup');
+
+	$tabla->addFieldId('NumeGrup', 'Número', true, true);
+	$tabla->addField('NombGrup', 'text', 40, 'Nombre del Grupo');
+	$tabla->addFieldSelect("NumeSupe", 0, "Supervisor", true, '', 'usuarios', '', 'NumeUser', 'NombPers', 'NumeEsta = 1 AND NumeCarg <= 3', '', 'NombPers');
+	$tabla->addFieldSelect("NumeEsta", 0, "Estado", true, '1', 'estados', '', 'NumeEsta', 'NombEsta', '', '', 'NombEsta');
+	$tabla->fields["NumeEsta"]["condFormat"] = 'return ($fila[$field["name"]] == 0);';
+	$tabla->fields["NumeEsta"]["classFormat"] = 'txtRed';
+
+	$config->tablas['gruposventa'] = $tabla;
+
+	/**
+	 * GRUPOS DE VENTA DETALLES
+	 */
+	$tabla = new Tabla('gruposventadetalles', 'gruposventadetalles', 'Integrantes', 'el Integrante', false, 'objeto/gruposventadetalles.php', 'fas fa-users', '');
+	$tabla->numeCarg = 2;
+	$tabla->masterTable = 'gruposventa';
+	$tabla->masterFieldIdMaster = 'NumeGrup';
+	$tabla->masterFieldId = 'NumeGrup';
+	$tabla->masterFieldName = 'NombGrup';
+
+	$tabla->addFieldId('NumeDeta', 'Numero', true, true);
+	$tabla->addField('NumeGrup', 'hidden', 0, 'NumeGrup');
+	$tabla->fields['NumeGrup']['isHiddenInList'] = true;
+
+	$tabla->addFieldSelect("NumeUser", 0, "Integrante", true, '', 'usuarios', '', 'NumeUser', 'NombPers', 'NumeEsta = 1', '', 'NombPers');
+
+	$config->tablas['gruposventadetalles'] = $tabla;
+
+	/**
+	 * CARGOS
+	 */
+	$tabla = new Tabla('cargos', 'cargos', 'Cargos', 'el Cargo', false, 'objeto/cargos.php', 'fas fa-user-tag', 'NumeCarg');
+	$tabla->labelField = 'NumeCarg';
+	$tabla->numeCarg = 1;
+	$tabla->isSubItem = true;
+
+	$tabla->addFieldId('NumeCarg', 'Número');
+	$tabla->addField('NombCarg', 'text', 40, 'Nombre');
+	$tabla->fields['NombCarg']['attrControl'] = [
+		'onblur'=>'this.value = this.value.toUpperCase();',
+		'onkeypress'=>'if(event.keyCode == 13) this.value = this.value.toUpperCase();'
+	];
+
+	$config->tablas['cargos'] = $tabla;
 
 	/**
 	 * BANCOS
@@ -522,13 +576,17 @@
 		new btnListItem('btnCambiarEstado', 'Cambiar estado', '<i class="fas fa-retweet fa-fw"></i>', 'btn-warning', 'button', '', 'cambiarEstado')
 	];
 
+	$tabla->searchFields[] = new SearchField('NumeCheq', 'LIKE');
+	$tabla->searchFields[] = new SearchField('NombTitu', 'LIKE');
+	$tabla->searchFields[] = new SearchField('CUITTitu', 'LIKE');
+
 	$tabla->jsFiles = ["admin/js/custom/cheques.js"];
 	$tabla->jsOnList = "verEstado();";
 	$tabla->jsOnNew = "onNew();";
 	$tabla->jsOnEdit = "onEdit();";
 
 	$tabla->addFieldId("CodiCheq", "CodiCheq", true, true);
-	$tabla->addField("NumeCheq", "number", 80, "Número");
+	$tabla->addField("NumeCheq", "text", 80, "Número");
 	$tabla->addField("EsPropio", "checkbox", 0, "Es propio?");
 	$tabla->addField("Cruzado", "checkbox", 0, "Es cruzado?");
 

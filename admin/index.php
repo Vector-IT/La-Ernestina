@@ -37,6 +37,7 @@
 		</p>
 
 		<!-- CUOTAS VENCIDAS IMPAGAS -->
+		<?php if ($numeCarg <= 2) {?>
 		<p class="lead">
 			Cuotas Vencidas Impagas
 		</p>
@@ -84,6 +85,7 @@
 
 			echo $strSalida;
 		?>
+		<?php }?>
 
 		<!-- SEGUIMIENTOS DEL DIA -->
 		<p class="lead">
@@ -99,6 +101,16 @@
 			$strSQL.= $crlf."WHERE";
 			$strSQL.= $crlf."ss.NumeEstaSegu > 0";
 			$strSQL.= $crlf."AND ss.FechSegu = DATE_FORMAT(SYSDATE(), '%Y-%m-%d')";
+
+			switch ($numeCarg) {
+				case '3': //Supervisor
+					$strSQL.= $crlf."AND ss.NumeUser IN (SELECT gvd.NumeUser FROM gruposventa gv, gruposventadetalles gvd WHERE gv.NumeGrup = gvd.NumeGrup AND gv.NumeSupe = ". $_SESSION['NumeUser'] .")";
+				break;
+
+				case '4': //Vendedor
+					$strSQL.= $crlf."AND ss.NumeUser = ". $_SESSION['NumeUser'];
+				break;
+			}
 
 			$seguimientos = $config->cargarTabla($strSQL);
 
@@ -148,6 +160,15 @@
 			$strSQL.= $crlf."WHERE";
 			$strSQL.= $crlf."ss.NumeEstaSegu > 0";
 			$strSQL.= $crlf."AND ss.FechSegu >= DATE_FORMAT(DATE_ADD(SYSDATE(), INTERVAL(-WEEKDAY(SYSDATE())) DAY), '%Y-%m-%d')";
+			switch ($numeCarg) {
+				case '3': //Supervisor
+					$strSQL.= $crlf."AND ss.NumeUser IN (SELECT gvd.NumeUser FROM gruposventa gv, gruposventadetalles gvd WHERE gv.NumeGrup = gvd.NumeGrup AND gv.NumeSupe = ". $_SESSION['NumeUser'] .")";
+				break;
+
+				case '4': //Vendedor
+					$strSQL.= $crlf."AND ss.NumeUser = ". $_SESSION['NumeUser'];
+				break;
+			}
 
 			$seguimientos = $config->cargarTabla($strSQL);
 
@@ -199,6 +220,15 @@
 			$strSQL.= $crlf."WHERE";
 			$strSQL.= $crlf."ss.NumeEstaSegu > 0";
 			$strSQL.= $crlf."AND ss.FechSegu >= DATE_FORMAT(SYSDATE(), '%Y-%m-01')";
+			switch ($numeCarg) {
+				case '3': //Supervisor
+					$strSQL.= $crlf."AND ss.NumeUser IN (SELECT gvd.NumeUser FROM gruposventa gv, gruposventadetalles gvd WHERE gv.NumeGrup = gvd.NumeGrup AND gv.NumeSupe = ". $_SESSION['NumeUser'] .")";
+				break;
+
+				case '4': //Vendedor
+					$strSQL.= $crlf."AND ss.NumeUser = ". $_SESSION['NumeUser'];
+				break;
+			}
 
 			$seguimientos = $config->cargarTabla($strSQL);
 
