@@ -285,7 +285,7 @@
 	/**
 	 * PRODUCTOS
 	 */
-	$tabla = new Producto("productos", "productos", "Productos", "el Producto", true, "objeto/productos.php", "far fa-paper-plane", "NumeProd");
+	$tabla = new Producto("productos", "productos", "Planes", "el Plan", true, "objeto/productos.php", "far fa-paper-plane", "NumeProd");
 	$tabla->labelField = "NombProd";
 	$tabla->allowDelete = false;
 
@@ -306,7 +306,7 @@
 
 	$tabla->includeList = ["php/modals/prodCliente.php"];
 
-	$tabla->addFieldId("NumeProd", "Número de producto", true, true);
+	$tabla->addFieldId("NumeProd", "Número de Plan", true, true);
 	$tabla->addField("NombProd", "text", 100, "Nombre");
 
 	$tabla->addField("ValoProd", "number", 0, "Precio");
@@ -337,6 +337,7 @@
 	$tabla->labelField = "NumeCuot";
 	$tabla->masterTable = "productos";
 	$tabla->masterFieldId = "NumeProd";
+	$tabla->masterFieldIdMaster = "NumeProd";
 	$tabla->masterFieldName = "NombProd";
 	$tabla->order = 'FechVenc, NumeCuot';
 
@@ -352,7 +353,7 @@
 	$tabla->addField("FechCuot", "date", 0, "Fecha de creación");
 	$tabla->fields["FechCuot"]["showOnForm"] = false;
 
-	$tabla->addField("NumeProd", "select", 0, "Producto", true, false, false, true, '', '', 'productos', 'NumeProd', 'NombProd');
+	$tabla->addField("NumeProd", "select", 0, "Plan", true, false, false, true, '', '', 'productos', 'NumeProd', 'NombProd');
 	$tabla->fields["NumeProd"]["showOnForm"] = false;
 	$tabla->fields["NumeProd"]["showOnList"] = false;
 

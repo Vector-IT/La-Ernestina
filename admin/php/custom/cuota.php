@@ -21,7 +21,7 @@ class Cuota extends Tabla
 						$strSQL = "UPDATE cuotas SET ImpoOtro = {$cuota["Dias"]} * (ImpoCuot * {$intereses} / 100) WHERE CodiIden = ". $post["CodiIden"];
 					}
 					else {
-						$strSQL = "UPDATE cuotas SET ImpoOtro = 0 - ({$cuota["Dias"]} * (ImpoCuot * {$intereses} / 100)) WHERE CodiIden = ". $post["CodiIden"];
+						$strSQL = "UPDATE cuotas SET ImpoOtro = ({$cuota["Dias"]} * (ImpoCuot * {$intereses} / 100)) WHERE CodiIden = ". $post["CodiIden"];
 					}
 					$result = $config->ejecutarCMD($strSQL);
 					return $result;
