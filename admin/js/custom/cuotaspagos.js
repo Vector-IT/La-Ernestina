@@ -100,7 +100,7 @@ function formasPago() {
 }
 
 function cambiarEstado(strID) {
-	$('#actualizando').show();
+	actualizando();
 
 	var codiIden = $('#CodiIden' + strID).val();
 
@@ -114,19 +114,15 @@ function cambiarEstado(strID) {
 			dato: { NumePago: strID, CodiIden: codiIden }
 		},
 		success: function(data) {
+			divActualizando.close();
+
 			if (data.valor === true) {
-				$('#txtHint').html('Datos actualizados!');
-				$('#divMsj').removeClass('alert-danger');
-				$('#divMsj').addClass('alert-success');
+				notifySuccess();
 
 				listarcuotaspagos();
 			} else {
-				$('#txtHint').html(data.valor);
-				$('#divMsj').removeClass('alert-success');
-				$('#divMsj').addClass('alert-danger');
+				notifyDanger({ message: data.valor });
 			}
-			$('#actualizando').hide();
-			$('#divMsj').show();
 		},
 		async: true
 	});
@@ -156,11 +152,8 @@ function validar() {
 	}
 
 	if (mensaje != '') {
-		$('#actualizando').hide();
-		$('#txtHint').html(mensaje);
-		$('#divMsj').removeClass('alert-success');
-		$('#divMsj').addClass('alert-danger');
-		$('#divMsj').show();
+		divActualizando.close();
+		notifyDanger({ message: mensaje });
 		return false;
 	}
 

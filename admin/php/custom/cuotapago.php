@@ -31,7 +31,7 @@ class CuotaPago extends Tabla
                 }
 
                 $cuotas = $config->getTabla("cuotas");
-                $cuotas->editar($datos);
+                $cuotas->editar($datos, $datos["CodiIden"]);
 
                 return $result;
                 break;
@@ -71,7 +71,7 @@ class CuotaPago extends Tabla
         }
 
         $cuotas = $config->getTabla("cuotas");
-        $cuotas->editar($datos2);
+        $cuotas->editar($datos2, $datos2["CodiIden"]);
 
         return $result;
     }

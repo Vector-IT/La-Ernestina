@@ -1,2 +1,7 @@
 .txtRojo { color: red; }
 .txtTachado { text-decoration:line-through; }
+
+.fondoVerde { background-color: #00fa98 !important; }
+.fondoAmarillo { background-color: #f1cd05 !important; }
+.fondoRojo { background-color: #e94857 !important; }
+.fondoMagenta { background-color: magenta !important; }

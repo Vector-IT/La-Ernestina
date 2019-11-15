@@ -1,7 +1,7 @@
 var $;
 
 function cambiarEstado(strID) {
-	$('#actualizando').show();
+	actualizando();
 
 	$.ajax({
 		type: 'POST',
@@ -13,19 +13,15 @@ function cambiarEstado(strID) {
 			dato: { NumeCaja: strID, NumeEsta: $('#NumeEsta' + strID).val() }
 		},
 		success: function(data) {
+			divActualizando.close();
+
 			if (data.valor === true) {
-				$('#txtHint').html('Datos actualizados!');
-				$('#divMsj').removeClass('alert-danger');
-				$('#divMsj').addClass('alert-success');
+				notifySuccess();
 
 				listarcaja();
 			} else {
-				$('#txtHint').html(data.valor);
-				$('#divMsj').removeClass('alert-success');
-				$('#divMsj').addClass('alert-danger');
+				notifyDanger({ message: data.valor });
 			}
-			$('#actualizando').hide();
-			$('#divMsj').show();
 		},
 		async: true
 	});

@@ -108,7 +108,10 @@
 
 		<?php
 			$strSalida = '';
-			$strSalida.= $crlf.'<button id="btnVolver" type="button" title="Volver" class="btn btn-sm btn-info" onclick="history.go(-1)"><i class="fa fa-chevron-circle-left fa-fw"></i> '.gral_back.'</button>';
+			if (((($tabla->masterTable != '') && isset($_REQUEST[$tabla->masterFieldId])) || (isset($_REQUEST["id"]))) && (!isset($_REQUEST["back"]) || $_REQUEST["back"] == 1)) {
+				$strSalida.= $crlf.'<button id="btnVolver" type="button" title="Volver" class="btn btn-sm btn-info" onclick="((document.referrer.indexOf(\'/login.php\') == -1)? history.go(-1): history.go(-3));"><i class="fa fa-chevron-circle-left fa-fw" aria-hidden="true"></i> '. gral_back .'</button>';
+				// $strSalida.= $crlf.'<button id="btnVolver" type="button" title="Volver" class="btn btn-sm btn-info" onclick="history.go(-1)"><i class="fa fa-chevron-circle-left fa-fw"></i> '.gral_back.'</button>';
+			}
 
             if (!isset($_REQUEST["imprimir"]) || $_REQUEST["imprimir"] == 1) {
                 $strSalida.= $crlf.'<button id="btnImprimir" type="button" title="Imprimir" class="btn btn-sm btn-primary" onclick="window.print()"><i class="fa fa-print fa-fw"></i> '.gral_print.'</button>';

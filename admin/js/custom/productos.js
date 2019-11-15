@@ -4,6 +4,10 @@ $(document).ready(function() {
 	$('#modalCliente').on('shown.bs.modal', function() {
 		$('#NumeClie').focus();
 	});
+
+	$('#frmAsignarCliente').submit(function() {
+		cerrarModal()
+	});
 });
 
 function cheqList() {
@@ -38,33 +42,41 @@ function asignarCliente(NumeProd) {
 }
 
 function borrarCliente(numeProd) {
-	$('#divMsj').hide();
-	$('#actualizando').show();
+	$('#vFila' + numeProd).addClass('table-success');
 
-	$.post(
-		'php/tablaHandler.php',
-		{
-			operacion: '100',
-			tabla: 'productos',
-			field: 'Borrar Cliente',
-			dato: { NumeProd: numeProd }
-		},
-		function(data) {
-			if (data.valor === true) {
-				$('#txtHint').html('Datos actualizados!');
-				$('#divMsj').removeClass('alert-danger');
-				$('#divMsj').addClass('alert-success');
+	swal({
+		title: "Confirmar",
+		type: "warning",
+		html: "Seguro de borrar el cliente <span class='font-weight-bold'>" + $("#NombClie" + numeProd).text() + "</span> del plan <span class='font-weight-bold'>" + $("#NombProd" + numeProd).text() + "</span>?",
+		showCancelButton: true,
+		confirmButtonText: "SI",
+		cancelButtonText: "NO",
+	}).then((result) => {
+		if (result.value) {
+			actualizando();
 
-				listarproductos();
-			} else {
-				$('#txtHint').html(data.valor);
-				$('#divMsj').removeClass('alert-success');
-				$('#divMsj').addClass('alert-danger');
-			}
-			$('#actualizando').hide();
-			$('#divMsj').show();
+			$.post(
+				'php/tablaHandler.php',
+				{
+					operacion: '100',
+					tabla: 'productos',
+					field: 'Borrar Cliente',
+					dato: { NumeProd: numeProd }
+				},
+				function(data) {
+					divActualizando.close();
+
+					if (data.valor === true) {
+						notifySuccess();
+
+						listarproductos();
+					} else {
+						notifyDanger({ message: data.valor });
+					}
+				}
+			);
 		}
-	);
+	});
 }
 
 function cerrarModal() {
@@ -86,8 +98,7 @@ function cerrarModal() {
 
 	$('#modalCliente').modal('hide');
 
-	$('#divMsj').hide();
-	$('#actualizando').show();
+	actualizando();
 
 	$.post(
 		'php/tablaHandler.php',
@@ -98,19 +109,15 @@ function cerrarModal() {
 			dato: { NumeProd: numeProd, NumeClie: numeClie, ImpoAnti: impoAnti, Interes: interes, FechInic: fechInic, CantCuot: cantCuot, CuotExtr: montoCuot, FechExtr: fechExtr }
 		},
 		function(data) {
-			if (data.valor === true) {
-				$('#txtHint').html('Datos actualizados!');
-				$('#divMsj').removeClass('alert-danger');
-				$('#divMsj').addClass('alert-success');
+			divActualizando.close();
 
-				listarproductos();
+			if (data.valor === true) {
+				notifySuccess();
+
+				listarproductos(numeProd);
 			} else {
-				$('#txtHint').html(data.valor);
-				$('#divMsj').removeClass('alert-success');
-				$('#divMsj').addClass('alert-danger');
+				notifyDanger({ message: data.valor });
 			}
-			$('#actualizando').hide();
-			$('#divMsj').show();
 		}
 	);
 }

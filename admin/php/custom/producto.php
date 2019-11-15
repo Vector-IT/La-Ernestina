@@ -3,8 +3,7 @@ namespace VectorForms;
 
 class Producto extends Tabla
 {
-    public function customFunc($post)
-    {
+    public function customFunc($post) {
         global $config;
 
         switch ($post['field']) {
@@ -16,6 +15,7 @@ class Producto extends Tabla
                 $cantCuot = intval($post["dato"]["CantCuot"]);
 				$fechInic = $post["dato"]["FechInic"];
 				$interes = $post["dato"]["Interes"];
+				$numeVend = $_SESSION["NumeUser"];
 
                 $cuotExtr = (isset($post["dato"]["CuotExtr"]) ? $post["dato"]["CuotExtr"] : []);
                 $fechExtr = (isset($post["dato"]["FechExtr"]) ? $post["dato"]["FechExtr"] : []);
@@ -27,7 +27,20 @@ class Producto extends Tabla
                     $cantCuot = "0";
                 }
 
-                $result = $config->ejecutarCMD("UPDATE productos SET NumeEstaProd = ".$numeEsta.", NumeClie = ".$numeClie.", CantCuot = ".$cantCuot.", InteresDiario = ". $interes ." WHERE NumeProd = ". $numeProd);
+                $result = $config->ejecutarCMD("UPDATE productos SET NumeEstaProd = ".$numeEsta.", NumeClie = ".$numeClie.", CantCuot = ".$cantCuot.", InteresDiario = ". $interes .", NumeVend = ". $numeVend ." WHERE NumeProd = ". $numeProd);
+
+				if ($result === true) {
+					$estados = $config->getTabla("productosestados");
+
+					$datosAux = [
+						"CodiIden" => '',
+						"NumeProd" => $numeProd,
+						"NumeEstaProd" => $numeEsta,
+						"NumeVend" => $numeVend
+					];
+
+					$estados->insertar($datosAux);
+				}
 
                 $cuota = $config->getTabla("cuotas");
 
@@ -97,7 +110,7 @@ class Producto extends Tabla
 					}
 				}
                 return $result;
-                break;
+			break;
 
             case "Borrar Cliente":
                 $numeProd = $post["dato"]["NumeProd"];
@@ -107,7 +120,55 @@ class Producto extends Tabla
                 $result = $config->ejecutarCMD("UPDATE productos SET NumeEstaProd = 1, NumeClie = null, CantCuot = null WHERE NumeProd = ". $numeProd);
 
                 return $result;
-                break;
+			break;
         }
-    }
+	}
+
+	public function insertar($datos) {
+		global $config;
+
+		$result = parent::insertar($datos);
+
+		if ($result["estado"] === true) {
+			$estados = $config->getTabla("productosestados");
+
+			$datosAux = [
+				"CodiIden" => '',
+				"NumeProd" => $result["id"],
+				"NumeEstaProd" => $datos["NumeEstaProd"],
+				"NumeVend" => $datos["NumeVend"]
+			];
+
+			$estados->insertar($datosAux);
+		}
+
+		return $result;
+	}
+
+	function colorEstado(&$field, $dato) {
+		$cantDias = intval($dato["CantDias"]);
+
+        switch ($field["name"]) {
+			case 'NumeEstaProd':
+				if ($dato["NumeEstaProd"] == "4") {
+					$field["classFormat"] = 'fondoMagenta';
+				}
+			break;
+
+			case 'NumeProd':
+				if ($dato["NumeEstaProd"] != "1") {
+					if ($cantDias <= 1) {
+						$field["classFormat"] = 'fondoVerde';
+					} elseif ($cantDias <= 2) {
+						$field["classFormat"] = 'fondoAmarillo';
+					} else {
+						$field["classFormat"] = 'fondoRojo';
+					}
+				}
+			break;
+		}
+
+		return true;
+	}
+
 }

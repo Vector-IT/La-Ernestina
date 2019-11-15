@@ -1,7 +1,7 @@
 <div id="modalCliente" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
 	<div class="modal-dialog modal-lg" role="document">
 		<div class="modal-content">
-			<form class="form-horizontal" method="post" onsubmit="cerrarModal();">
+			<form id="frmAsignarCliente" class="form-horizontal" method="post" onsubmit="return false;">
 				<div class="modal-header">
 					<!--<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>-->
 					<h4 class="modal-title">Asignar cliente al producto <span id="txtNombProd"></span></h4>

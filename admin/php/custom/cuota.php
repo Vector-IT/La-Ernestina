@@ -34,7 +34,7 @@ class Cuota extends Tabla
     {
         global $config;
 
-        $result = parent::editar($datos);
+        $result = parent::editar($datos, $idViejo);
 
         $numeProd = $config->buscarDato("SELECT NumeProd FROM cuotas WHERE CodiIden = ". $datos["CodiIden"]);
 
@@ -64,7 +64,7 @@ class Cuota extends Tabla
             }
         }
         $producto = $config->getTabla("productos");
-        $producto->editar($datos2);
+        $producto->editar($datos2, $datos2["NumeProd"]);
 
         return $result;
     }

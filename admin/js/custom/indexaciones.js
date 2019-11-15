@@ -1,7 +1,7 @@
 var $;
 
 function cambiarEstado(strID) {
-	$('#actualizando').show();
+	actualizando();
 
 	$.ajax({
 		type: 'POST',
@@ -13,19 +13,16 @@ function cambiarEstado(strID) {
 			dato: { NumeInde: strID, PorcInde: $('#PorcInde' + strID).html() }
 		},
 		success: function(data) {
+			divActualizando.close();
+
 			if (data.valor === true) {
-				$('#txtHint').html('Datos actualizados!');
-				$('#divMsj').removeClass('alert-danger');
-				$('#divMsj').addClass('alert-success');
+				notifySuccess();
 
 				listarindexaciones();
 			} else {
-				$('#txtHint').html(data.valor);
-				$('#divMsj').removeClass('alert-success');
-				$('#divMsj').addClass('alert-danger');
+				notifyDanger({ message: data.valor });
 			}
-			$('#actualizando').hide();
-			$('#divMsj').show();
+			divActualizando.close();
 		},
 		async: true
 	});

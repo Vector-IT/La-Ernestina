@@ -32,6 +32,8 @@ function cambiarEstado(strID) {
 			dato: { CodiCheq: strID }
 		},
 		success: function(data) {
+			divActualizando.close();
+
 			if (data.valor === true) {
 				notifySuccess();
 

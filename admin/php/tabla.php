@@ -1674,7 +1674,7 @@ class Tabla
 
 		if (count($this->searchFields) > 0) {
 			$strSalida.= $crlf.'<div id="searchForm">';
-			// $strSalida.= $crlf.'<hr>';
+			$strSalida.= $crlf.'<hr>';
 			$strSalida.= $crlf.'<h4>'. gral_search .' '. $this->titulo .'</h4>';
 			$strSalida.= $crlf.'<form id="frmSearch'. $this->tabladb .'" class="frmSearch mt-4" method="post" onSubmit="return false;" novalidate>';
 			$strSalida.= $crlf.'	<input type="number" id="hdnDirtySearch" class="d-none" />';
