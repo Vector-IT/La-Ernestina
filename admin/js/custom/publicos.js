@@ -26,7 +26,7 @@ function verCliente(numeProd) {
 
 function verEstados(numeProd) {
 	$.fancybox.open({
-		src: 'objeto/productosestados.php?NumeProd=' + numeProd + '&menu=0&header=0&back=0',
+		src: 'objeto/clientesestados.php?NumeClie=' + numeProd + '&menu=0&header=0&back=0',
 		type: 'iframe',
 		toolbar: false,
 		smallBtn: true,

@@ -14,6 +14,7 @@ class Producto extends Tabla
                 $impoAnti = floatval($post["dato"]["ImpoAnti"]);
                 $cantCuot = intval($post["dato"]["CantCuot"]);
 				$fechInic = $post["dato"]["FechInic"];
+				$diaVenc = $post["dato"]["DiaVenc"];
 				$interes = $post["dato"]["Interes"];
 				$numeVend = $_SESSION["NumeUser"];
 
@@ -28,19 +29,6 @@ class Producto extends Tabla
                 }
 
                 $result = $config->ejecutarCMD("UPDATE productos SET NumeEstaProd = ".$numeEsta.", NumeClie = ".$numeClie.", CantCuot = ".$cantCuot.", InteresDiario = ". $interes .", NumeVend = ". $numeVend ." WHERE NumeProd = ". $numeProd);
-
-				if ($result === true) {
-					$estados = $config->getTabla("productosestados");
-
-					$datosAux = [
-						"CodiIden" => '',
-						"NumeProd" => $numeProd,
-						"NumeEstaProd" => $numeEsta,
-						"NumeVend" => $numeVend
-					];
-
-					$estados->insertar($datosAux);
-				}
 
                 $cuota = $config->getTabla("cuotas");
 
@@ -89,7 +77,7 @@ class Producto extends Tabla
 						$saldo = $valoProd - $impoAnti;
 						$impoCuot = number_format($saldo / $cantCuot, 2, ".", "");
 
-						$fechVenc = new \DateTime($fecha->format("Y-m-"). "10");
+						$fechVenc = new \DateTime($fecha->format("Y-m-"). $diaVenc);
 
 						for ($numeCuot = 1; $numeCuot <= $cantCuot; $numeCuot++) {
 							$fechVenc->add(new \DateInterval("P1M"));
@@ -123,52 +111,4 @@ class Producto extends Tabla
 			break;
         }
 	}
-
-	public function insertar($datos) {
-		global $config;
-
-		$result = parent::insertar($datos);
-
-		if ($result["estado"] === true) {
-			$estados = $config->getTabla("productosestados");
-
-			$datosAux = [
-				"CodiIden" => '',
-				"NumeProd" => $result["id"],
-				"NumeEstaProd" => $datos["NumeEstaProd"],
-				"NumeVend" => $datos["NumeVend"]
-			];
-
-			$estados->insertar($datosAux);
-		}
-
-		return $result;
-	}
-
-	function colorEstado(&$field, $dato) {
-		$cantDias = intval($dato["CantDias"]);
-
-        switch ($field["name"]) {
-			case 'NumeEstaProd':
-				if ($dato["NumeEstaProd"] == "4") {
-					$field["classFormat"] = 'fondoMagenta';
-				}
-			break;
-
-			case 'NumeProd':
-				if ($dato["NumeEstaProd"] != "1") {
-					if ($cantDias <= 1) {
-						$field["classFormat"] = 'fondoVerde';
-					} elseif ($cantDias <= 2) {
-						$field["classFormat"] = 'fondoAmarillo';
-					} else {
-						$field["classFormat"] = 'fondoRojo';
-					}
-				}
-			break;
-		}
-
-		return true;
-	}
-
 }

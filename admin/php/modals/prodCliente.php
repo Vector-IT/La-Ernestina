@@ -14,7 +14,7 @@
 						<label for="NumeClie" class="control-label col-md-2">Cliente:</label>
 						<div class="col-md-8">
 							<select class="form-control ucase" id="NumeClie">
-								<?php echo $config->cargarCombo('clientes', 'NumeClie', 'NombClie', 'NumeEsta = 1', 'NombClie')?>
+								<?php echo $config->cargarCombo('clientes', 'NumeClie', 'NombClie', '', 'NombClie')?>
 							</select>
 						</div>
 					</div>
@@ -29,7 +29,7 @@
 					<div class="form-group row">
 						<label for="Interes" class="control-label col-md-2">Interés diario:</label>
 						<div class="col-md-8">
-							<input type="number" min="0" class="form-control" id="Interes" required value="0">
+							<input type="number" min="0" step="0.1" class="form-control" id="Interes" required value="0">
 						</div>
 					</div>
 
@@ -63,6 +63,13 @@
 						<label for="CantCuot" class="control-label col-md-2">Cantidad de cuotas:</label>
 						<div class="col-md-8">
 							<input type="number" min="0" class="form-control ucase" id="CantCuot" required>
+						</div>
+					</div>
+
+					<div class="form-group row">
+						<label for="DiaVenc" class="control-label col-md-2">Vencimiento en el día:</label>
+						<div class="col-md-8">
+							<input type="number" min="1" max="28" class="form-control ucase" id="DiaVenc" value="10" required>
 						</div>
 					</div>
 

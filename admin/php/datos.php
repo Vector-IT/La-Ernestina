@@ -8,6 +8,7 @@
 	require_once 'vectorForms.php';
 
 	require_once 'custom/caja.php';
+	require_once 'custom/clientes.php';
 	require_once 'custom/producto.php';
 	require_once 'custom/cuota.php';
 	require_once 'custom/cuotapago.php';
@@ -198,6 +199,19 @@
 	$config->tablas["tipospagos"] = $tabla;
 
 	/**
+	 * ESTADOS CLIENTES
+	 */
+	$tabla = new Tabla("estadosclientes", "estadosclientes", "Estados de clientes", "el Estado", false, "objeto/estadosclientes.php", "fa-wrench");
+	$tabla->labelField = "NombEstaClie";
+	$tabla->isSubItem = true;
+
+	$tabla->addField("NumeEstaClie", "number", 0, "Número", false, true, true);
+	$tabla->addField("NombEstaClie", "text", 100, "Nombre");
+	$tabla->fields["NombEstaClie"]["cssControl"] = "ucase";
+
+	$config->tablas["estadosclientes"] = $tabla;
+
+	/**
 	 * ESTADOS PRODUCTOS
 	 */
 	$tabla = new Tabla("estadosproductos", "estadosproductos", "Estados de productos", "el Estado", false, "objeto/estadosproductos.php", "fa-wrench");
@@ -301,7 +315,6 @@
 	];
 
 	$tabla->btnList = [
-		new btnListItem('btnVerEstados', "Estados", '<i class="fa fa-archive fa-fw" aria-hidden="true"></i>', "btn-info", 'button', "", "verEstados"),
 		new btnListItem('btnAsigClie', 'Asignar Cliente', '<i class="fas fa-plus-circle fa-fw"></i>', 'btn-success', 'button', '', 'asignarCliente'),
 		new btnListItem('btnBorrClie', 'Borrar Cliente', '<i class="fa fa-times fa-fw"></i>', 'btn-danger', 'button', '', 'borrarCliente'),
 		new btnListItem('btnVerCliente', 'Ver Cliente', '<i class="far fa-id-card"></i>', 'btn-secondary', 'button', '', 'verCliente', '', 'return ($fila["NumeClie"] != "");'),
@@ -322,15 +335,7 @@
 	$tabla->fields["ValoProd"]["txtAlign"] = "right";
 	$tabla->fields["ValoProd"]["txtBefore"] = "$ ";
 
-	$tabla->addField("NumeEstaProd", "select", 0, "Estado", true, false, false, true, '1', '', 'estadosproductos', 'NumeEstaProd', 'NombEstaProd');
-
-	$tabla->addFieldSelect("CantDias", 0, 'Días', false, '', '(SELECT NumeProd, MAX(FechRegi) FechRegi FROM productosestados GROUP BY NumeProd)', 'se', 'NumeProd', 'FechRegi');
-	$tabla->fields["CantDias"]["name"] = "NumeProd";
-	$tabla->fields["CantDias"]["formatDb"] = "TIMESTAMPDIFF(DAY, FechRegi, SYSDATE())";
-	$tabla->fields["CantDias"]["nameAlias"] = "CantDias";
-	$tabla->fields["CantDias"]["txtAlign"] = "right";
-	$tabla->fields["CantDias"]["showOnForm"] = false;
-	$tabla->fields["CantDias"]["condFormat"] = 'return $this->colorEstado($field, $fila);';
+	$tabla->addFieldSelect("NumeEstaProd", 0, "Estado", true, '1', 'estadosproductos', '', 'NumeEstaProd', 'NombEstaProd', '', '', 'NumeEstaProd');
 
 	$tabla->addField("NumeClie", "select", 100, "Cliente", false, false, false, true, '', '', 'clientes', 'NumeClie', 'NombClie', 'NumeEsta = 1', 'NombClie');
 	$tabla->fields["NumeClie"]["showOnForm"] = false;
@@ -343,42 +348,11 @@
 	$tabla->fields["InteresDiario"]["showOnForm"] = false;
 	$tabla->fields["InteresDiario"]["txtAlign"] = "right";
 	$tabla->fields["InteresDiario"]["txtAfter"] = "%";
+	$tabla->fields["InteresDiario"]["step"] = "0.01";
 
 	$tabla->addFieldSelect('NumeVend', 0, 'Vendedor', true, '', 'usuarios', '', 'NumeUser', 'NombPers', 'NumeCarg = 4', '', 'NombPers');
 
 	$config->tablas["productos"] = $tabla;
-
-	/**
-	 * SOLICITUDES ESTADOS
-	 */
-	$tabla = new Tabla("productosestados", "productosestados", "Estados", "el estado", false, "", "fa-archive");
-	$tabla->masterTable = "productos";
-	$tabla->masterFieldId = "NumeProd";
-	$tabla->masterFieldIdMaster = "NumeProd";
-	$tabla->masterFieldName = "NombProd";
-	$tabla->order = "FechRegi";
-
-	$tabla->allowNew = false;
-	$tabla->allowEdit = false;
-	$tabla->numeCargDelete = 1;
-
-	$tabla->regUser = true;
-
-	$tabla->addFieldId("CodiIden", 'Número', true, true);
-
-	$tabla->addField("NumeProd", "hidden", "Plan");
-	$tabla->fields["NumeProd"]["isHiddenInList"] = true;
-
-	$tabla->addField("FechRegi", "datetime", 0, "Fecha / Hora");
-	$tabla->addFieldSelect("NumeEstaProd", 0, "Estado", true, '', 'estadosproductos', '', 'NumeEstaProd', 'NombEstaProd', '', '', 'NombEstaProd');
-
-	$strSQL = "(SELECT NumeUser NumeVend, NombPers NombVend";
-	$strSQL.= $crlf."FROM usuarios)";
-	$tabla->addFieldSelect("NumeVend", 50, "Vendedor", false, '', $strSQL, 'vendedores', 'NumeVend', 'NombVend', '', '', 'NombVend', true);
-
-	$tabla->addFieldSelect("NumeUser", 0, 'Usuario', true, '', 'usuarios', '', 'NumeUser', 'NombPers');
-
-	$config->tablas["productosestados"] = $tabla;
 
 	/**
 	 * CUOTAS
@@ -528,13 +502,14 @@
 	/**
 	 * CLIENTES
 	 */
-	$tabla = new Tabla("clientes", "clientes", "Clientes", "el Cliente", true, "objeto/clientes.php", "far fa-id-card");
+	$tabla = new Cliente("clientes", "clientes", "Clientes", "el Cliente", true, "objeto/clientes.php", "far fa-id-card");
 	$tabla->labelField = "NombClie";
 
 	$tabla->searchFields = [
 		new SearchField('NombClie', 'LIKE')
 	];
 
+	$tabla->btnList[] = new btnListItem('btnVerEstados', "Estados", '<i class="fa fa-archive fa-fw" aria-hidden="true"></i>', "btn-info", 'button', "", "verEstados");
 	$tabla->btnList[] = new btnListItem('btnVerSeguimientos', "Seguimientos", '<i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>', "btn-info", 'button', "", "verSeguimientos");
 
 	$tabla->addField("NumeClie", "number", 0, "Numero", false, true, true);
@@ -581,9 +556,45 @@
 	$tabla->addField("ObseClie", "textarea", 201, "Observaciones", false);
 	$tabla->fields["ObseClie"]["isHiddenInList"] = true;
 
-	$tabla->addField("NumeEsta", "select", 0, "Estado", true, false, false, true, '1', '', 'estados', 'NumeEsta', 'NombEsta', '', 'NombEsta');
+	$tabla->addFieldSelect("CantDias", 0, 'Días', false, '', '(SELECT NumeClie, MAX(FechRegi) FechRegi FROM clientesestados GROUP BY NumeClie)', 'se', 'NumeClie', 'FechRegi');
+	$tabla->fields["CantDias"]["name"] = "NumeClie";
+	$tabla->fields["CantDias"]["formatDb"] = "TIMESTAMPDIFF(DAY, FechRegi, SYSDATE())";
+	$tabla->fields["CantDias"]["nameAlias"] = "CantDias";
+	$tabla->fields["CantDias"]["txtAlign"] = "right";
+	$tabla->fields["CantDias"]["showOnForm"] = false;
+	$tabla->fields["CantDias"]["condFormat"] = 'return $this->colorEstado($field, $fila);';
+
+	$tabla->addField("NumeEstaClie", "select", 0, "Estado", true, false, false, true, '1', '', 'estadosclientes', 'NumeEstaClie', 'NombEstaClie', '', 'NumeEstaClie');
 
 	$config->tablas["clientes"] = $tabla;
+
+	/**
+	 * CLIENTES ESTADOS
+	 */
+	$tabla = new Tabla("clientesestados", "clientesestados", "Estados", "el estado", false, "", "fa-archive");
+	$tabla->masterTable = "clientes";
+	$tabla->masterFieldId = "NumeClie";
+	$tabla->masterFieldIdMaster = "NumeClie";
+	$tabla->masterFieldName = "NombClie";
+	$tabla->order = "FechRegi";
+
+	$tabla->allowNew = false;
+	$tabla->allowEdit = false;
+	$tabla->numeCargDelete = 1;
+
+	$tabla->regUser = true;
+
+	$tabla->addFieldId("CodiIden", 'Número', true, true);
+
+	$tabla->addField("NumeClie", "hidden", "Plan");
+	$tabla->fields["NumeClie"]["isHiddenInList"] = true;
+
+	$tabla->addField("FechRegi", "datetime", 0, "Fecha / Hora");
+	$tabla->addFieldSelect("NumeEstaClie", 0, "Estado", true, '', 'estadosclientes', '', 'NumeEstaClie', 'NombEstaClie', '', '', 'NombEstaClie');
+
+	$tabla->addFieldSelect("NumeUser", 0, 'Usuario', true, '', 'usuarios', '', 'NumeUser', 'NombPers');
+
+	$config->tablas["clientesestados"] = $tabla;
 
 	/**
 	 * SEGUIMIENTOS DE PRODUCTOS
@@ -624,7 +635,6 @@
 	$tabla->addField("ObseSegu", "textarea", 100, "Observaciones");
 
 	$config->tablas["seguimientos"] = $tabla;
-
 
 	/**
 	 * CHEQUES

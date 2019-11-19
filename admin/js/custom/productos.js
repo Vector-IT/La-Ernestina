@@ -85,6 +85,7 @@ function cerrarModal() {
 	var impoAnti = $('#ImpoAnti').val();
 	var interes = $('#Interes').val();
 	var fechInic = $('#Fecha').val();
+	var diaVenc = $('#DiaVenc').val();
 	var cantCuot = $('#CantCuot').val();
 	var cantCuotExtr = $('#cuotasExtra').children().length;
 
@@ -106,7 +107,7 @@ function cerrarModal() {
 			operacion: '100',
 			tabla: 'productos',
 			field: 'Asignar Cliente',
-			dato: { NumeProd: numeProd, NumeClie: numeClie, ImpoAnti: impoAnti, Interes: interes, FechInic: fechInic, CantCuot: cantCuot, CuotExtr: montoCuot, FechExtr: fechExtr }
+			dato: { NumeProd: numeProd, NumeClie: numeClie, ImpoAnti: impoAnti, Interes: interes, FechInic: fechInic, DiaVenc: diaVenc, CantCuot: cantCuot, CuotExtr: montoCuot, FechExtr: fechExtr }
 		},
 		function(data) {
 			divActualizando.close();
