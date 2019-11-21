@@ -364,7 +364,7 @@
 	/**
 	 * PRODUCTOS
 	 */
-	$tabla = new Producto("productos", "productos", "Planes", "el Plan", true, "objeto/productos.php", "far fa-paper-plane", "NumeProd");
+	$tabla = new Producto("productos", "productos", "Stock y Planes", "el Registro", true, "objeto/productos.php", "far fa-paper-plane", "NumeProd");
 	$tabla->labelField = "NombProd";
 	$tabla->allowDelete = false;
 
@@ -374,7 +374,7 @@
 
 	$tabla->btnList = [
 		new btnListItem('btnAsigClie', 'Asignar Cliente', '<i class="fas fa-plus-circle fa-fw"></i>', 'btn-success', 'button', '', 'asignarCliente'),
-		new btnListItem('btnBorrClie', 'Borrar Cliente', '<i class="fa fa-times fa-fw"></i>', 'btn-danger', 'button', '', 'borrarCliente'),
+		new btnListItem('btnBorrClie', 'Borrar Cliente', '<i class="fa fa-times fa-fw"></i>', 'btn-danger', 'button', '', 'borrarCliente', 1),
 		new btnListItem('btnVerCliente', 'Ver Cliente', '<i class="far fa-id-card"></i>', 'btn-secondary', 'button', '', 'verCliente', '', 'return ($fila["NumeClie"] != "");'),
 		new btnListItem('btnVerCuot', 'Ver Cuotas', '<i class="far fa-map"></i>', 'btn-secondary', 'a', 'objeto/cuotas.php?NumeProd'),
 	];
@@ -388,6 +388,11 @@
 
 	$tabla->addFieldId("NumeProd", "Número de Plan", true, true);
 	$tabla->addField("NombProd", "text", 100, "Producto");
+
+	$tabla->addField('ImpoCost', 'number', 0, 'Costo');
+	$tabla->fields["ImpoCost"]["txtAlign"] = "right";
+	$tabla->fields["ImpoCost"]["txtBefore"] = "$ ";
+	$tabla->fields['ImpoCost']['numeCarg'] = 2;
 
 	$tabla->addField("ValoProd", "number", 0, "Precio");
 	$tabla->fields["ValoProd"]["txtAlign"] = "right";
