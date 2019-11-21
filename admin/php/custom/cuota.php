@@ -3,8 +3,7 @@ namespace VectorForms;
 
 class Cuota extends Tabla
 {
-    public function customFunc($post)
-    {
+    public function customFunc($post) {
         global $config;
 
         switch ($post['field']) {
@@ -13,25 +12,20 @@ class Cuota extends Tabla
 			break;
 
 			case 'CalcInterses':
-				$cuota = $config->buscarDato("SELECT NumeProd, DATEDIFF(SYSDATE(), FechVenc) Dias FROM cuotas WHERE CodiIden = ". $post["CodiIden"]);
+				$cuota = $config->buscarDato("SELECT NumeProd, DATEDIFF(STR_TO_DATE('{$post["Fecha"]}', '%Y-%m-%d'), FechVenc) Dias FROM cuotas WHERE CodiIden = ". $post["CodiIden"]);
 				$intereses = \floatval($config->buscarDato("SELECT InteresDiario FROM productos WHERE NumeProd = ". $cuota["NumeProd"]));
 
 				if ($intereses != 0) {
-					if ($cuota["Dias"] >= 0) {
-						$strSQL = "UPDATE cuotas SET ImpoOtro = {$cuota["Dias"]} * (ImpoCuot * {$intereses} / 100) WHERE CodiIden = ". $post["CodiIden"];
-					}
-					else {
-						$strSQL = "UPDATE cuotas SET ImpoOtro = ({$cuota["Dias"]} * (ImpoCuot * {$intereses} / 100)) WHERE CodiIden = ". $post["CodiIden"];
-					}
+					$strSQL = "UPDATE cuotas SET ImpoOtro = {$cuota["Dias"]} * (ImpoCuot * {$intereses} / 100) WHERE CodiIden = ". $post["CodiIden"];
 					$result = $config->ejecutarCMD($strSQL);
+
 					return $result;
 				}
 			break;
         }
     }
 
-    public function editar($datos, $idViejo)
-    {
+    public function editar($datos, $idViejo) {
         global $config;
 
         $result = parent::editar($datos, $idViejo);
@@ -69,8 +63,7 @@ class Cuota extends Tabla
         return $result;
     }
 
-    public function listar($strFiltro = "", $conBotones = true, $btnList = [], $order = '', $pagina = 1, $strFiltroSQL = '', $conCheckboxes = false)
-    {
+    public function listar($strFiltro = "", $conBotones = true, $btnList = [], $order = '', $pagina = 1, $strFiltroSQL = '', $conCheckboxes = false) {
         global $config, $crlf;
 
         $cuotas = $config->buscarDato("SELECT SUM(ImpoCuot + ImpoOtro) FROM cuotas WHERE NumeProd = ".$_REQUEST[$this->masterFieldId]);

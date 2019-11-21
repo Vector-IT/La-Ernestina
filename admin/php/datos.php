@@ -44,11 +44,11 @@
 			new MenuItem("Salir del Sistema", 'logout.php', '', 'fa-sign-out-alt', '', false, false)
 	];
 
-	$config->cssFiles[] = "admin/css/custom/custom.css";
 	$config->cssFiles[] = "admin/js/custom/fancybox/jquery.fancybox.min.css";
+	$config->cssFiles[] = "admin/css/custom/custom.css";
 
-	$config->jsFiles[] = 'admin/js/custom/publicos.js?'. rand(1, 999);
 	$config->jsFiles[] = 'admin/js/custom/fancybox/jquery.fancybox.min.js';
+	$config->jsFiles[] = 'admin/js/custom/publicos.js?'. rand(1, 999);
 
 	/**
 	 * TABLAS
@@ -387,7 +387,7 @@
 	$tabla->includeList = ["php/modals/prodCliente.php"];
 
 	$tabla->addFieldId("NumeProd", "Número de Plan", true, true);
-	$tabla->addField("NombProd", "text", 100, "Nombre");
+	$tabla->addField("NombProd", "text", 100, "Producto");
 
 	$tabla->addField("ValoProd", "number", 0, "Precio");
 	$tabla->fields["ValoProd"]["txtAlign"] = "right";
@@ -424,8 +424,6 @@
 	$tabla->order = 'FechVenc, NumeCuot';
 
 	$tabla->btnList[] = new btnListItem('btnPagos', 'Ver Pagos', '<i class="fas fa-cash-register fa-fw"></i>', 'btn-primary', 'a', 'objeto/cuotaspagos.php?CodiIden');
-
-	$tabla->jsFiles = ["admin/js/custom/cuotas.js"];
 
 	$tabla->allowNew = false;
 	$tabla->allowDelete = false;
@@ -479,26 +477,21 @@
 
 	$tabla->regUser = true;
 
+	$tabla->includeList = ["php/modals/mdlIntereses.php"];
+
 	$tabla->btnForm[] = new btnListItem('btnCheques', 'Cheques', '<i class="fa fa-credit-card fa-fw"></i> Cheques', 'btn-primary', 'button', '', 'abrirCheques();');
-	$tabla->btnForm[] = new btnListItem('btnActualizar', 'Calcular Interés', '<i class="fas fa-percentage fa-fw"></i> Calcular Interés', 'btn-success', 'button', '', 'calcularIntereses()');
+	$tabla->btnForm[] = new btnListItem('btnActualizar', 'Calcular Interés', '<i class="fas fa-percentage fa-fw"></i> Calcular Interés', 'btn-success', 'button', '', "$('#modalIntereses').modal('show');");
 
 	$tabla->btnList = [
 		new btnListItem('btnCambiarEstado', 'Cambiar Estado', '<i class="fas fa-retweet fa-fw"></i>', 'btn-warning', 'button', '', 'cambiarEstado')
 	];
 
-	$tabla->includeList = ["php/modals/cheques.php"];
-
 	$tabla->jsFiles = [
 		"admin/js/custom/cuotaspagos.js",
-		"admin/js/custom/jquery.fancybox.min.js"
 	];
 
 	$tabla->jsOnLoad = "afterLoad();";
 	$tabla->jsOnList = "afterList();";
-
-	$tabla->cssFiles = [
-		"admin/css/custom/jquery.fancybox.min.css"
-	];
 
 	$tabla->addFieldId("NumePago", "NumePago", false, false);
 	$tabla->fields["NumePago"]["isHiddenInForm"] = true;

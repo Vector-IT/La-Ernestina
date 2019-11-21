@@ -83,6 +83,7 @@ function cerrarModal() {
 	var numeProd = $('#hdnNumeProd').val();
 	var numeClie = $('#NumeClie').val();
 	var impoAnti = $('#ImpoAnti').val();
+	var impoAnti2 = $('#ImpoAnti2').val();
 	var interes = $('#Interes').val();
 	var fechInic = $('#Fecha').val();
 	var diaVenc = $('#DiaVenc').val();
@@ -107,7 +108,7 @@ function cerrarModal() {
 			operacion: '100',
 			tabla: 'productos',
 			field: 'Asignar Cliente',
-			dato: { NumeProd: numeProd, NumeClie: numeClie, ImpoAnti: impoAnti, Interes: interes, FechInic: fechInic, DiaVenc: diaVenc, CantCuot: cantCuot, CuotExtr: montoCuot, FechExtr: fechExtr }
+			dato: { NumeProd: numeProd, NumeClie: numeClie, ImpoAnti: impoAnti, ImpoAnti2: impoAnti2, Interes: interes, FechInic: fechInic, DiaVenc: diaVenc, CantCuot: cantCuot, CuotExtr: montoCuot, FechExtr: fechExtr }
 		},
 		function(data) {
 			divActualizando.close();

@@ -12,6 +12,7 @@ class Producto extends Tabla
                 $numeClie = $post["dato"]["NumeClie"];
                 $valoProd = floatval($config->buscarDato("SELECT ValoProd FROM productos WHERE NumeProd = ". $numeProd));
                 $impoAnti = floatval($post["dato"]["ImpoAnti"]);
+                $impoAnti2 = floatval($post["dato"]["ImpoAnti2"]);
                 $cantCuot = intval($post["dato"]["CantCuot"]);
 				$fechInic = $post["dato"]["FechInic"];
 				$diaVenc = $post["dato"]["DiaVenc"];
@@ -35,19 +36,21 @@ class Producto extends Tabla
                 $fecha = new \DateTime($fechInic);
 
 				if ($result === true) {
-					//Creo el anticipo
-					$datos = array(
-						"CodiIden"=>"",
-						"NumeCuot"=>"0",
-						"FechCuot"=>$fecha->format("Y-m-d"),
-						"NumeProd"=>$numeProd,
-						"NumeTipoCuot"=>"1",
-						"FechVenc"=>$fecha->format("Y-m-d"),
-						"ImpoCuot"=>$impoAnti,
-						"ImpoOtro"=>"0",
-						"NumeEstaCuot"=>"1"
-					);
-					$resCuota = $cuota->insertar($datos);
+					//Creo el anticipo en plata
+					if ($impoAnti > 0) {
+						$datos = array(
+							"CodiIden"=>"",
+							"NumeCuot"=>"0",
+							"FechCuot"=>$fecha->format("Y-m-d"),
+							"NumeProd"=>$numeProd,
+							"NumeTipoCuot"=>"1",
+							"FechVenc"=>$fecha->format("Y-m-d"),
+							"ImpoCuot"=>$impoAnti,
+							"ImpoOtro"=>"0",
+							"NumeEstaCuot"=>"1"
+						);
+						$resCuota = $cuota->insertar($datos);
+					}
 
 					//Creo las cuotas extraordinarias
 					$I = 0;
@@ -74,7 +77,7 @@ class Producto extends Tabla
 
 					//Creo las cuotas
 					if (intval($cantCuot) > 0) {
-						$saldo = $valoProd - $impoAnti;
+						$saldo = $valoProd - $impoAnti - $impoAnti2;
 						$impoCuot = number_format($saldo / $cantCuot, 2, ".", "");
 
 						$fechVenc = new \DateTime($fecha->format("Y-m-"). $diaVenc);
@@ -95,6 +98,35 @@ class Producto extends Tabla
 							);
 							$resCuota = $cuota->insertar($datos);
 						}
+					}
+
+					//Creo el anticipo en usado
+					if ($impoAnti2 > 0) {
+						$datos = array(
+							"CodiIden"=>"",
+							"NumeCuot"=>"0",
+							"FechCuot"=>$fecha->format("Y-m-d"),
+							"NumeProd"=>$numeProd,
+							"NumeTipoCuot"=>"4",
+							"FechVenc"=>$fecha->format("Y-m-d"),
+							"ImpoCuot"=>$impoAnti2,
+							"ImpoOtro"=>"0",
+							"NumeEstaCuot"=>"1"
+						);
+						$resCuota = $cuota->insertar($datos);
+
+						$cPago = $config->getTabla("cuotaspagos");
+
+						$datos = array(
+							"NumePago" => '',
+							"CodiIden" => $resCuota['id'],
+							"FechPago"=>$fecha->format("Y-m-d"),
+							"NumeTipoPago" => 3,
+							"ImpoPago" => $impoAnti2,
+							"NumeEsta" => 1
+						);
+
+						$cPago->insertar($datos);
 					}
 				}
                 return $result;

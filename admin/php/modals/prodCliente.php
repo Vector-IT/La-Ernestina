@@ -20,9 +20,16 @@
 					</div>
 
 					<div class="form-group row">
-						<label for="ImpoAnti" class="control-label col-md-2">Anticipo:</label>
+						<label for="ImpoAnti" class="control-label col-md-2">Anticipo Eft:</label>
 						<div class="col-md-8">
 							<input type="number" min="0" class="form-control" id="ImpoAnti" required value="0">
+						</div>
+					</div>
+
+					<div class="form-group row">
+						<label for="ImpoAnti2" class="control-label col-md-2">Anticipo Usado:</label>
+						<div class="col-md-8">
+							<input type="number" min="0" class="form-control" id="ImpoAnti2" required value="0">
 						</div>
 					</div>
 

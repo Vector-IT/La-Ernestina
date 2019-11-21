@@ -86,8 +86,21 @@ class Caja extends Tabla
 
         $strSalida = '';
 
-        $credito = $config->buscarDato("SELECT SUM(ImpoCaja) FROM ". $this->tabladb ." WHERE NumeEsta = 1 AND NumeTipoCaja IN (SELECT NumeTIpoCaja FROM tiposcaja WHERE NumeTipoOper = 1)");
-        $debito = $config->buscarDato("SELECT SUM(ImpoCaja) FROM ". $this->tabladb ." WHERE NumeEsta = 1 AND NumeTipoCaja IN (SELECT NumeTIpoCaja FROM tiposcaja WHERE NumeTipoOper = 2)");
+		if ($this->name == 'caja') {
+			$strSQL2 = "SELECT SUM(Credito) FROM (";
+			$strSQL2.= $crlf."SELECT SUM(ImpoCaja) Credito FROM ". $this->tabladb;
+			$strSQL2.= $crlf."WHERE NumeEsta = 1 AND NumeTipoCaja IN (SELECT NumeTipoCaja FROM tiposcaja WHERE NumeTipoOper = 1)";
+			$strSQL2.= $crlf."UNION ALL ";
+			$strSQL2.= $crlf."SELECT SUM(ImpoPago) FROM cuotaspagos";
+			$strSQL2.= $crlf."WHERE NumeEsta = 1 AND NumeTipoPago = 1";
+			$strSQL2.= $crlf.") tabla";
+
+			$credito = $config->buscarDato($strSQL2);
+		}
+		else {
+			$credito = $config->buscarDato("SELECT SUM(ImpoCaja) FROM ". $this->tabladb ." WHERE NumeEsta = 1 AND NumeTipoCaja IN (SELECT NumeTipoCaja FROM tiposcaja WHERE NumeTipoOper = 1)");
+		}
+        $debito = $config->buscarDato("SELECT SUM(ImpoCaja) FROM ". $this->tabladb ." WHERE NumeEsta = 1 AND NumeTipoCaja IN (SELECT NumeTipoCaja FROM tiposcaja WHERE NumeTipoOper = 2)");
         $saldo = floatval($credito) - floatval($debito);
 
         if ($saldo >= 0) {

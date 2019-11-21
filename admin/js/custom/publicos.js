@@ -67,3 +67,51 @@ function verSeguimientos(numeClie) {
 		}
 	});
 }
+
+function verSeguimiento(numeSegu, numeClie) {
+	$.fancybox.open({
+		src: 'objeto/seguimientos.php?NumeClie=' + numeClie + '&id=' + numeSegu + '&menu=0&header=0&back=0',
+		type: 'iframe',
+		toolbar: false,
+		smallBtn: true,
+		lang: 'es',
+		i18n: {
+			es: {
+				CLOSE: 'Cerrar'
+			}
+		},
+		iframe: {
+			css: {
+				width: '95%',
+				height: '100%',
+				margin: '0'
+			}
+		}
+	});
+}
+
+
+function abrirCheques() {
+	$.fancybox.open({
+		src: 'objeto/cheques.php?menu=0&header=0',
+		type: 'iframe',
+		toolbar: false,
+		smallBtn: true,
+		lang: 'es',
+		i18n: {
+			es: {
+				CLOSE: 'Cerrar'
+			}
+		},
+		iframe: {
+			css: {
+				width: '95%',
+				height: '100%',
+				margin: '0'
+			}
+		},
+		afterClose: function() {
+			cargarCheques();
+		}
+	});
+}

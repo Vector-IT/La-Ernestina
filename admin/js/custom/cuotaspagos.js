@@ -1,20 +1,14 @@
 var $;
 
-function abrirCheques() {
-	$('[data-fancybox]').fancybox({
-		iframe: {
-			css: {
-				width: '100%',
-				height: '100%'
-			}
-		},
-		afterClose: function() {
-			cargarCheques();
-		}
+$(document).ready(function() {
+	$('#modalIntereses').on('shown.bs.modal', function() {
+		$('#Fecha').focus();
 	});
 
-	$('#modalCheques').click();
-}
+	$('#frmIntereses').submit(function() {
+		calcularIntereses();
+	});
+});
 
 function afterLoad() {
 	$('#CodiCheq').prop('disabled', true);
@@ -162,6 +156,9 @@ function validar() {
 
 function calcularIntereses() {
 	actualizando();
+
+	$('#modalIntereses').modal('hide');
+
 	var codiIden = getVariable('CodiIden');
 
 	$.post(
@@ -170,7 +167,8 @@ function calcularIntereses() {
 			operacion: '100',
 			tabla: 'cuotas',
 			field: 'CalcInterses',
-			CodiIden: codiIden
+			CodiIden: codiIden,
+			Fecha: $('#Fecha').val()
 		},
 		function(data) {
 			divActualizando.close();

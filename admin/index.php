@@ -92,23 +92,23 @@
 			Seguimientos del día
 		</p>
 		<?php
-			$strSQL = "SELECT ss.NumeSegu, s.NumeProd, s.NombProd, ts.NombTipoSegu, ss.ObseSegu";
-			$strSQL.= $crlf."FROM seguimientos ss";
-			$strSQL.= $crlf."INNER JOIN (SELECT NumeProd, NombProd";
-			$strSQL.= $crlf."			FROM productos s";
-			$strSQL.= $crlf."			) s ON ss.NumeProd = s.NumeProd";
-			$strSQL.= $crlf."INNER JOIN tiposseguimientos ts ON ss.NumeTipoSegu = ts.NumeTipoSegu";
+			$strSQL = "SELECT s.NumeSegu, s.NumeClie, c.NombClie, ts.NombTipoSegu, s.ObseSegu";
+			$strSQL.= $crlf."FROM seguimientos s";
+			$strSQL.= $crlf."INNER JOIN (SELECT NumeClie, NombClie";
+			$strSQL.= $crlf."			FROM clientes c";
+			$strSQL.= $crlf."			) c ON s.NumeClie = c.NumeClie";
+			$strSQL.= $crlf."INNER JOIN tiposseguimientos ts ON s.NumeTipoSegu = ts.NumeTipoSegu";
 			$strSQL.= $crlf."WHERE";
-			$strSQL.= $crlf."ss.NumeEstaSegu > 0";
-			$strSQL.= $crlf."AND ss.FechSegu = DATE_FORMAT(SYSDATE(), '%Y-%m-%d')";
+			$strSQL.= $crlf."s.NumeEstaSegu > 0";
+			$strSQL.= $crlf."AND s.FechSegu = DATE_FORMAT(SYSDATE(), '%Y-%m-%d')";
 
 			switch ($numeCarg) {
 				case '3': //Supervisor
-					$strSQL.= $crlf."AND ss.NumeUser IN (SELECT gvd.NumeUser FROM gruposventa gv, gruposventadetalles gvd WHERE gv.NumeGrup = gvd.NumeGrup AND gv.NumeSupe = ". $_SESSION['NumeUser'] .")";
+					$strSQL.= $crlf."AND s.NumeUser IN (SELECT gvd.NumeUser FROM gruposventa gv, gruposventadetalles gvd WHERE gv.NumeGrup = gvd.NumeGrup AND gv.NumeSupe = ". $_SESSION['NumeUser'] .")";
 				break;
 
 				case '4': //Vendedor
-					$strSQL.= $crlf."AND ss.NumeUser = ". $_SESSION['NumeUser'];
+					$strSQL.= $crlf."AND s.NumeUser = ". $_SESSION['NumeUser'];
 				break;
 			}
 
@@ -118,7 +118,6 @@
 				$strSalida = $crlf.'<table class="table table-striped table-bordered table-hover table-condensed table-sm sortable">';
 				$strSalida.= $crlf.'<thead>';
 				$strSalida.= $crlf.'<tr>';
-				$strSalida.= $crlf.'<th>Solicitud</th>';
 				$strSalida.= $crlf.'<th>Cliente</th>';
 				$strSalida.= $crlf.'<th>Tipo de seguimiento</th>';
 				$strSalida.= $crlf.'<th>Observación</th>';
@@ -128,11 +127,10 @@
 
 				while ($segui = $seguimientos->fetch_assoc()) {
 					$strSalida.= $crlf.'<tr>';
-					$strSalida.= $crlf.'<td>'. $segui["NumeProd"] .'</td>';
-					$strSalida.= $crlf.'<td>'. $segui["NombProd"] .'</td>';
+					$strSalida.= $crlf.'<td>'. $segui["NombClie"] .'</td>';
 					$strSalida.= $crlf.'<td>'. $segui["NombTipoSegu"] .'</td>';
 					$strSalida.= $crlf.'<td>'. $segui["ObseSegu"] .'</td>';
-					$strSalida.= $crlf.'<td class="text-center"><button class="btn btn-info btn-sm" title="Ver seguimiento" onclick="verSeguimiento('. $segui["NumeSegu"] .', '. $segui["NumeProd"] .');"><i class="fa fa-calendar-alt"></i></button></td>';
+					$strSalida.= $crlf.'<td class="text-center"><button class="btn btn-info btn-sm" title="Ver seguimiento" onclick="verSeguimiento('. $segui["NumeSegu"] .', '. $segui["NumeClie"] .');"><i class="fa fa-calendar-alt"></i></button></td>';
 					$strSalida.= $crlf.'</tr>';
 				}
 
@@ -151,22 +149,22 @@
 			Seguimientos de la semana
 		</p>
 		<?php
-			$strSQL = "SELECT ss.NumeSegu, ss.FechSegu, s.NumeProd, s.NombProd, ts.NombTipoSegu, ss.ObseSegu";
-			$strSQL.= $crlf."FROM seguimientos ss";
-			$strSQL.= $crlf."INNER JOIN (SELECT NumeProd, NombProd";
-			$strSQL.= $crlf."			FROM productos s";
-			$strSQL.= $crlf."			) s ON ss.NumeProd = s.NumeProd";
-			$strSQL.= $crlf."INNER JOIN tiposseguimientos ts ON ss.NumeTipoSegu = ts.NumeTipoSegu";
+			$strSQL = "SELECT s.NumeSegu, s.FechSegu, s.NumeClie, c.NombClie, ts.NombTipoSegu, s.ObseSegu";
+			$strSQL.= $crlf."FROM seguimientos s";
+			$strSQL.= $crlf."INNER JOIN (SELECT NumeClie, NombClie";
+			$strSQL.= $crlf."			FROM clientes c";
+			$strSQL.= $crlf."			) c ON s.NumeClie = c.NumeClie";
+			$strSQL.= $crlf."INNER JOIN tiposseguimientos ts ON s.NumeTipoSegu = ts.NumeTipoSegu";
 			$strSQL.= $crlf."WHERE";
-			$strSQL.= $crlf."ss.NumeEstaSegu > 0";
-			$strSQL.= $crlf."AND ss.FechSegu >= DATE_FORMAT(DATE_ADD(SYSDATE(), INTERVAL(-WEEKDAY(SYSDATE())) DAY), '%Y-%m-%d')";
+			$strSQL.= $crlf."s.NumeEstaSegu > 0";
+			$strSQL.= $crlf."AND s.FechSegu >= DATE_FORMAT(DATE_ADD(SYSDATE(), INTERVAL(-WEEKDAY(SYSDATE())) DAY), '%Y-%m-%d')";
 			switch ($numeCarg) {
 				case '3': //Supervisor
-					$strSQL.= $crlf."AND ss.NumeUser IN (SELECT gvd.NumeUser FROM gruposventa gv, gruposventadetalles gvd WHERE gv.NumeGrup = gvd.NumeGrup AND gv.NumeSupe = ". $_SESSION['NumeUser'] .")";
+					$strSQL.= $crlf."AND s.NumeUser IN (SELECT gvd.NumeUser FROM gruposventa gv, gruposventadetalles gvd WHERE gv.NumeGrup = gvd.NumeGrup AND gv.NumeSupe = ". $_SESSION['NumeUser'] .")";
 				break;
 
 				case '4': //Vendedor
-					$strSQL.= $crlf."AND ss.NumeUser = ". $_SESSION['NumeUser'];
+					$strSQL.= $crlf."AND s.NumeUser = ". $_SESSION['NumeUser'];
 				break;
 			}
 
@@ -176,7 +174,6 @@
 				$strSalida = $crlf.'<table class="table table-striped table-bordered table-hover table-condensed table-sm sortable">';
 				$strSalida.= $crlf.'<thead>';
 				$strSalida.= $crlf.'<tr>';
-				$strSalida.= $crlf.'<th>Solicitud</th>';
 				$strSalida.= $crlf.'<th>Fecha</th>';
 				$strSalida.= $crlf.'<th>Cliente</th>';
 				$strSalida.= $crlf.'<th>Tipo de seguimiento</th>';
@@ -187,12 +184,11 @@
 
 				while ($segui = $seguimientos->fetch_assoc()) {
 					$strSalida.= $crlf.'<tr>';
-					$strSalida.= $crlf.'<td>'. $segui["NumeProd"] .'</td>';
 					$strSalida.= $crlf.'<td>'. $segui["FechSegu"] .'</td>';
-					$strSalida.= $crlf.'<td>'. $segui["NombProd"] .'</td>';
+					$strSalida.= $crlf.'<td>'. $segui["NombClie"] .'</td>';
 					$strSalida.= $crlf.'<td>'. $segui["NombTipoSegu"] .'</td>';
 					$strSalida.= $crlf.'<td>'. $segui["ObseSegu"] .'</td>';
-					$strSalida.= $crlf.'<td class="text-center"><button class="btn btn-info btn-sm" title="Ver seguimiento" onclick="verSeguimiento('. $segui["NumeSegu"] .', '. $segui["NumeProd"] .');"><i class="fa fa-calendar-alt"></i></button></td>';
+					$strSalida.= $crlf.'<td class="text-center"><button class="btn btn-info btn-sm" title="Ver seguimiento" onclick="verSeguimiento('. $segui["NumeSegu"] .', '. $segui["NumeClie"] .');"><i class="fa fa-calendar-alt"></i></button></td>';
 					$strSalida.= $crlf.'</tr>';
 				}
 
@@ -211,22 +207,22 @@
 			Seguimientos del mes
 		</p>
 		<?php
-			$strSQL = "SELECT ss.NumeSegu, DATE_FORMAT(ss.FechSegu, '%d/%m/%Y') FechSegu, s.NumeProd, s.NombProd, ts.NombTipoSegu, ss.ObseSegu";
-			$strSQL.= $crlf."FROM seguimientos ss";
-			$strSQL.= $crlf."INNER JOIN (SELECT NumeProd, NombProd";
-			$strSQL.= $crlf."			FROM productos s";
-			$strSQL.= $crlf."			) s ON ss.NumeProd = s.NumeProd";
-			$strSQL.= $crlf."INNER JOIN tiposseguimientos ts ON ss.NumeTipoSegu = ts.NumeTipoSegu";
+			$strSQL = "SELECT s.NumeSegu, s.FechSegu, s.NumeClie, c.NombClie, ts.NombTipoSegu, s.ObseSegu";
+			$strSQL.= $crlf."FROM seguimientos s";
+			$strSQL.= $crlf."INNER JOIN (SELECT NumeClie, NombClie";
+			$strSQL.= $crlf."			FROM clientes c";
+			$strSQL.= $crlf."			) c ON s.NumeClie = c.NumeClie";
+			$strSQL.= $crlf."INNER JOIN tiposseguimientos ts ON s.NumeTipoSegu = ts.NumeTipoSegu";
 			$strSQL.= $crlf."WHERE";
-			$strSQL.= $crlf."ss.NumeEstaSegu > 0";
-			$strSQL.= $crlf."AND ss.FechSegu >= DATE_FORMAT(SYSDATE(), '%Y-%m-01')";
+			$strSQL.= $crlf."s.NumeEstaSegu > 0";
+			$strSQL.= $crlf."AND s.FechSegu >= DATE_FORMAT(SYSDATE(), '%Y-%m-01')";
 			switch ($numeCarg) {
 				case '3': //Supervisor
-					$strSQL.= $crlf."AND ss.NumeUser IN (SELECT gvd.NumeUser FROM gruposventa gv, gruposventadetalles gvd WHERE gv.NumeGrup = gvd.NumeGrup AND gv.NumeSupe = ". $_SESSION['NumeUser'] .")";
+					$strSQL.= $crlf."AND s.NumeUser IN (SELECT gvd.NumeUser FROM gruposventa gv, gruposventadetalles gvd WHERE gv.NumeGrup = gvd.NumeGrup AND gv.NumeSupe = ". $_SESSION['NumeUser'] .")";
 				break;
 
 				case '4': //Vendedor
-					$strSQL.= $crlf."AND ss.NumeUser = ". $_SESSION['NumeUser'];
+					$strSQL.= $crlf."AND s.NumeUser = ". $_SESSION['NumeUser'];
 				break;
 			}
 
@@ -236,7 +232,6 @@
 				$strSalida = $crlf.'<table class="table table-striped table-bordered table-hover table-condensed table-sm sortable">';
 				$strSalida.= $crlf.'<thead>';
 				$strSalida.= $crlf.'<tr>';
-				$strSalida.= $crlf.'<th>Solicitud</th>';
 				$strSalida.= $crlf.'<th>Fecha</th>';
 				$strSalida.= $crlf.'<th>Cliente</th>';
 				$strSalida.= $crlf.'<th>Tipo de seguimiento</th>';
@@ -247,12 +242,11 @@
 
 				while ($segui = $seguimientos->fetch_assoc()) {
 					$strSalida.= $crlf.'<tr>';
-					$strSalida.= $crlf.'<td>'. $segui["NumeProd"] .'</td>';
 					$strSalida.= $crlf.'<td>'. $segui["FechSegu"] .'</td>';
-					$strSalida.= $crlf.'<td>'. $segui["NombProd"] .'</td>';
+					$strSalida.= $crlf.'<td>'. $segui["NombClie"] .'</td>';
 					$strSalida.= $crlf.'<td>'. $segui["NombTipoSegu"] .'</td>';
 					$strSalida.= $crlf.'<td>'. $segui["ObseSegu"] .'</td>';
-					$strSalida.= $crlf.'<td class="text-center"><button class="btn btn-info btn-sm" title="Ver seguimiento" onclick="verSeguimiento('. $segui["NumeSegu"] .', '. $segui["NumeProd"] .');"><i class="fa fa-calendar-alt"></i></button></td>';
+					$strSalida.= $crlf.'<td class="text-center"><button class="btn btn-info btn-sm" title="Ver seguimiento" onclick="verSeguimiento('. $segui["NumeSegu"] .', '. $segui["NumeClie"] .');"><i class="fa fa-calendar-alt"></i></button></td>';
 					$strSalida.= $crlf.'</tr>';
 				}
 
