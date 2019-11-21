@@ -521,6 +521,7 @@ class Tabla
 						}
 					}
 
+					$strSalida.= $crlf.'				<div class="clearer"></div>';
 					$strSalida.= $crlf.'				<div id="divMsjModal" class="alert alert-danger" role="alert" style="display: none;">';
 					$strSalida.= $crlf.'					<span id="txtHintModal">Info</span>';
 					$strSalida.= $crlf.'				</div>';
@@ -2545,7 +2546,10 @@ class Tabla
 			$strSalida.= $crlf.'			}';
 			$strSalida.= $crlf.'			else {';
 			$strSalida.= $crlf.'				notifyDanger({title: "'.gral_updateerror.'", message:"<br>" + result.estado});';
-
+			$strSalida.= $crlf.'			}';
+			$strSalida.= $crlf;
+			$strSalida.= $crlf.'			if (result.sql) {';
+			$strSalida.= $crlf.'				console.log(result.sql);';
 			$strSalida.= $crlf.'			}';
 			$strSalida.= $crlf;
 			$strSalida.= $crlf.'		}';
@@ -2596,6 +2600,10 @@ class Tabla
 			$strSalida.= $crlf.'			}';
 			$strSalida.= $crlf.'			else {';
 			$strSalida.= $crlf.'				notifyDanger({title: "'.gral_updateerror.'", message:"<br>" + result.estado});';
+			$strSalida.= $crlf.'			}';
+			$strSalida.= $crlf;
+			$strSalida.= $crlf.'			if (result.sql) {';
+			$strSalida.= $crlf.'				console.log(result.sql);';
 			$strSalida.= $crlf.'			}';
 			$strSalida.= $crlf;
 			$strSalida.= $crlf.'		}';
@@ -2911,7 +2919,7 @@ class Tabla
 
 	public function insertar($datos) {
 		try {
-			global $config, $formatDateDB;
+			global $config, $formatDateDB, $nombSistema;
 			$strCampos = "";
 			$strValores = "";
 			$strID = "";
@@ -3004,6 +3012,16 @@ class Tabla
 			$strSQL.= " ($strCampos)";
 			$strSQL.= " VALUES ($strValores)";
 
+			//Seteo la variable a devolver
+			$result = [
+				'estado' => true,
+				'id' => ''
+			];
+
+			if (isset($_SESSION[$nombSistema. "_debug"])) {
+				$result["sql"] = $strSQL;
+			}
+
 			if (!$campoMultiple) {
 				if (!$this->IDFieldAutoIncrement) {
 					// SI EL ID NO ES AUTOINCREMENT
@@ -3023,12 +3041,6 @@ class Tabla
 				}
 			}
 			else {
-				//Seteo la variable a devolver
-				$result = [
-					'estado' => true,
-					'id' => ''
-				];
-
 				//Si tiene orden lo voy acomodando
 				if ($this->orderField != '') {
 					$strSQL_order = "UPDATE ". $this->tabladb;
@@ -3057,7 +3069,7 @@ class Tabla
 
 	public function editar($datos, $idViejo) {
 		try {
-			global $config, $formatDateDB;
+			global $config, $formatDateDB, $nombSistema;
 
 			$strCampos = "";
 			$strWhere = "";
@@ -3161,6 +3173,10 @@ class Tabla
 			$result["estado"] = $config->ejecutarCMD($strSQL);
 			$result["id"] = $strID;
 
+			if (isset($_SESSION[$nombSistema. "_debug"])) {
+				$result["sql"] = $strSQL;
+			}
+
 			// return json_encode($result);
 			return $result;
 		} catch (Exception $e) {
@@ -3170,7 +3186,7 @@ class Tabla
 
 	public function borrar($datos, $filtro = '') {
 		try {
-			global $config;
+			global $config, $nombSistema;
 			$strWhere = "";
 			$strID = "";
 
@@ -3212,6 +3228,10 @@ class Tabla
 			// Borro el registro
 			$result["estado"] = $config->ejecutarCMD($strSQL);
 			$result["id"] = $strID;
+
+			if (isset($_SESSION[$nombSistema. "_debug"])) {
+				$result["sql"] = $strSQL;
+			}
 
 			// return json_encode($result);
 			return $result;

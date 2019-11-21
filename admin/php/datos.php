@@ -201,7 +201,7 @@
 	/**
 	 * ESTADOS CLIENTES
 	 */
-	$tabla = new Tabla("estadosclientes", "estadosclientes", "Estados de clientes", "el Estado", false, "objeto/estadosclientes.php", "fa-wrench");
+	$tabla = new Tabla("estadosclientes", "estadosclientes", "Estados de clientes", "el Estado", true, "objeto/estadosclientes.php", "fa-wrench");
 	$tabla->labelField = "NombEstaClie";
 	$tabla->isSubItem = true;
 
@@ -214,7 +214,7 @@
 	/**
 	 * ESTADOS PRODUCTOS
 	 */
-	$tabla = new Tabla("estadosproductos", "estadosproductos", "Estados de productos", "el Estado", false, "objeto/estadosproductos.php", "fa-wrench");
+	$tabla = new Tabla("estadosproductos", "estadosproductos", "Estados de productos", "el Estado", true, "objeto/estadosproductos.php", "fa-wrench");
 	$tabla->labelField = "NombEstaProd";
 	$tabla->isSubItem = true;
 
@@ -242,13 +242,20 @@
 	/**
 	 * TIPOS DE CAJA
 	 */
-	$tabla = new Tabla("tiposcaja", "tiposcaja", "Tipos de operaciones de caja", "el registro", true, "objeto/tiposcaja.php", "fa-sitemap");
+	$tabla = new Tabla("tiposcaja", "tiposcaja", "Tipos de operaciones de caja", "el registro", true, "objeto/tiposcaja.php", "fa-sitemap", 'NumeTipoCaja');
 	$tabla->isSubItem = true;
 	$tabla->labelField = "NombTipoCaja";
 
+	$tabla->condEdit = 'return ($fila["NumeTipoCaja"] > 1);';
+	$tabla->condDelete = 'return ($fila["NumeTipoCaja"] > 1);';
+
 	$tabla->addFieldId("NumeTipoCaja", "Número");
 	$tabla->addField("NombTipoCaja", "text", 100, "Nombre");
-	$tabla->fields["NombTipoCaja"]["cssControl"] = "ucase";
+	$tabla->fields['NombTipoCaja']['cssControl'] = 'ucase';
+	$tabla->fields['NombTipoCaja']['attrControl'] = [
+		'onblur'=>'this.value = this.value.toUpperCase();',
+		'onkeypress'=>'if(event.keyCode == 13) this.value = this.value.toUpperCase();'
+	];
 	$tabla->addField("NumeTipoOper", "select", 0, "Tipo de operación", true, false, false, true, '', '', 'tiposoperaciones', 'NumeTipoOper', 'NombTipoOper');
 
 	$config->tablas["tiposcaja"] = $tabla;
@@ -274,9 +281,55 @@
 	$tabla->allowDelete = false;
 	$tabla->allowEdit = false;
 
+	$tabla->regUser = true;
+
 	$tabla->searchFields = [
 		new SearchField("NombCaja"),
-		new SearchField("FechCaja"),
+		new SearchField("FechCaja", '=', 'AND', 'caja.FechCaja', false, null, null, null, 'date'),
+		new SearchField("NumeTipoCaja", "=", "AND", "caja.NumeTipoCaja")
+	];
+	$tabla->jsFiles = ["admin/js/custom/caja.js"];
+
+	$tabla->jsOnLoad = "iniciar();";
+
+	$tabla->btnForm = [
+		new btnListItem('btnVerTodos', '', '<i class="fa fa-th fa-fw" aria-hidden="true"></i> Ver Todos', 'btn-primary', 'button', '', 'verTodos()')
+	];
+
+	$tabla->addFieldId("NumeCaja", "Número de caja", true, true);
+	$tabla->addField("FechCaja", "datetime", 80, "Fecha");
+	$tabla->fields["FechCaja"]["showOnForm"] = false;
+
+	$tabla->addField("NumeUser", "select", 0, "Usuario", true, false, false, true, '', '', 'usuarios', 'NumeUser', 'NombPers');
+	$tabla->fields["NumeUser"]["isHiddenInForm"] = true;
+
+	$tabla->addField("NombCaja", "text", 80, "Descripcion");
+	$tabla->fields['NombCaja']['cssControl'] = 'ucase';
+	$tabla->fields['NombCaja']['attrControl'] = [
+		'onblur'=>'this.value = this.value.toUpperCase();',
+		'onkeypress'=>'if(event.keyCode == 13) this.value = this.value.toUpperCase();'
+	];
+
+	$tabla->addField("NumeTipoCaja", "select", 80, "Tipo de operación", true, false, false, true, '', '', 'tiposcaja', 'NumeTipoCaja', 'NombTipoCaja', 'NumeTipoCaja > 1', 'NombTipoCaja');
+	$tabla->addField("ImpoCaja", "number", 0, "Importe");
+	$tabla->fields["ImpoCaja"]["step"] = "0.1";
+	$tabla->addField("NumeEsta", "select", 0, "Estado", true, false, false, true, '1', '', 'estados', 'NumeEsta', 'NombEsta', '', 'NombEsta');
+
+	$config->tablas["caja"] = $tabla;
+
+	/**
+	 * CAJA 2
+	 */
+	$tabla = new Caja("caja2", "caja2", "Caja 2", "el detalle", true, "objeto/caja2.php", "fas fa-money-bill");
+	$tabla->labelField = "NombCaja";
+	$tabla->allowDelete = false;
+	$tabla->allowEdit = false;
+
+	$tabla->regUser = true;
+
+	$tabla->searchFields = [
+		new SearchField("NombCaja"),
+		new SearchField("FechCaja", '=', 'AND', 'caja.FechCaja', false, null, null, null, 'date'),
 		new SearchField("NumeTipoCaja", "=", "AND", "caja.NumeTipoCaja")
 	];
 	$tabla->jsFiles = ["admin/js/custom/caja.js"];
@@ -288,20 +341,25 @@
 	];
 
 	$tabla->addFieldId("NumeCaja", "Número de caja");
-	$tabla->addField("FechCaja", "date", 80, "Fecha");
-	$tabla->fields["FechCaja"]["isHiddenInForm"] = true;
+	$tabla->addField("FechCaja", "datetime", 80, "Fecha");
+	$tabla->fields["FechCaja"]["showOnForm"] = false;
 
 	$tabla->addField("NumeUser", "select", 0, "Usuario", true, false, false, true, '', '', 'usuarios', 'NumeUser', 'NombPers');
 	$tabla->fields["NumeUser"]["isHiddenInForm"] = true;
 
 	$tabla->addField("NombCaja", "text", 80, "Descripcion");
-	$tabla->fields["NombCaja"]["cssControl"] = "ucase";
-	$tabla->addField("NumeTipoCaja", "select", 80, "Tipo de operación", true, false, false, true, '', '', 'tiposcaja', 'NumeTipoCaja', 'NombTipoCaja', '', 'NombTipoCaja');
+	$tabla->fields['NombCaja']['cssControl'] = 'ucase';
+	$tabla->fields['NombCaja']['attrControl'] = [
+		'onblur'=>'this.value = this.value.toUpperCase();',
+		'onkeypress'=>'if(event.keyCode == 13) this.value = this.value.toUpperCase();'
+	];
+
+	$tabla->addField("NumeTipoCaja", "select", 80, "Tipo de operación", true, false, false, true, '', '', 'tiposcaja', 'NumeTipoCaja', 'NombTipoCaja', 'NumeTipoCaja > 1', 'NombTipoCaja');
 	$tabla->addField("ImpoCaja", "number", 0, "Importe");
 	$tabla->fields["ImpoCaja"]["step"] = "0.1";
 	$tabla->addField("NumeEsta", "select", 0, "Estado", true, false, false, true, '1', '', 'estados', 'NumeEsta', 'NombEsta', '', 'NombEsta');
 
-	$config->tablas["caja"] = $tabla;
+	$config->tablas["caja2"] = $tabla;
 
 	/**
 	 * PRODUCTOS
@@ -418,6 +476,8 @@
 	$tabla->masterFieldName = "NumeCuot";
 	$tabla->allowEdit = false;
 	$tabla->allowDelete = false;
+
+	$tabla->regUser = true;
 
 	$tabla->btnForm[] = new btnListItem('btnCheques', 'Cheques', '<i class="fa fa-credit-card fa-fw"></i> Cheques', 'btn-primary', 'button', '', 'abrirCheques();');
 	$tabla->btnForm[] = new btnListItem('btnActualizar', 'Calcular Interés', '<i class="fas fa-percentage fa-fw"></i> Calcular Interés', 'btn-success', 'button', '', 'calcularIntereses()');

@@ -9,7 +9,7 @@ class Caja extends Tabla
 
         switch ($post['field']) {
             case "NumeEsta":
-                return $config->ejecutarCMD("UPDATE caja SET NumeEsta = NOT NumeEsta WHERE NumeCaja = ". $post["dato"]["NumeCaja"]);
+                return $config->ejecutarCMD("UPDATE ". $this->tabladb ." SET NumeEsta = NOT NumeEsta WHERE NumeCaja = ". $post["dato"]["NumeCaja"]);
                 break;
         }
     }
@@ -20,18 +20,17 @@ class Caja extends Tabla
 
         $filtro = "";
 
-        $strSQL = "SELECT c.NumeCaja, c.FechCaja, c.NombCaja, c.NumeTipoCaja, c.ImpoCaja, c.NumeEsta, c.NumeUser,";
-        $strSQL.= $crlf." u.NombPers, tc.NombTipoCaja, tc.NumeTipoOper, e.NombEsta";
-        $strSQL.= $crlf." FROM (SELECT * FROM caja";
+        $strSQL = "SELECT c.NumeCaja, c.FechCaja, c.NombCaja, c.NumeTipoCaja, c.ImpoCaja, c.NumeEsta, c.NumeUser, u.NombPers, tc.NombTipoCaja, tc.NumeTipoOper, e.NombEsta";
+        $strSQL.= $crlf."FROM (SELECT * FROM ". $this->tabladb;
         if ($strFiltro == "") {
-            $strSQL.= $crlf." WHERE FechCaja > DATE_ADD(SYSDATE(), INTERVAL -30 DAY)";
+            $strSQL.= $crlf."WHERE FechCaja > DATE_ADD(SYSDATE(), INTERVAL -30 DAY)";
         } else {
             if (isset($strFiltro["FechCaja"])) {
                 if ($strFiltro["FechCaja"]["value"] != 'TODOS') {
                     if ($filtro != "") {
                         $filtro.= $crlf." AND ";
                     }
-                    $filtro.= "DATE_FORMAT(FechCaja, '%Y-%m') = '{$strFiltro["FechCaja"]["value"]}'";
+                    $filtro.= "DATE_FORMAT(FechCaja, '%Y-%m-%d') = '{$strFiltro["FechCaja"]["value"]}'";
                 }
             }
 
@@ -53,12 +52,31 @@ class Caja extends Tabla
                 $strSQL.= $crlf." WHERE ". $filtro;
             }
         }
-        $strSQL.= $crlf." ) c";
-        $strSQL.= $crlf." INNER JOIN usuarios u ON c.NumeUser = u.NumeUser";
-        $strSQL.= $crlf." INNER JOIN tiposcaja tc ON c.NumeTipoCaja = tc.NumeTipoCaja";
-        $strSQL.= $crlf." INNER JOIN estados e ON c.NumeEsta = e.NumeEsta";
+        $strSQL.= $crlf.") c";
+        $strSQL.= $crlf."INNER JOIN usuarios u ON c.NumeUser = u.NumeUser";
+        $strSQL.= $crlf."INNER JOIN tiposcaja tc ON c.NumeTipoCaja = tc.NumeTipoCaja";
+        $strSQL.= $crlf."INNER JOIN estados e ON c.NumeEsta = e.NumeEsta";
 
-        $strSQL.= $crlf." ORDER BY c.NumeCaja DESC";
+		if ($this->name == 'caja') {
+			$strSQL.= $crlf."UNION ALL";
+			$strSQL.= $crlf."SELECT 0, cp.FechPago, 'INGRESO CUOTA', 1, cp.ImpoPago, cp.NumeEsta, cp.NumeUser, u.NombPers, tc.NombTipoCaja, tc.NumeTipoOper, e.NombEsta";
+			$strSQL.= $crlf."FROM cuotaspagos cp";
+			$strSQL.= $crlf."INNER JOIN usuarios u ON cp.NumeUser = u.NumeUser";
+			$strSQL.= $crlf."INNER JOIN tiposcaja tc ON 1 = tc.NumeTipoCaja";
+			$strSQL.= $crlf."INNER JOIN estados e ON cp.NumeEsta = e.NumeEsta";
+			$strSQL.= $crlf."WHERE cp.NumeTipoPago = 1";
+			if ($strFiltro == "") {
+				$strSQL.= $crlf."AND cp.FechPago > DATE_ADD(SYSDATE(), INTERVAL -30 DAY)";
+			} else {
+				if (isset($strFiltro["FechPago"])) {
+					if ($strFiltro["FechPago"]["value"] != 'TODOS') {
+						$strSQL.= $crlf."AND DATE_FORMAT(cp.FechPago, '%Y-%m-%d') = '{$strFiltro["FechCaja"]["value"]}'";
+					}
+				}
+			}
+		}
+
+        $strSQL.= $crlf."ORDER BY 2 DESC";
 
 		$tabla = $config->cargarTabla($strSQL);
 
@@ -68,8 +86,8 @@ class Caja extends Tabla
 
         $strSalida = '';
 
-        $credito = $config->buscarDato("SELECT SUM(ImpoCaja) FROM caja WHERE NumeEsta = 1 AND NumeTipoCaja IN (SELECT NumeTIpoCaja FROM tiposcaja WHERE NumeTipoOper = 1)");
-        $debito = $config->buscarDato("SELECT SUM(ImpoCaja) FROM caja WHERE NumeEsta = 1 AND NumeTipoCaja IN (SELECT NumeTIpoCaja FROM tiposcaja WHERE NumeTipoOper = 2)");
+        $credito = $config->buscarDato("SELECT SUM(ImpoCaja) FROM ". $this->tabladb ." WHERE NumeEsta = 1 AND NumeTipoCaja IN (SELECT NumeTIpoCaja FROM tiposcaja WHERE NumeTipoOper = 1)");
+        $debito = $config->buscarDato("SELECT SUM(ImpoCaja) FROM ". $this->tabladb ." WHERE NumeEsta = 1 AND NumeTipoCaja IN (SELECT NumeTIpoCaja FROM tiposcaja WHERE NumeTipoOper = 2)");
         $saldo = floatval($credito) - floatval($debito);
 
         if ($saldo >= 0) {
@@ -83,7 +101,7 @@ class Caja extends Tabla
                 $strSalida.= $crlf.'<table class="table table-striped table-bordered table-hover table-condensed table-sm">';
 
                 $strSalida.= $crlf.'<tr>';
-                $strSalida.= $crlf.'<th>Número</th>';
+                // $strSalida.= $crlf.'<th>Número</th>';
                 $strSalida.= $crlf.'<th>Fecha</th>';
                 $strSalida.= $crlf.'<th>Usuario</th>';
                 $strSalida.= $crlf.'<th>Descripción</th>';
@@ -99,7 +117,7 @@ class Caja extends Tabla
 
                     $strSalida.= $crlf.'<tr class="'.($fila["NumeEsta"] != "1"?'txtTachado':'').'">';
 
-                    $strSalida.= $crlf.'<td id="NumeCaja'. $fila[$this->IDField].'">'.$fila['NumeCaja'].'</td>';
+                    $strSalida.= $crlf.'<input type="hidden" id="NumeCaja'. $fila[$this->IDField].'" value="'.$fila['NumeCaja'].'" />';
                     $strSalida.= $crlf.'<td id="FechCaja'. $fila[$this->IDField].'">'.$fila['FechCaja'].'</td>';
 
                     $strSalida.= $crlf.'<td class="ucase">'.$fila["NombPers"];
@@ -124,12 +142,17 @@ class Caja extends Tabla
                     $strSalida.= $crlf.'<input type="hidden" id="NumeEsta'.$fila[$this->IDField].'" value="'.$fila["NumeEsta"].'" />';
                     $strSalida.= $crlf.'</td>';
 
-                    //Botones
-                    if ($fila["NumeEsta"] == "1") {
-                        $strSalida.= $crlf.'<td class="text-center"><button class="btn btn-sm btn-danger" onclick="cambiarEstado(\''.$fila[$this->IDField].'\')">INACTIVAR</button></td>';
-                    } else {
-                        $strSalida.= $crlf.'<td class="text-center"><button class="btn btn-sm btn-success" onclick="cambiarEstado(\''.$fila[$this->IDField].'\')">ACTIVAR</button></td>';
-                    }
+					//Botones
+					if ($fila["NumeCaja"] != '0') {
+						if ($fila["NumeEsta"] == "1") {
+							$strSalida.= $crlf.'<td class="text-center"><button class="btn btn-sm btn-danger" onclick="cambiarEstado(\''.$fila[$this->IDField].'\')">INACTIVAR</button></td>';
+						} else {
+							$strSalida.= $crlf.'<td class="text-center"><button class="btn btn-sm btn-success" onclick="cambiarEstado(\''.$fila[$this->IDField].'\')">ACTIVAR</button></td>';
+						}
+					}
+					else {
+						$strSalida.= $crlf.'<td class="text-center"></td>';
+					}
 
                     $strSalida.= $crlf.'</tr>';
                 }
@@ -152,17 +175,7 @@ class Caja extends Tabla
 		return $resultado;
     }
 
-    public function insertar($datos)
-    {
-        global $config;
-
-        $datos["FechCaja"] = $config->buscarDato("SELECT SYSDATE()");
-        $datos["NumeUser"] = $_SESSION["NumeUser"];
-
-        return parent::insertar($datos);
-    }
-
-    public function createField2($field, $prefix = '', $conBuscador = false)
+    public function createFielda2($field, $prefix = '', $conBuscador = false)
     {
         global $crlf, $config;
 
