@@ -115,3 +115,25 @@ function abrirCheques() {
 		}
 	});
 }
+
+function enviarWhatsapp(strID) {
+	var numeTele = $('#NumeTele' + strID).val();
+
+	if (numeTele == '') {
+		numeTele = $('#NumeTele' + strID).text().trim();
+	}
+
+	window.open('https://wa.me/' + numeTele);
+}
+
+function enviarWhatsappCliente() {
+	var numeTele = $('#NumeTele').val();
+
+	window.open('https://wa.me/' + numeTele);
+}
+
+function enviarWhatsappOtro() {
+	var numeTele = $('[id^="NumeTele"]').val();
+
+	window.open('https://wa.me/' + numeTele);
+}

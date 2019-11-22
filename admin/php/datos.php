@@ -372,12 +372,12 @@
 		new SearchField('NombProd', 'LIKE')
 	];
 
-	$tabla->btnList = [
-		new btnListItem('btnAsigClie', 'Asignar Cliente', '<i class="fas fa-plus-circle fa-fw"></i>', 'btn-success', 'button', '', 'asignarCliente'),
-		new btnListItem('btnBorrClie', 'Borrar Cliente', '<i class="fa fa-times fa-fw"></i>', 'btn-danger', 'button', '', 'borrarCliente', 1),
-		new btnListItem('btnVerCliente', 'Ver Cliente', '<i class="far fa-id-card"></i>', 'btn-secondary', 'button', '', 'verCliente', '', 'return ($fila["NumeClie"] != "");'),
-		new btnListItem('btnVerCuot', 'Ver Cuotas', '<i class="far fa-map"></i>', 'btn-secondary', 'a', 'objeto/cuotas.php?NumeProd'),
-	];
+	$tabla->btnList[] = new btnListItem('btnAsigClie', 'Asignar Cliente', '<i class="fas fa-plus-circle fa-fw"></i>', 'btn-success', 'button', '', 'asignarCliente');
+	$tabla->btnList[] = new btnListItem('btnBorrClie', 'Borrar Cliente', '<i class="fa fa-times fa-fw"></i>', 'btn-danger', 'button', '', 'borrarCliente', 1);
+	$tabla->btnList[] = new btnListItem('btnVerCliente', 'Ver Cliente', '<i class="far fa-id-card"></i>', 'btn-secondary', 'button', '', 'verCliente', '', 'return ($fila["NumeClie"] != "");');
+	$tabla->btnList[] = new btnListItem('btnVerCuot', 'Ver Cuotas', '<i class="far fa-map"></i>', 'btn-secondary', 'a', 'objeto/cuotas.php?NumeProd');
+	$tabla->btnList[] = new btnListItem('btnWhatsapp', 'WhatsApp', '<i class="fab fa-whatsapp"></i>', 'btn-success', 'button', '', 'enviarWhatsapp');
+
 
 	$tabla->jsFiles = ["admin/js/custom/productos.js"];
 
@@ -402,6 +402,10 @@
 
 	$tabla->addField("NumeClie", "select", 100, "Cliente", false, false, false, true, '', '', 'clientes', 'NumeClie', 'NombClie', 'NumeEsta = 1', 'NombClie');
 	$tabla->fields["NumeClie"]["showOnForm"] = false;
+
+	$tabla->addFieldSelect('NumeTele', 0, 'Teléfono', true, '', 'clientes', '', 'NumeClie', 'NumeTele', '', '', 'NumeTele');
+	$tabla->fields['NumeTele']['name'] = 'NumeClie';
+	$tabla->fields["NumeTele"]["showOnForm"] = false;
 
 	$tabla->addField("CantCuot", "number", 0, "Cantidad de Cuotas");
 	$tabla->fields["CantCuot"]["showOnForm"] = false;
@@ -430,6 +434,8 @@
 
 	$tabla->btnList[] = new btnListItem('btnPagos', 'Ver Pagos', '<i class="fas fa-cash-register fa-fw"></i>', 'btn-primary', 'a', 'objeto/cuotaspagos.php?CodiIden');
 
+	$tabla->btnForm[] = new btnListItem('btnWhatsapp', 'WhatsApp', '<i class="fab fa-whatsapp"></i> Enviar WhatsApp', 'btn-success', 'button', '', 'enviarWhatsappOtro()');
+
 	$tabla->allowNew = false;
 	$tabla->allowDelete = false;
 
@@ -438,9 +444,18 @@
 	$tabla->addField("FechCuot", "date", 0, "Fecha de creación");
 	$tabla->fields["FechCuot"]["showOnForm"] = false;
 
-	$tabla->addField("NumeProd", "select", 0, "Plan", true, false, false, true, '', '', 'productos', 'NumeProd', 'NombProd');
+	$strSQL = "(SELECT NumeProd, NombProd, NumeTele";
+	$strSQL.= $crlf."FROM productos p";
+	$strSQL.= $crlf."INNER JOIN clientes c ON p.NumeClie = c.NumeClie)";
+	$tabla->addFieldSelect('NumeProd', 0, 'Plan', true, '', $strSQL, 'productos', 'NumeProd', 'NombProd', '', '', 'NombProd');
 	$tabla->fields["NumeProd"]["showOnForm"] = false;
 	$tabla->fields["NumeProd"]["showOnList"] = false;
+
+	$tabla->addFieldSelect('NumeTele', 0, 'Telefono', true, '', $strSQL, 'productos', 'NumeProd', 'NumeTele', '', '', 'NumeTele');
+	$tabla->fields['NumeTele']['name'] = 'NumeProd';
+	$tabla->fields['NumeTele']['nameAlias'] = 'NumeTele';
+	$tabla->fields["NumeTele"]["showOnForm"] = false;
+	$tabla->fields['NumeTele']['isHiddenInList'] = true;
 
 	$tabla->addField("NumeTipoCuot", "select", 0, "Tipo", true, false, false, true, '', '', 'tiposcuotas', 'NumeTipoCuot', 'NombTipoCuot');
 	$tabla->fields["NumeTipoCuot"]["showOnForm"] = false;
@@ -485,10 +500,11 @@
 	$tabla->includeList = ["php/modals/mdlIntereses.php"];
 
 	$tabla->btnForm[] = new btnListItem('btnCheques', 'Cheques', '<i class="fa fa-credit-card fa-fw"></i> Cheques', 'btn-primary', 'button', '', 'abrirCheques();');
-	$tabla->btnForm[] = new btnListItem('btnActualizar', 'Calcular Interés', '<i class="fas fa-percentage fa-fw"></i> Calcular Interés', 'btn-success', 'button', '', "$('#modalIntereses').modal('show');");
+	$tabla->btnForm[] = new btnListItem('btnActualizar', 'Calcular Interés', '<i class="fas fa-percentage fa-fw"></i> Calcular Interés', 'btn-warning', 'button', '', "$('#modalIntereses').modal('show');");
+	$tabla->btnForm[] = new btnListItem('btnWhatsapp', 'WhatsApp', '<i class="fab fa-whatsapp"></i> Enviar WhatsApp', 'btn-success', 'button', '', 'enviarWhatsappOtro()');
 
 	$tabla->btnList = [
-		new btnListItem('btnCambiarEstado', 'Cambiar Estado', '<i class="fas fa-retweet fa-fw"></i>', 'btn-warning', 'button', '', 'cambiarEstado')
+		new btnListItem('btnCambiarEstado', 'Cambiar Estado', '<i class="fas fa-retweet fa-fw"></i>', 'btn-danger', 'button', '', 'cambiarEstado')
 	];
 
 	$tabla->jsFiles = [
@@ -505,6 +521,18 @@
 	$tabla->addField("CodiIden", "number");
 	$tabla->fields["CodiIden"]["isHiddenInForm"] = true;
 	$tabla->fields["CodiIden"]["isHiddenInList"] = true;
+
+	$strSQL = "(SELECT CodiIden, NumeTele";
+	$strSQL.= $crlf."FROM cuotas c";
+	$strSQL.= $crlf."INNER JOIN (SELECT NumeProd, NumeTele";
+	$strSQL.= $crlf."FROM productos p";
+	$strSQL.= $crlf."INNER JOIN clientes c ON p.NumeClie = c.NumeClie) p ON c.NumeProd = p.NumeProd)";
+
+	$tabla->addFieldSelect('NumeTele', 0, 'Telefono', true, '', $strSQL, 'productos', 'CodiIden', 'NumeTele', '', '', 'NumeTele');
+	$tabla->fields['NumeTele']['name'] = 'CodiIden';
+	$tabla->fields['NumeTele']['nameAlias'] = 'NumeTele';
+	$tabla->fields["NumeTele"]["showOnForm"] = false;
+	$tabla->fields['NumeTele']['isHiddenInList'] = true;
 
 	$tabla->addField("FechPago", "datetime", 0, "Fecha");
 	$tabla->fields["FechPago"]["showOnForm"] = false;
@@ -567,8 +595,11 @@
 		new SearchField('NombClie', 'LIKE')
 	];
 
+	$tabla->btnFicha[] = new btnListItem('btnWhatsapp', 'WhatsApp', '<i class="fab fa-whatsapp"></i> Enviar WhatsApp', 'btn-success', 'button', '', 'enviarWhatsappCliente()');
+
 	$tabla->btnList[] = new btnListItem('btnVerEstados', "Estados", '<i class="fa fa-archive fa-fw" aria-hidden="true"></i>', "btn-info", 'button', "", "verEstados");
 	$tabla->btnList[] = new btnListItem('btnVerSeguimientos', "Seguimientos", '<i class="far fa-calendar-alt fa-fw" aria-hidden="true"></i>', "btn-info", 'button', "", "verSeguimientos");
+	$tabla->btnList[] = new btnListItem('btnWhatsapp', 'WhatsApp', '<i class="fab fa-whatsapp"></i>', 'btn-success', 'button', '', 'enviarWhatsapp');
 
 	$tabla->addField("NumeClie", "number", 0, "Numero", false, true, true);
 	$tabla->fields["NumeClie"]["isHiddenInForm"] = true;
@@ -695,6 +726,26 @@
 	$config->tablas["seguimientos"] = $tabla;
 
 	/**
+	 * PERSONAS
+	 */
+	$tabla = new Tabla('personas', 'personas', 'Personas', 'la persona', true, 'objeto/personas.php', 'fas fa-male', 'NombPers');
+	$tabla->labelField = 'NombPers';
+	$tabla->numeCarg = 2;
+
+	$tabla->addFieldId('NumePers', 'Número', true, true);
+	$tabla->addField('NombPers', 'text', 40, 'Nombre completo');
+	$tabla->fields['NombPers']['cssControl'] = 'ucase';
+	$tabla->fields['NombPers']['attrControl'] = [
+		'onblur'=>'this.value = this.value.toUpperCase();',
+		'onkeypress'=>'if(event.keyCode == 13) this.value = this.value.toUpperCase();'
+	];
+	$tabla->addField('NumeDocu', 'text', 40, 'DNI / CUIT');
+	$tabla->addField('NumeTele', 'text', 40, 'Teléfono');
+	$tabla->addField('DirePers', 'text', 60, 'Dirección', false);
+
+	$config->tablas['personas'] = $tabla;
+
+	/**
 	 * CHEQUES
 	 */
 	$tabla = new Cheque("cheques", "cheques", "Cheques", "el Cheque", true, "objeto/cheques.php", "fa-credit-card");
@@ -752,26 +803,16 @@
 	$tabla->addField("NumeEsta", "select", 0, "Estado", true, false, false, true, '1', '', 'estados', 'NumeEsta', 'NombEsta', '', 'NombEsta');
 
 	//Recibido de
-	$tabla->addField("NombReci", "text", 80, "Recibido de", true);
-	$tabla->fields["NombReci"]["cssGroup"] = "form-group2";
-
-	$tabla->addField("TeleReci", "text", 80, "Teléfono", true);
-	$tabla->fields["TeleReci"]["isHiddenInList"] = true;
-	$tabla->fields["TeleReci"]["cssGroup"] = "form-group2";
-
-	$tabla->addField("DireReci", "text", 400, "Dirección", false);
-	$tabla->fields["DireReci"]["isHiddenInList"] = true;
+	$strSQL = "(SELECT NumePers, CONCAT(NombPers, ' - ', NumeTele) NombPersReci";
+	$strSQL.= $crlf."FROM personas)";
+	$tabla->addFieldSelect('NumePersReci', 80, 'Recibido de', true, '', $strSQL, 'precibido', 'NumePers', 'NombPersReci', '', '', 'NombPersReci');
+	$tabla->fields["NumePersReci"]["cssGroup"] = "form-group2";
 
 	//Entregado a
-	$tabla->addField("NombEntr", "text", 80, "Entregado a", false);
-	$tabla->fields["NombEntr"]["cssGroup"] = "form-group2";
-
-	$tabla->addField("TeleEntr", "text", 80, "Teléfono", false);
-	$tabla->fields["TeleEntr"]["isHiddenInList"] = true;
-	$tabla->fields["TeleEntr"]["cssGroup"] = "form-group2";
-
-	$tabla->addField("DireEntr", "text", 400, "Dirección", false);
-	$tabla->fields["DireEntr"]["isHiddenInList"] = true;
+	$strSQL = "(SELECT NumePers, CONCAT(NombPers, ' - ', NumeTele) NombPersEntr";
+	$strSQL.= $crlf."FROM personas)";
+	$tabla->addFieldSelect('NumePersEntr', 80, 'Entregado a', false, '', $strSQL, 'pentregado', 'NumePers', 'NombPersEntr', '', '', 'NombPersEntr', true);
+	$tabla->fields["NumePersEntr"]["cssGroup"] = "form-group2";
 
 	$config->tablas["cheques"] = $tabla;
 
