@@ -8,7 +8,7 @@
 	<title><?php echo $config->titulo ?></title>
 
 	<!-- JQUERY -->
-	<script src="<?php echo $config->raiz ?>admin/js/jquery-3.3.1.min.js"></script>
+	<script src="<?php echo $config->raiz ?>admin/js/jquery-3.7.0.min.js"></script>
 
 <?php if (isset($_SESSION['is_logged_in_'. $nombSistema])) { ?>
 	<script src="<?php echo $config->raiz ?>admin/js/vectorMenu.js?1"></script>
